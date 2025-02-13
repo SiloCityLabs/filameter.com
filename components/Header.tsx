@@ -10,7 +10,7 @@ const defaultNavLinks = [
   { label: "Home", href: "/", target: "" },
   {
     label: "GitHub",
-    href: "https://github.com/Bana0615/bootstrap-nextjs-github-pages",
+    href: "https://github.com/SiloCityLabs/filameter.com",
     target: "_blank",
   },
 ];

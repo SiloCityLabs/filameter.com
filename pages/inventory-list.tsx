@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import { Container, Row, Col, Table, Button } from "react-bootstrap";
 import Header from "@/components/Header";
@@ -9,6 +10,21 @@ import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 import data from "@/json/tmp-data.json";
 
 export default function InventoryList() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(false);
+  });
+
+  //deleteFilament
+  const deleteFilament = async (ID: number) => {
+    console.log("DELETE: ", ID);
+  };
+
+  if (isLoading) {
+    return <div className="text-center">Loading...</div>;
+  }
+
   return (
     <>
       <Head>
@@ -70,8 +86,13 @@ export default function InventoryList() {
                               >
                                 <FontAwesomeIcon icon={faPenToSquare} />
                               </a>
-                              {/* TODO: Make This a function call */}
-                              <a href={`/delete-filament/${key}`}>
+                              <a
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  deleteFilament(data[key].ID);
+                                }}
+                              >
                                 <FontAwesomeIcon icon={faTrash} />
                               </a>
                             </td>

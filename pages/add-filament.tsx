@@ -1,7 +1,8 @@
 import Head from "next/head";
-import { Container, Row } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ManageFilament from "@/components/ManageFilament";
 
 export default function AddFilament() {
   return (
@@ -15,7 +16,12 @@ export default function AddFilament() {
       <div className="main-container">
         <Header />
         <Container className="main-content">
-          <Row className="shadow-lg p-3 bg-body rounded mt-4">Add Filament</Row>
+          <Row className="shadow-lg p-3 bg-body rounded mt-4">
+            <h3 className="text-center">Add Filament</h3>
+            <Col>
+              <ManageFilament />
+            </Col>
+          </Row>
         </Container>
         <Footer />
       </div>

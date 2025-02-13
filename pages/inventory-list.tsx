@@ -40,7 +40,7 @@ export default function InventoryList() {
                           <th className="text-center">Material</th>
                           <th className="text-center">Used Weight</th>
                           <th className="text-center">Location</th>
-                          <th className="text-center">Comment</th>
+                          <th className="text-center">Comments</th>
                           <th className="text-center">Actions</th>
                         </tr>
                       </thead>
@@ -60,7 +60,9 @@ export default function InventoryList() {
                             <td className="text-center">
                               {data[key].Location}
                             </td>
-                            <td className="text-center">{data[key].Comment}</td>
+                            <td className="text-center">
+                              {data[key].Comments}
+                            </td>
                             <td className="text-center">
                               <a
                                 href={`/edit-filament?ID=${data[key].ID}`}
@@ -69,7 +71,7 @@ export default function InventoryList() {
                                 <FontAwesomeIcon icon={faPenToSquare} />
                               </a>
                               {/* TODO: Make This a function call */}
-                              <a href={`/delete-filament/${data[key].ID}`}>
+                              <a href={`/delete-filament/${key}`}>
                                 <FontAwesomeIcon icon={faTrash} />
                               </a>
                             </td>

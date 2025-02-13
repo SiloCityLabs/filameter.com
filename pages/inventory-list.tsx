@@ -40,7 +40,7 @@ export default function InventoryList() {
             <Col className="text-right">
               <Row>
                 <Col className="mb-2">
-                  <Button variant="success" href="/add-filament" size="sm">
+                  <Button variant="primary" href="/add-filament" size="sm">
                     Add Filament
                   </Button>
                 </Col>

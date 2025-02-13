@@ -1,4 +1,4 @@
-# bootstrap-nextjs-github-pages
+# Filameter - Filament Inventory Manager
 
 Inspired by https://github.com/Donkie/Spoolman
 

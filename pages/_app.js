@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@/public/styles/main.css";
 import "@/public/styles/material.css";
 
-const GA_TRACKING_ID = "";
+const GA_TRACKING_ID = "G-ZSE5YNKGXV";
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();

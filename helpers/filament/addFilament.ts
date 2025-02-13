@@ -1,4 +1,4 @@
-import { filamentSchema } from "@/helpers/initializeFilamentDB";
+import { filamentSchema } from "@/helpers/filament/initializeFilamentDB";
 import { v4 as uuidv4 } from "uuid";
 
 export const addFilament = async (db, filamentData) => {

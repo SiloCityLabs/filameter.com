@@ -3,15 +3,21 @@ import Head from "next/head";
 import { Container, Row, Col, Table, Button } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+//Components
+import CustomAlert from "@/components/bootstrap/CustomAlert";
 //DB
-import getAllFilaments from "@/helpers/getAllFilaments";
-import { initializeFilamentDB } from "@/helpers/initializeFilamentDB";
+import deleteFilament from "@/helpers/filament/deleteFilament";
+import getAllFilaments from "@/helpers/filament/getAllFilaments";
+import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
 //Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 export default function InventoryList() {
   const [isLoading, setIsLoading] = useState(true);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertVariant, setAlertVariant] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
   const [db, setDb] = useState(null);
   const [filaments, setFilaments] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -47,8 +53,36 @@ export default function InventoryList() {
   }, [db]);
 
   //deleteFilament
-  const deleteFilament = async (ID: number) => {
-    console.log("DELETE: ", ID);
+  const handleDelete = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    if (db) {
+      try {
+        const success = await deleteFilament(db, id);
+        if (success) {
+          setShowAlert(true);
+          setAlertMessage("Filament deleted successfully.");
+          // Update the list of filaments after deletion
+          const updatedFilaments = await getAllFilaments(db);
+          setFilaments(updatedFilaments);
+        } else {
+          console.log("");
+          setShowAlert(true);
+          setAlertMessage("Filament not found or not deleted.");
+          setAlertVariant("danger");
+        }
+      } catch (err: unknown) {
+        if (typeof err === "string") {
+          setError(err);
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Failed to delete filament.");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   if (isLoading) {
@@ -67,6 +101,12 @@ export default function InventoryList() {
         <Header />
         <Container className="main-content">
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
+            <CustomAlert
+              variant={alertVariant ? alertVariant : "success"}
+              message={alertMessage}
+              show={showAlert}
+              onClose={() => setShowAlert(false)}
+            />
             <Col className="text-right">
               <Row>
                 <Col className="mb-2">
@@ -112,7 +152,7 @@ export default function InventoryList() {
                                 href="#"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  deleteFilament(filament._id);
+                                  handleDelete(filament._id);
                                 }}
                               >
                                 <FontAwesomeIcon icon={faTrash} />

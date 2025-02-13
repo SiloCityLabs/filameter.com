@@ -5,8 +5,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ManageFilament from "@/components/ManageFilament";
 //DB
-import getFilamentById from "@/helpers/getFilamentById";
-import { initializeFilamentDB } from "@/helpers/initializeFilamentDB";
+import getFilamentById from "@/helpers/filament/getFilamentById";
+import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
 //Tmp data
 import data from "@/json/tmp-data.json";
 

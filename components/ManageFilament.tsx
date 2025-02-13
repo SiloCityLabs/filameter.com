@@ -5,8 +5,8 @@ import CustomAlert from "@/components/bootstrap/CustomAlert";
 //Types
 import { ManageFilamentProps, Filament } from "@/types/Filament";
 //DB
-import { addFilament } from "@/helpers/addFilament";
-import { initializeFilamentDB } from "@/helpers/initializeFilamentDB";
+import { addFilament } from "@/helpers/filament/addFilament";
+import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
 
 const defaultValue: Filament = {
   filament: "",
@@ -69,12 +69,6 @@ function ManageFilament({ data }: ManageFilamentProps) {
     }
   };
 
-  interface AlertProps {
-    variant: string;
-    message: string;
-    show: boolean;
-    onClose: () => void;
-  }
   return (
     <>
       <CustomAlert

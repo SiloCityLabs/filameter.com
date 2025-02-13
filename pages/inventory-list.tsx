@@ -3,18 +3,48 @@ import Head from "next/head";
 import { Container, Row, Col, Table, Button } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+//DB
+import getAllFilaments from "@/helpers/getAllFilaments";
+import { initializeFilamentDB } from "@/helpers/initializeFilamentDB";
 //Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
-//Tmp data
-import data from "@/json/tmp-data.json";
 
 export default function InventoryList() {
   const [isLoading, setIsLoading] = useState(true);
+  const [db, setDb] = useState(null);
+  const [filaments, setFilaments] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoading(false);
-  });
+    async function init() {
+      const initializedDb = await initializeFilamentDB();
+      setDb(initializedDb);
+    }
+    init();
+  }, []);
+
+  useEffect(() => {
+    async function fetchFilaments() {
+      if (db) {
+        try {
+          const allFilaments = await getAllFilaments(db);
+          setFilaments(allFilaments);
+        } catch (err: unknown) {
+          if (typeof err === "string") {
+            setError(err);
+          } else if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError("Failed to fetch filaments.");
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    }
+    fetchFilaments();
+  }, [db]);
 
   //deleteFilament
   const deleteFilament = async (ID: number) => {
@@ -61,27 +91,19 @@ export default function InventoryList() {
                         </tr>
                       </thead>
                       <tbody>
-                        {Object.keys(data).map((key) => (
-                          <tr key={key}>
-                            <td className="text-center">{data[key].ID}</td>
+                        {filaments.map((filament) => (
+                          <tr key={`filament-${filament._id}`}>
+                            <td className="text-center">{filament._id}</td>
+                            <td className="text-center">{filament.filament}</td>
+                            <td className="text-center">{filament.material}</td>
                             <td className="text-center">
-                              {data[key].filament}
+                              {filament.used_weight}
                             </td>
-                            <td className="text-center">
-                              {data[key].material}
-                            </td>
-                            <td className="text-center">
-                              {data[key].used_weight}
-                            </td>
-                            <td className="text-center">
-                              {data[key].location}
-                            </td>
-                            <td className="text-center">
-                              {data[key].comments}
-                            </td>
+                            <td className="text-center">{filament.location}</td>
+                            <td className="text-center">{filament.comments}</td>
                             <td className="text-center">
                               <a
-                                href={`/edit-filament?ID=${data[key].id}`}
+                                href={`/edit-filament?ID=${filament._id}`}
                                 className="me-2"
                               >
                                 <FontAwesomeIcon icon={faPenToSquare} />
@@ -90,7 +112,7 @@ export default function InventoryList() {
                                 href="#"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  deleteFilament(data[key].id);
+                                  deleteFilament(filament._id);
                                 }}
                               >
                                 <FontAwesomeIcon icon={faTrash} />

@@ -1,5 +1,7 @@
 # bootstrap-nextjs-github-pages
 
+Inspired by https://github.com/Donkie/Spoolman
+
 This is a project to run a website, leveraging [Next.js](https://nextjs.org/), [React Bootstrap](https://react-bootstrap.netlify.app/) and hosted on GitHub Pages.
 
 ## Getting Started

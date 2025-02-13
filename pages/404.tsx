@@ -6,8 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const redirects: Record<string, string> = {
-  //PHP site generators
-  //Each of these may have subpages we need to add.
+  //Example
   "/old": "/new",
 };
 

@@ -65,23 +65,23 @@ export default function InventoryList() {
                           <tr key={key}>
                             <td className="text-center">{data[key].ID}</td>
                             <td className="text-center">
-                              {data[key].Filament}
+                              {data[key].filament}
                             </td>
                             <td className="text-center">
-                              {data[key].Material}
+                              {data[key].material}
                             </td>
                             <td className="text-center">
-                              {data[key].Used_Weight}
+                              {data[key].used_weight}
                             </td>
                             <td className="text-center">
-                              {data[key].Location}
+                              {data[key].location}
                             </td>
                             <td className="text-center">
-                              {data[key].Comments}
+                              {data[key].comments}
                             </td>
                             <td className="text-center">
                               <a
-                                href={`/edit-filament?ID=${data[key].ID}`}
+                                href={`/edit-filament?ID=${data[key].id}`}
                                 className="me-2"
                               >
                                 <FontAwesomeIcon icon={faPenToSquare} />
@@ -90,7 +90,7 @@ export default function InventoryList() {
                                 href="#"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  deleteFilament(data[key].ID);
+                                  deleteFilament(data[key].id);
                                 }}
                               >
                                 <FontAwesomeIcon icon={faTrash} />

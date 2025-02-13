@@ -1,10 +1,10 @@
 export type Filament = {
-  ID: number;
-  Filament: string;
-  Material: string;
-  Used_Weight: number;
-  Location: string;
-  Comments: string;
+  id?: number;
+  filament: string;
+  material: string;
+  used_weight: number;
+  location: string;
+  comments: string;
 };
 
 export interface ManageFilamentProps {

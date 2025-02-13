@@ -17,6 +17,7 @@ const defaultValue: Filament = {
 };
 
 function ManageFilament({ data }: ManageFilamentProps) {
+  const [isEdit, setIsEdit] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -32,6 +33,10 @@ function ManageFilament({ data }: ManageFilamentProps) {
       setDb(initializedDb);
     }
     init();
+
+    if (data?._id) {
+      setIsEdit(true);
+    }
   }, []);
 
   const handleInputChange = (e) => {
@@ -41,17 +46,20 @@ function ManageFilament({ data }: ManageFilamentProps) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const type = isEdit ? "updated" : "added";
     const result = await addFilament(db, formData); // Pass the db and formData
 
     if (result.success) {
-      console.log("Filament added successfully:", result.data);
-      setFormData(defaultValue);
       setShowAlert(true);
-      setAlertMessage("Filament added successfully");
+      setAlertMessage(`Filament ${type} successfully`);
+
+      //Clear form data if adding
+      if (!isEdit) {
+        setFormData(defaultValue);
+      }
     } else {
-      console.error("Error adding filament:", result.error);
+      console.error(`Error: Filament not ${type}:`, result.error);
       if (typeof result.error === "object") {
-        // Check if it's Joi error details
         const formattedErrors = {};
         result.error.forEach((err) => {
           formattedErrors[err.path[0]] = err.message;

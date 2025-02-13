@@ -103,7 +103,7 @@ export default function InventoryList() {
                             <td className="text-center">{filament.comments}</td>
                             <td className="text-center">
                               <a
-                                href={`/edit-filament?ID=${filament._id}`}
+                                href={`/edit-filament?id=${filament._id}`}
                                 className="me-2"
                               >
                                 <FontAwesomeIcon icon={faPenToSquare} />

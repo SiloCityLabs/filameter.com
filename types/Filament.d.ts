@@ -1,5 +1,6 @@
 export type Filament = {
-  id?: number;
+  _id?: string;
+  _rev?: string;
   filament: string;
   material: string;
   used_weight: number;

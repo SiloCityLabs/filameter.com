@@ -12,14 +12,33 @@ export const addFilament = async (db, filamentData) => {
         return { success: false, error: error.details };
       }
 
-      const doc = {
-        _id: uuidv4(),
-        ...validatedData,
-      };
+      let doc = { ...validatedData }; // Start with validated data
+
+      if (filamentData._id) {
+        try {
+          const existingDoc = await db.get(filamentData._id);
+          doc._id = filamentData._id;
+          doc._rev = existingDoc._rev;
+        } catch (getErr: unknown) {
+          if (getErr instanceof Error && getErr.name === "NotFoundError") {
+            doc._id = uuidv4();
+          } else {
+            console.error(
+              "Error getting existing document for update:",
+              getErr
+            );
+            return {
+              success: false,
+              error: "Error getting document for update.",
+            };
+          }
+        }
+      } else {
+        doc._id = uuidv4();
+      }
 
       const response = await db.put(doc);
-      console.log("Filament added:", response);
-      return { success: true, data: response }; // Return success and data
+      return { success: true, data: response };
     } catch (error: unknown) {
       console.error("Error adding filament:", error);
 

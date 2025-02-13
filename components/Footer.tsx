@@ -30,7 +30,7 @@ function Footer() {
               padding: "7px",
             }}
           >
-            ©2025 Copyright: bootstrap-nextjs-github-pages
+            ©2025 Copyright: Filameter
           </Nav.Item>
           <Nav.Item>
             <Nav.Link href="/terms">Terms</Nav.Link>

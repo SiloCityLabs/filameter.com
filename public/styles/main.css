@@ -10,3 +10,9 @@
 .main-content {
   flex-grow: 1;
 }
+
+.navbar-subtitle {
+  font-size: 0.7rem;
+  display: block;
+  margin-top: -0.2rem;
+}

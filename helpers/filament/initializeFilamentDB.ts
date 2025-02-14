@@ -35,7 +35,7 @@ export const filamentSchema = Joi.object({
   _rev: Joi.string().allow(""),
   filament: Joi.string().required(),
   material: Joi.string().required(),
-  used_weight: Joi.number().min(0).default(0),
-  location: Joi.string().allow(""),
+  used_weight: Joi.number().min(0).empty('').default(0),
+  location: Joi.string().empty('').default(''),
   comments: Joi.string().allow(""),
 });

@@ -88,7 +88,7 @@ function ManageFilament({ data }: ManageFilamentProps) {
             name="filament"
             value={formData.filament}
             onChange={handleInputChange}
-            required
+
           />
         </Form.Group>
 
@@ -122,7 +122,7 @@ function ManageFilament({ data }: ManageFilamentProps) {
             name="location"
             value={formData.location}
             onChange={handleInputChange}
-            required
+
           />
         </Form.Group>
 

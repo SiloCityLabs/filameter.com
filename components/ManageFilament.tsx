@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import { Form, Button } from "react-bootstrap";
 //Components
 import CustomAlert from "@/components/bootstrap/CustomAlert";
@@ -17,6 +18,7 @@ const defaultValue: Filament = {
 };
 
 function ManageFilament({ data }: ManageFilamentProps) {
+  const router = useRouter();
   const [isEdit, setIsEdit] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
@@ -56,6 +58,7 @@ function ManageFilament({ data }: ManageFilamentProps) {
       //Clear form data if adding
       if (!isEdit) {
         setFormData(defaultValue);
+        router.replace("/inventory-list");
       }
     } else {
       console.error(`Error: Filament not ${type}:`, result.error);

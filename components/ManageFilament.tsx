@@ -137,9 +137,12 @@ function ManageFilament({ data }: ManageFilamentProps) {
           />
         </Form.Group>
 
-        <div className="text-center mt-2">
+        <div className="text-center mt-2 d-flex justify-content-center">
+          <Button href="/inventory-list" variant="primary" className="me-2">
+            Back to Inventory List
+          </Button>
           <Button variant="primary" type="submit">
-            Submit
+            Save
           </Button>
         </div>
       </Form>

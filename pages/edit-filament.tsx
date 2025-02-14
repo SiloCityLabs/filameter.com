@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ManageFilament from "@/components/ManageFilament";
 //DB
 import getFilamentById from "@/helpers/filament/getFilamentById";
 import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
-//Tmp data
-import data from "@/json/tmp-data.json";
 
 export default function EditFilament() {
   const [db, setDb] = useState(null);

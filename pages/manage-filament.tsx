@@ -10,9 +10,18 @@ import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
 //Types
 import { Filament } from "@/types/Filament";
 
+const defaultValue: Filament = {
+  filament: "t",
+  material: "",
+  used_weight: 0,
+  location: "",
+  comments: "",
+};
+
 export default function EditFilament() {
   const [db, setDb] = useState(null);
-  const [filament, setFilament] = useState<Filament | null>(null);
+  const [filament, setFilament] = useState<Filament>(defaultValue);
+  const [duplicate, setDuplicate] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filamentIdToFetch, setFilamentIdToFetch] = useState<string | null>(
     null
@@ -22,7 +31,11 @@ export default function EditFilament() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentId = urlParams.get("id");
+    const duplicate = urlParams.get("duplicate");
     setFilamentIdToFetch(currentId);
+    if (duplicate) {
+      setDuplicate(true);
+    }
 
     async function init() {
       const initializedDb = await initializeFilamentDB();
@@ -39,6 +52,11 @@ export default function EditFilament() {
       try {
         const fetchedFilament = await getFilamentById(db, id);
         setFilament(fetchedFilament);
+
+        if (duplicate) {
+          const { _id, _rev, ...filamentWithoutIdAndRev } = fetchedFilament;
+          setFilament(filamentWithoutIdAndRev);
+        }
       } catch (err: unknown) {
         if (typeof err === "string") {
           setError(err);
@@ -77,7 +95,7 @@ export default function EditFilament() {
         <Header />
         <Container className="main-content">
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
-            {filamentIdToFetch ? (
+            {filamentIdToFetch && !duplicate ? (
               filament ? (
                 <>
                   <h3 className="text-center">Edit Filament</h3>
@@ -92,7 +110,7 @@ export default function EditFilament() {
               <>
                 <h3 className="text-center">Add Filament</h3>
                 <Col>
-                  <ManageFilament />
+                  <ManageFilament data={filament} />
                 </Col>
               </>
             )}

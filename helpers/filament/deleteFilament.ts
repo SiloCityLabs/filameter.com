@@ -6,28 +6,26 @@ async function deleteFilament(
 ): Promise<boolean> {
   if (!db) {
     console.error("Database is not initialized.");
-    return false; // Or throw an error if you prefer
+    return false;
   }
 
   try {
-    const doc = await db.get(id); // Get the document to delete
+    const doc = await db.get(id);
     if (!doc) {
       console.error(`Filament with ID ${id} not found for deletion.`);
       return false;
     }
     const response = await db.remove(doc); // Delete the document
-    console.log(`Filament with ID ${id} deleted:`, response);
-    return true; // Indicate successful deletion
+    return true;
   } catch (error: unknown) {
     console.error(`Error deleting filament with ID ${id}:`, error);
 
     if (error instanceof Error) {
-      // Handle error types
       if (error.name === "NotFoundError") {
-        console.error(`Filament with ID ${id} not found for deletion.`); // Log but don't re-throw
+        console.error(`Filament with ID ${id} not found for deletion.`);
         return false;
       } else {
-        throw new Error(error.message); // Re-throw other errors
+        throw new Error(error.message);
       }
     } else if (typeof error === "string") {
       throw new Error(error);

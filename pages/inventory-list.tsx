@@ -81,7 +81,6 @@ export default function InventoryList() {
           const updatedFilaments = await getAllFilaments(db);
           setFilaments(updatedFilaments);
         } else {
-          console.log("");
           setShowAlert(true);
           setAlertMessage("Filament not found or not deleted.");
           setAlertVariant("danger");

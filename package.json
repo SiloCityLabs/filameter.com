@@ -1,6 +1,6 @@
 {
-  "name": "nextjs-github-pages",
-  "version": "0.0.0",
+  "name": "filameter.com",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

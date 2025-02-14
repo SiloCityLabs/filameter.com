@@ -21,6 +21,8 @@ export default function InventoryList() {
   const [db, setDb] = useState(null);
   const [filaments, setFilaments] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     async function init() {
@@ -85,6 +87,35 @@ export default function InventoryList() {
     }
   };
 
+  const sortFilaments = (filamentsToSort: any) => {
+    if (!sortKey) return filamentsToSort; // No sorting needed
+
+    const sortedFilaments = [...filamentsToSort].sort((a, b) => {
+      const aValue = a[sortKey];
+      const bValue = b[sortKey];
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        const comparison = aValue.localeCompare(bValue); // String comparison
+        return sortDirection === "asc" ? comparison : -comparison;
+      } else {
+        const comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0; // Numeric or other comparison
+        return sortDirection === "asc" ? comparison : -comparison;
+      }
+    });
+    return sortedFilaments;
+  };
+
+  const handleSortClick = (key: string) => {
+    if (sortKey === key) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDirection("asc"); // Default to ascending order for new sorts
+    }
+  };
+
+  const sortedFilaments = sortFilaments(filaments);
+
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -121,17 +152,77 @@ export default function InventoryList() {
                     <Table striped bordered hover size="sm">
                       <thead>
                         <tr>
-                          <th className="text-center">ID</th>
-                          <th className="text-center">Filament</th>
-                          <th className="text-center">Material</th>
-                          <th className="text-center">Used Weight</th>
-                          <th className="text-center">Location</th>
-                          <th className="text-center">Comments</th>
-                          <th className="text-center">Actions</th>
+                          <th
+                            className="text-center"
+                            onClick={() => handleSortClick("_id")}
+                          >
+                            ID{" "}
+                            {sortKey === "_id"
+                              ? sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲▼"}
+                          </th>
+
+                          <th
+                            className="text-center"
+                            onClick={() => handleSortClick("filament")}
+                          >
+                            Filament{" "}
+                            {sortKey === "filament"
+                              ? sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲▼"}
+                          </th>
+                          <th
+                            className="text-center"
+                            onClick={() => handleSortClick("material")}
+                          >
+                            Material{" "}
+                            {sortKey === "material"
+                              ? sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲▼"}
+                          </th>
+                          <th
+                            className="text-center"
+                            onClick={() => handleSortClick("used_weight")}
+                          >
+                            Used Weight{" "}
+                            {sortKey === "used_weight"
+                              ? sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲▼"}
+                          </th>
+                          <th
+                            className="text-center"
+                            onClick={() => handleSortClick("location")}
+                          >
+                            Location{" "}
+                            {sortKey === "location"
+                              ? sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲▼"}
+                          </th>
+                          <th
+                            className="text-center"
+                            onClick={() => handleSortClick("comments")}
+                          >
+                            Comments{" "}
+                            {sortKey === "comments"
+                              ? sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲▼"}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filaments.map((filament) => (
+                        {sortedFilaments.map((filament) => (
                           <tr key={`filament-${filament._id}`}>
                             <td className="text-center">{filament._id}</td>
                             <td className="text-center">{filament.filament}</td>

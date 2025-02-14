@@ -11,7 +11,7 @@ import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
 import { Filament } from "@/types/Filament";
 
 const defaultValue: Filament = {
-  filament: "t",
+  filament: "",
   material: "",
   used_weight: 0,
   location: "",

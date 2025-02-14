@@ -7,8 +7,8 @@ export async function initializeFilamentDB() {
     if (typeof window !== "undefined") {
       const db = new PouchDB("filament");
 
-      const dbInfo = await db.info(); // Optional: For debugging
-      console.log("Database Info:", dbInfo);
+      // const dbInfo = await db.info(); //For debugging
+      // console.log("Database Info:", dbInfo);
 
       // Create indexes (very important for performance)
       // await db.createIndex({

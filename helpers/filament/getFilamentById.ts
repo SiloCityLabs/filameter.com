@@ -13,12 +13,11 @@ async function getFilamentById(
     const doc = await db.get(id);
     return doc;
   } catch (error: unknown) {
-    console.error(`Error getting filament with ID ${id}:`, error);
-
     if (error instanceof Error) {
-      if (error.name === "NotFoundError") {
-        return null; // Document not found, return null
+      if (error.name === "NotFoundError" || error.name === "not_found") {
+        return null;
       } else {
+        console.error(`Error getting filament with ID ${id}:`, error);
         throw new Error(error.message);
       }
     } else if (typeof error === "string") {

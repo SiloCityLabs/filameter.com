@@ -6,7 +6,7 @@ import CustomAlert from "@/components/bootstrap/CustomAlert";
 //Types
 import { ManageFilamentProps, Filament } from "@/types/Filament";
 //DB
-import { addFilament } from "@/helpers/filament/addFilament";
+import { saveFilament } from "@/helpers/filament/saveFilament";
 import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
 
 const defaultValue: Filament = {
@@ -49,7 +49,7 @@ function ManageFilament({ data }: ManageFilamentProps) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const type = isEdit ? "updated" : "added";
-    const result = await addFilament(db, formData); // Pass the db and formData
+    const result = await saveFilament(db, formData);
 
     if (result.success) {
       setShowAlert(true);

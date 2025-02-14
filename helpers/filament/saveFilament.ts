@@ -1,7 +1,7 @@
 import { filamentSchema } from "@/helpers/filament/initializeFilamentDB";
 import { v4 as uuidv4 } from "uuid";
 
-export const addFilament = async (db, filamentData) => {
+export const saveFilament = async (db, filamentData) => {
   if (db) {
     try {
       const { error, value: validatedData } =
@@ -12,7 +12,7 @@ export const addFilament = async (db, filamentData) => {
         return { success: false, error: error.details };
       }
 
-      let doc = { ...validatedData }; // Start with validated data
+      let doc = { ...validatedData };
 
       if (filamentData._id) {
         try {

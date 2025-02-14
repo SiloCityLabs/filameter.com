@@ -38,6 +38,14 @@ export default function InventoryList() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const alert_msg = urlParams.get("alert_msg");
+
+    if (alert_msg) {
+      setShowAlert(true);
+      setAlertMessage(alert_msg);
+    }
+
     async function init() {
       const initializedDb = await initializeFilamentDB();
       setDb(initializedDb);
@@ -175,12 +183,14 @@ export default function InventoryList() {
         <Header />
         <Container className="main-content">
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
-            <CustomAlert
-              variant={alertVariant ? alertVariant : "success"}
-              message={alertMessage}
-              show={showAlert}
-              onClose={() => setShowAlert(false)}
-            />
+            <div className="text-center">
+              <CustomAlert
+                variant={alertVariant ? alertVariant : "success"}
+                message={alertMessage}
+                show={showAlert}
+                onClose={() => setShowAlert(false)}
+              />
+            </div>
             <Col className="text-right">
               <Row>
                 <Col className="mb-2">

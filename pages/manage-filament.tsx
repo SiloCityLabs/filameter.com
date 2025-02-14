@@ -22,6 +22,7 @@ export default function EditFilament() {
   const [db, setDb] = useState(null);
   const [filament, setFilament] = useState<Filament>(defaultValue);
   const [duplicate, setDuplicate] = useState<boolean>(false);
+  const [usedWeight, setUsedWeight] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [filamentIdToFetch, setFilamentIdToFetch] = useState<string | null>(
     null
@@ -32,9 +33,13 @@ export default function EditFilament() {
     const urlParams = new URLSearchParams(window.location.search);
     const currentId = urlParams.get("id");
     const duplicate = urlParams.get("duplicate");
+    const usedWeight = urlParams.get("used_weight");
     setFilamentIdToFetch(currentId);
     if (duplicate) {
       setDuplicate(true);
+    }
+    if (usedWeight) {
+      setFilament({ ...defaultValue, used_weight: parseInt(usedWeight) })
     }
 
     async function init() {

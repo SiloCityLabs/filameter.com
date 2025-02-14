@@ -28,7 +28,9 @@ function Header(props: HeaderProps) {
       className={`${className}`}
     >
       <Container>
-        <Navbar.Brand href="/">Filameter</Navbar.Brand>
+        <Navbar.Brand href="/">
+          Filameter <span style={{ fontSize: "0.7rem" }}>by SiloCityLabs</span>
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">

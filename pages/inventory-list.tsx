@@ -233,11 +233,7 @@ export default function InventoryList() {
                               {renderAction(
                                 "Duplicate",
                                 <a
-                                  href="#"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    handleDelete(filament._id);
-                                  }}
+                                  href={`/manage-filament?id=${filament._id}&duplicate=true`}
                                 >
                                   <FontAwesomeIcon icon={faCopy} />
                                 </a>

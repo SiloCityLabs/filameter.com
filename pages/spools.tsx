@@ -26,7 +26,7 @@ import {
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function InventoryList() {
+export default function Spools() {
   const [isLoading, setIsLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
@@ -174,7 +174,7 @@ export default function InventoryList() {
   return (
     <>
       <Head>
-        <title>Filameter - Inventory List</title>
+        <title>Filameter - Spools</title>
         <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />

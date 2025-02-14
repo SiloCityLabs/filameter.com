@@ -43,7 +43,7 @@ export default function Home() {
                 FilaMeter helps you stay organized and in control of your 3D
                 printing materials.
               </p>
-              <Button variant="primary" href="/inventory-list" size="sm">
+              <Button variant="primary" href="/spools" size="sm">
                 Manage Filament
               </Button>
             </Col>

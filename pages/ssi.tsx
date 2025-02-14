@@ -83,7 +83,7 @@ export default function SpoolSenseImport() {
           setShowAlert(true);
           setAlertVariant("success");
           setAlertMessage(`Filament updated successfully`);
-          router.replace(`/inventory-list?alert_msg=Filament ${id} updated successfully`);
+          router.replace(`/spools?alert_msg=Filament ${id} updated successfully`);
         } else {
           console.error(`Error: Filament not updating:`, result.error);
           setShowAlert(true);

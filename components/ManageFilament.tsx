@@ -58,7 +58,7 @@ function ManageFilament({ data }: ManageFilamentProps) {
       //Clear form data if adding
       if (!isEdit) {
         setFormData(defaultValue);
-        router.replace("/inventory-list");
+        router.replace("/spools");
       }
     } else {
       console.error(`Error: Filament not ${type}:`, result.error);
@@ -139,8 +139,8 @@ function ManageFilament({ data }: ManageFilamentProps) {
 
         <div className="text-center mt-2 d-flex justify-content-center">
           {isEdit && (
-            <Button href="/inventory-list" variant="primary" className="me-2">
-              Back to Inventory List
+            <Button href="/spools" variant="primary" className="me-2">
+              Back to Spools
             </Button>
           )}
           <Button variant="primary" type="submit">

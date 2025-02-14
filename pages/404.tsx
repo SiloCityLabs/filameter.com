@@ -6,8 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const redirects: Record<string, string> = {
-  //Example
-  "/old": "/new",
+  "/inventory-list": "/spools",
 };
 
 export default function NotFoundPage() {

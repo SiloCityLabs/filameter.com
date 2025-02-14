@@ -8,6 +8,7 @@ interface HeaderProps {
 
 const defaultNavLinks = [
   { label: "Home", href: "/", target: "" },
+  { label: "Spools", href: "/spools", target: "" },
   { label: "SpoolSense", href: "https://shop.silocitylabs.com/products/spoolsense-a-filament-meter-for-your-spools-preorder", target: "" },
   {
     label: "GitHub",

@@ -7,10 +7,12 @@ import ManageFilament from "@/components/ManageFilament";
 //DB
 import getFilamentById from "@/helpers/filament/getFilamentById";
 import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
+//Types
+import { Filament } from "@/types/Filament";
 
 export default function EditFilament() {
   const [db, setDb] = useState(null);
-  const [filament, setFilament] = useState<any | null>(null);
+  const [filament, setFilament] = useState<Filament | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filamentIdToFetch, setFilamentIdToFetch] = useState<string | null>(
     null
@@ -54,6 +56,8 @@ export default function EditFilament() {
   useEffect(() => {
     if (filamentIdToFetch) {
       fetchFilament(filamentIdToFetch);
+    } else {
+      setIsLoading(false);
     }
   }, [filamentIdToFetch, db]);
 
@@ -76,9 +80,7 @@ export default function EditFilament() {
             {filamentIdToFetch ? (
               filament ? (
                 <>
-                  <h3 className="text-center">
-                    Edit Filament - {filamentIdToFetch}
-                  </h3>
+                  <h3 className="text-center">Edit Filament</h3>
                   <Col>
                     <ManageFilament data={filament} />
                   </Col>
@@ -87,7 +89,12 @@ export default function EditFilament() {
                 <p>Filament data not found for ID: {filamentIdToFetch}</p>
               )
             ) : (
-              <p>Missing ID</p>
+              <>
+                <h3 className="text-center">Add Filament</h3>
+                <Col>
+                  <ManageFilament />
+                </Col>
+              </>
             )}
           </Row>
         </Container>

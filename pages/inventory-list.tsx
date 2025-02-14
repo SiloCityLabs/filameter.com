@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
-import { Container, Row, Col, Table, Button } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Table,
+  Button,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 //Components
@@ -11,7 +19,12 @@ import getAllFilaments from "@/helpers/filament/getAllFilaments";
 import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
 //Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPenToSquare,
+  faTrash,
+  faCopy,
+  IconDefinition,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function InventoryList() {
   const [isLoading, setIsLoading] = useState(true);
@@ -116,6 +129,30 @@ export default function InventoryList() {
 
   const sortedFilaments = sortFilaments(filaments);
 
+  const renderHeader = (key: string, title: string) => {
+    return (
+      <th
+        className="text-center"
+        style={{ cursor: "pointer" }}
+        onClick={() => handleSortClick(key)}
+      >
+        {title} {sortKey === key ? (sortDirection === "asc" ? "▲" : "▼") : "▲▼"}
+      </th>
+    );
+  };
+
+  const renderAction = (tooltip: string, element: JSX.Element) => {
+    return (
+      <OverlayTrigger
+        placement="bottom"
+        delay={{ show: 250, hide: 400 }}
+        overlay={<Tooltip style={{ position: "fixed" }}>{tooltip}</Tooltip>}
+      >
+        {element}
+      </OverlayTrigger>
+    );
+  };
+
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -141,7 +178,7 @@ export default function InventoryList() {
             <Col className="text-right">
               <Row>
                 <Col className="mb-2">
-                  <Button variant="primary" href="/add-filament" size="sm">
+                  <Button variant="primary" href="/manage-filament" size="sm">
                     Add Filament
                   </Button>
                 </Col>
@@ -152,73 +189,12 @@ export default function InventoryList() {
                     <Table striped bordered hover size="sm">
                       <thead>
                         <tr>
-                          <th
-                            className="text-center"
-                            onClick={() => handleSortClick("_id")}
-                          >
-                            ID{" "}
-                            {sortKey === "_id"
-                              ? sortDirection === "asc"
-                                ? "▲"
-                                : "▼"
-                              : "▲▼"}
-                          </th>
-
-                          <th
-                            className="text-center"
-                            onClick={() => handleSortClick("filament")}
-                          >
-                            Filament{" "}
-                            {sortKey === "filament"
-                              ? sortDirection === "asc"
-                                ? "▲"
-                                : "▼"
-                              : "▲▼"}
-                          </th>
-                          <th
-                            className="text-center"
-                            onClick={() => handleSortClick("material")}
-                          >
-                            Material{" "}
-                            {sortKey === "material"
-                              ? sortDirection === "asc"
-                                ? "▲"
-                                : "▼"
-                              : "▲▼"}
-                          </th>
-                          <th
-                            className="text-center"
-                            onClick={() => handleSortClick("used_weight")}
-                          >
-                            Used Weight{" "}
-                            {sortKey === "used_weight"
-                              ? sortDirection === "asc"
-                                ? "▲"
-                                : "▼"
-                              : "▲▼"}
-                          </th>
-                          <th
-                            className="text-center"
-                            onClick={() => handleSortClick("location")}
-                          >
-                            Location{" "}
-                            {sortKey === "location"
-                              ? sortDirection === "asc"
-                                ? "▲"
-                                : "▼"
-                              : "▲▼"}
-                          </th>
-                          <th
-                            className="text-center"
-                            onClick={() => handleSortClick("comments")}
-                          >
-                            Comments{" "}
-                            {sortKey === "comments"
-                              ? sortDirection === "asc"
-                                ? "▲"
-                                : "▼"
-                              : "▲▼"}
-                          </th>
+                          {renderHeader("_id", "ID")}
+                          {renderHeader("filament", "Filament")}
+                          {renderHeader("material", "Material")}
+                          {renderHeader("used_weight", "Used Weight")}
+                          {renderHeader("location", "Location")}
+                          {renderHeader("comments", "Comments")}
                         </tr>
                       </thead>
                       <tbody>
@@ -233,21 +209,40 @@ export default function InventoryList() {
                             <td className="text-center">{filament.location}</td>
                             <td className="text-center">{filament.comments}</td>
                             <td className="text-center">
-                              <a
-                                href={`/edit-filament?id=${filament._id}`}
-                                className="me-2"
-                              >
-                                <FontAwesomeIcon icon={faPenToSquare} />
-                              </a>
-                              <a
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handleDelete(filament._id);
-                                }}
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </a>
+                              {renderAction(
+                                "Edit",
+                                <a
+                                  href={`/manage-filament?id=${filament._id}`}
+                                  className="me-2"
+                                >
+                                  <FontAwesomeIcon icon={faPenToSquare} />
+                                </a>
+                              )}
+                              {renderAction(
+                                "Delete",
+                                <a
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleDelete(filament._id);
+                                  }}
+                                  className="me-2"
+                                >
+                                  <FontAwesomeIcon icon={faTrash} />
+                                </a>
+                              )}
+                              {renderAction(
+                                "Duplicate",
+                                <a
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleDelete(filament._id);
+                                  }}
+                                >
+                                  <FontAwesomeIcon icon={faCopy} />
+                                </a>
+                              )}
                             </td>
                           </tr>
                         ))}

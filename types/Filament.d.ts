@@ -3,8 +3,8 @@ export type Filament = {
   _rev?: string;
   filament: string;
   material: string;
-  used_weight: number;
-  location: string;
+  used_weight?: number;
+  location?: string;
   comments: string;
 };
 

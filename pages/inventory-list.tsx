@@ -67,8 +67,15 @@ export default function InventoryList() {
     fetchFilaments();
   }, [db]);
 
-  //deleteFilament
   const handleDelete = async (id: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this filament?"
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     if (db) {

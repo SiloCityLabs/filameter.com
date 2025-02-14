@@ -194,6 +194,12 @@ export default function InventoryList() {
                           {renderHeader("used_weight", "Used Weight")}
                           {renderHeader("location", "Location")}
                           {renderHeader("comments", "Comments")}
+                          <th
+                            className="text-center"
+                            style={{ cursor: "pointer" }}
+                          >
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -212,11 +218,12 @@ export default function InventoryList() {
                                 "Edit",
                                 <a
                                   href={`/manage-filament?id=${filament._id}`}
-                                  className="me-2"
+                                  className="md:me-2"
                                 >
                                   <FontAwesomeIcon icon={faPenToSquare} />
                                 </a>
                               )}
+                              <br className="d-md-none" />{" "}
                               {renderAction(
                                 "Delete",
                                 <a
@@ -225,11 +232,12 @@ export default function InventoryList() {
                                     e.preventDefault();
                                     handleDelete(filament._id);
                                   }}
-                                  className="me-2"
+                                  className="md:me-2"
                                 >
                                   <FontAwesomeIcon icon={faTrash} />
                                 </a>
                               )}
+                              <br className="d-md-none" />{" "}
                               {renderAction(
                                 "Duplicate",
                                 <a

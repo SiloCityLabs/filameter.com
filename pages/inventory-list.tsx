@@ -210,52 +210,56 @@ export default function InventoryList() {
                         </tr>
                       </thead>
                       <tbody>
-                        {sortedFilaments.map((filament) => (
-                          <tr key={`filament-${filament._id}`}>
-                            <td className="text-center">{filament._id}</td>
-                            <td className="text-center">{filament.filament}</td>
-                            <td className="text-center">{filament.material}</td>
-                            <td className="text-center">
-                              {filament.used_weight}
-                            </td>
-                            <td className="text-center">{filament.location}</td>
-                            <td className="text-center">{filament.comments}</td>
-                            <td className="text-center">
-                              {renderAction(
-                                "Edit",
-                                <a
-                                  href={`/manage-filament?id=${filament._id}`}
-                                  className="md:me-2"
-                                >
-                                  <FontAwesomeIcon icon={faPenToSquare} />
-                                </a>
-                              )}
-                              <br className="d-md-none" />{" "}
-                              {renderAction(
-                                "Delete",
-                                <a
-                                  href="#"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    handleDelete(filament._id);
-                                  }}
-                                  className="md:me-2"
-                                >
-                                  <FontAwesomeIcon icon={faTrash} />
-                                </a>
-                              )}
-                              <br className="d-md-none" />{" "}
-                              {renderAction(
-                                "Duplicate",
-                                <a
-                                  href={`/manage-filament?id=${filament._id}&duplicate=true`}
-                                >
-                                  <FontAwesomeIcon icon={faCopy} />
-                                </a>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
+                        {Object.keys(sortedFilaments).length > 0 && (
+                          sortedFilaments.map((filament) => (
+                            <tr key={`filament-${filament._id}`}>
+                              <td className="text-center">{filament._id}</td>
+                              <td className="text-center">{filament.filament}</td>
+                              <td className="text-center">{filament.material}</td>
+                              <td className="text-center">
+                                {filament.used_weight}
+                              </td>
+                              <td className="text-center">{filament.location}</td>
+                              <td className="text-center">{filament.comments}</td>
+                              <td className="text-center">
+                                {renderAction(
+                                  "Edit",
+                                  <a
+                                    href={`/manage-filament?id=${filament._id}`}
+                                    className="md:me-2"
+                                  >
+                                    <FontAwesomeIcon icon={faPenToSquare} />
+                                  </a>
+                                )}
+                                <br className="d-md-none" />{" "}
+                                {renderAction(
+                                  "Delete",
+                                  <a
+                                    href="#"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleDelete(filament._id);
+                                    }}
+                                    className="md:me-2"
+                                  >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  </a>
+                                )}
+                                <br className="d-md-none" />{" "}
+                                {renderAction(
+                                  "Duplicate",
+                                  <a
+                                    href={`/manage-filament?id=${filament._id}&duplicate=true`}
+                                  >
+                                    <FontAwesomeIcon icon={faCopy} />
+                                  </a>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        ) || (
+                            <tr><td colSpan={7} className="text-center">No Rows</td></tr>
+                          )}
                       </tbody>
                     </Table>
                   </div>

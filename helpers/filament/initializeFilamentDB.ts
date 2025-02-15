@@ -1,5 +1,4 @@
 import PouchDB from "pouchdb";
-import { v4 as uuidv4 } from "uuid";
 import Joi from "joi";
 
 export async function initializeFilamentDB() {
@@ -35,7 +34,8 @@ export const filamentSchema = Joi.object({
   _rev: Joi.string().allow(""),
   filament: Joi.string().required(),
   material: Joi.string().required(),
-  used_weight: Joi.number().min(0).empty('').default(0),
-  location: Joi.string().empty('').default(''),
+  used_weight: Joi.number().min(0).empty("").default(0),
+  total_weight: Joi.number().min(0).empty("").default(1000),
+  location: Joi.string().empty("").default(""),
   comments: Joi.string().allow(""),
 });

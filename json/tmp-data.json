@@ -4,6 +4,7 @@
     "filament": "filament 1",
     "material": "material 1",
     "used_weight": 1,
+    "total_weight": 1,
     "location": "location 1",
     "comments": "comments 1"
   },
@@ -12,6 +13,7 @@
     "filament": "filament 2",
     "material": "material 2",
     "used_weight": 2,
+    "total_weight": 2,
     "location": "location 2",
     "comments": "comments 2"
   },
@@ -20,6 +22,7 @@
     "filament": "filament 3",
     "material": "material 3",
     "used_weight": 3,
+    "total_weight": 3,
     "location": "location 3",
     "comments": "comments 3"
   },
@@ -28,6 +31,7 @@
     "filament": "filament 4",
     "material": "material 4",
     "used_weight": 4,
+    "total_weight": 4,
     "location": "location 4",
     "comments": "comments 4"
   }

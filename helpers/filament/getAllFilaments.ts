@@ -12,8 +12,25 @@ async function getAllFilaments(db: PouchDB.Database): Promise<any[]> {
       attachments: false, // Don't include attachments (if any)
     });
 
-    // Map the rows to extract the document data
-    const filaments = result.rows.map((row) => row.doc);
+    //Add calculated weight
+    const filaments = result.rows
+      .map((row) => {
+        const doc = row.doc;
+        if (doc) {
+          const totalWeight =
+            typeof doc.total_weight === "number" ? doc.total_weight : 0;
+          const usedWeight =
+            typeof doc.used_weight === "number" ? doc.used_weight : 0;
+
+          return {
+            ...doc,
+            calc_weight: totalWeight - usedWeight,
+          };
+        }
+        return null;
+      })
+      .filter((doc) => doc !== null);
+
     return filaments;
   } catch (error: unknown) {
     console.error("Error getting all filaments:", error);

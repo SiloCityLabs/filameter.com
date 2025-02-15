@@ -17,6 +17,7 @@ import CustomAlert from "@/components/bootstrap/CustomAlert";
 import deleteFilament from "@/helpers/filament/deleteFilament";
 import getAllFilaments from "@/helpers/filament/getAllFilaments";
 import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
+import { migrateFilamentDB } from "@/helpers/filament/migrateFilamentDB";
 //Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -49,6 +50,9 @@ export default function Spools() {
     async function init() {
       const initializedDb = await initializeFilamentDB();
       setDb(initializedDb);
+      if (initializedDb) {
+        await migrateFilamentDB(initializedDb);
+      }
     }
     init();
   }, []);
@@ -209,6 +213,8 @@ export default function Spools() {
                           {renderHeader("filament", "Filament")}
                           {renderHeader("material", "Material")}
                           {renderHeader("used_weight", "Used Weight")}
+                          {renderHeader("total_weight", "Total Weight")}
+                          {renderHeader("calc_weight", "Weight Left")}
                           {renderHeader("location", "Location")}
                           {renderHeader("comments", "Comments")}
                           <th
@@ -220,23 +226,36 @@ export default function Spools() {
                         </tr>
                       </thead>
                       <tbody>
-                        {Object.keys(sortedFilaments).length > 0 && (
+                        {(Object.keys(sortedFilaments).length > 0 &&
                           sortedFilaments.map((filament) => (
                             <tr key={`filament-${filament._id}`}>
                               <td className="text-center">{filament._id}</td>
-                              <td className="text-center">{filament.filament}</td>
-                              <td className="text-center">{filament.material}</td>
+                              <td className="text-center">
+                                {filament.filament}
+                              </td>
+                              <td className="text-center">
+                                {filament.material}
+                              </td>
                               <td className="text-center">
                                 {filament.used_weight}
                               </td>
-                              <td className="text-center">{filament.location}</td>
-                              <td className="text-center">{filament.comments}</td>
+                              <td className="text-center">
+                                {filament.total_weight}
+                              </td>
+                              <td className="text-center">
+                                {filament.calc_weight}
+                              </td>
+                              <td className="text-center">
+                                {filament.location}
+                              </td>
+                              <td className="text-center">
+                                {filament.comments}
+                              </td>
                               <td className="text-center">
                                 {renderAction(
                                   "Edit",
                                   <a
                                     href={`/manage-filament?id=${filament._id}`}
-                                    className="md:me-2"
                                   >
                                     <FontAwesomeIcon icon={faPenToSquare} />
                                   </a>
@@ -250,7 +269,6 @@ export default function Spools() {
                                       e.preventDefault();
                                       handleDelete(filament._id);
                                     }}
-                                    className="md:me-2"
                                   >
                                     <FontAwesomeIcon icon={faTrash} />
                                   </a>
@@ -266,10 +284,13 @@ export default function Spools() {
                                 )}
                               </td>
                             </tr>
-                          ))
-                        ) || (
-                            <tr><td colSpan={7} className="text-center">No Rows</td></tr>
-                          )}
+                          ))) || (
+                          <tr>
+                            <td colSpan={7} className="text-center">
+                              No Rows
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </Table>
                   </div>

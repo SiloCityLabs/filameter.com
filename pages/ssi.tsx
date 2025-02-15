@@ -9,6 +9,7 @@ import CustomAlert from "@/components/bootstrap/CustomAlert";
 //DB
 import getFilamentById from "@/helpers/filament/getFilamentById";
 import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
+import { migrateFilamentDB } from "@/helpers/filament/migrateFilamentDB";
 import { saveFilament } from "@/helpers/filament/saveFilament";
 //Types
 import { Filament } from "@/types/Filament";
@@ -42,8 +43,10 @@ export default function SpoolSenseImport() {
       setUsedWeight(parseInt(usedWeight));
     }
 
-
-    if ((currentId === null && usedWeight === null) || (currentId != null && usedWeight === null)) {
+    if (
+      (currentId === null && usedWeight === null) ||
+      (currentId != null && usedWeight === null)
+    ) {
       setError(true);
       setShowAlert(true);
       setAlertMessage("Missing Data");
@@ -55,6 +58,9 @@ export default function SpoolSenseImport() {
     async function init() {
       const initializedDb = await initializeFilamentDB();
       setDb(initializedDb);
+      if (initializedDb) {
+        await migrateFilamentDB(initializedDb);
+      }
     }
     init();
   }, []);
@@ -83,7 +89,9 @@ export default function SpoolSenseImport() {
           setShowAlert(true);
           setAlertVariant("success");
           setAlertMessage(`Filament updated successfully`);
-          router.replace(`/spools?alert_msg=Filament ${id} updated successfully`);
+          router.replace(
+            `/spools?alert_msg=Filament ${id} updated successfully`
+          );
         } else {
           console.error(`Error: Filament not updating:`, result.error);
           setShowAlert(true);
@@ -116,11 +124,8 @@ export default function SpoolSenseImport() {
 
   // Handle loading state
   if (isLoading) {
-    return (
-      <div className="text-center">Loading...</div>
-    );
+    return <div className="text-center">Loading...</div>;
   }
-
 
   return (
     <>

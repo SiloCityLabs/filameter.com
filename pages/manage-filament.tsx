@@ -14,6 +14,7 @@ const defaultValue: Filament = {
   filament: "",
   material: "",
   used_weight: 0,
+  total_weight: 1000,
   location: "",
   comments: "",
 };
@@ -39,7 +40,7 @@ export default function EditFilament() {
       setDuplicate(true);
     }
     if (usedWeight) {
-      setFilament({ ...defaultValue, used_weight: parseInt(usedWeight) })
+      setFilament({ ...defaultValue, used_weight: parseInt(usedWeight) });
     }
 
     async function init() {

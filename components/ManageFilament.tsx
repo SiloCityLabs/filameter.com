@@ -13,6 +13,7 @@ const defaultValue: Filament = {
   filament: "",
   material: "",
   used_weight: 0,
+  total_weight: 1000,
   location: "",
   comments: "",
 };
@@ -88,7 +89,6 @@ function ManageFilament({ data }: ManageFilamentProps) {
             name="filament"
             value={formData.filament}
             onChange={handleInputChange}
-
           />
         </Form.Group>
 
@@ -115,6 +115,18 @@ function ManageFilament({ data }: ManageFilamentProps) {
           />
         </Form.Group>
 
+        <Form.Group controlId="totalWeight">
+          <Form.Label>Used Weight:</Form.Label>
+          <Form.Control
+            type="number"
+            name="total_weight"
+            value={formData.total_weight}
+            onChange={handleInputChange}
+            min="0"
+            required
+          />
+        </Form.Group>
+
         <Form.Group controlId="location">
           <Form.Label>Location:</Form.Label>
           <Form.Control
@@ -122,7 +134,6 @@ function ManageFilament({ data }: ManageFilamentProps) {
             name="location"
             value={formData.location}
             onChange={handleInputChange}
-
           />
         </Form.Group>
 

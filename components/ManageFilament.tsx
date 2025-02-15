@@ -116,7 +116,7 @@ function ManageFilament({ data }: ManageFilamentProps) {
         </Form.Group>
 
         <Form.Group controlId="totalWeight">
-          <Form.Label>Used Weight:</Form.Label>
+          <Form.Label>Total Weight:</Form.Label>
           <Form.Control
             type="number"
             name="total_weight"

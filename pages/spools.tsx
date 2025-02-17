@@ -277,7 +277,7 @@ export default function Spools() {
                                 {renderAction(
                                   "Duplicate",
                                   <a
-                                    href={`/manage-filament?id=${filament._id}&duplicate=true`}
+                                    href={`/manage-filament?id=${filament._id}&type=duplicate`}
                                   >
                                     <FontAwesomeIcon icon={faCopy} />
                                   </a>

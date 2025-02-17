@@ -37,7 +37,7 @@ function ManageFilament({ data }: ManageFilamentProps) {
     }
     init();
 
-    if (data?._id) {
+    if (data?._id && data?._rev) {
       setIsEdit(true);
     }
   }, []);
@@ -82,6 +82,18 @@ function ManageFilament({ data }: ManageFilamentProps) {
         onClose={() => setShowAlert(false)}
       />
       <Form onSubmit={handleSubmit}>
+        {formData._id && (
+          <Form.Group controlId="_id">
+            <Form.Label>ID:</Form.Label>
+            <Form.Control
+              type="text"
+              name="_id"
+              value={formData._id}
+              disabled={true}
+            />
+          </Form.Group>
+        )}
+
         <Form.Group controlId="filament">
           <Form.Label>Filament:</Form.Label>
           <Form.Control

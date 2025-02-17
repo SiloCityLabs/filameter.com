@@ -14,7 +14,7 @@ export const saveFilament = async (db, filamentData) => {
 
       let doc = { ...validatedData };
 
-      if (filamentData._id) {
+      if (filamentData._id && filamentData._rev) {
         try {
           const existingDoc = await db.get(filamentData._id);
           doc._id = filamentData._id;
@@ -34,7 +34,7 @@ export const saveFilament = async (db, filamentData) => {
           }
         }
       } else {
-        doc._id = uuidv4();
+        doc._id = filamentData._id ? filamentData._id : uuidv4();
       }
 
       const response = await db.put(doc);

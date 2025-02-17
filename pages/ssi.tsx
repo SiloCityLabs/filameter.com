@@ -74,7 +74,9 @@ export default function SpoolSenseImport() {
         const fetchedFilament = await getFilamentById(db, id);
         //No id = Create new filament and prefill used_weight
         if (fetchedFilament === null) {
-          router.push(`/manage-filament?used_weight=${used}`);
+          router.push(
+            `/manage-filament?used_weight=${used}&id=${id}&type=create`
+          );
           return;
         }
 

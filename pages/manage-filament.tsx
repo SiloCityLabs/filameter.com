@@ -22,8 +22,7 @@ const defaultValue: Filament = {
 export default function EditFilament() {
   const [db, setDb] = useState(null);
   const [filament, setFilament] = useState<Filament>(defaultValue);
-  const [duplicate, setDuplicate] = useState<boolean>(false);
-  const [usedWeight, setUsedWeight] = useState<number>(0);
+  const [type, setType] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [filamentIdToFetch, setFilamentIdToFetch] = useState<string | null>(
     null
@@ -33,15 +32,19 @@ export default function EditFilament() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const currentId = urlParams.get("id");
-    const duplicate = urlParams.get("duplicate");
-    const usedWeight = urlParams.get("used_weight");
+    const type = urlParams.get("type") ?? "";
+    const usedWeight = urlParams.get("used_weight") ?? 0;
     setFilamentIdToFetch(currentId);
-    if (duplicate) {
-      setDuplicate(true);
-    }
+    setType(type);
+    let overwriteObj = {};
+
     if (usedWeight) {
-      setFilament({ ...defaultValue, used_weight: parseInt(usedWeight) });
+      overwriteObj["used_weight"] = parseInt(usedWeight);
     }
+    if (currentId && type === "create") {
+      overwriteObj["_id"] = currentId;
+    }
+    setFilament({ ...defaultValue, ...overwriteObj });
 
     async function init() {
       const initializedDb = await initializeFilamentDB();
@@ -59,7 +62,7 @@ export default function EditFilament() {
         const fetchedFilament = await getFilamentById(db, id);
         setFilament(fetchedFilament);
 
-        if (duplicate) {
+        if (type === "duplicate") {
           const { _id, _rev, ...filamentWithoutIdAndRev } = fetchedFilament;
           setFilament(filamentWithoutIdAndRev);
         }
@@ -78,7 +81,7 @@ export default function EditFilament() {
   };
 
   useEffect(() => {
-    if (filamentIdToFetch) {
+    if (filamentIdToFetch && type === "") {
       fetchFilament(filamentIdToFetch);
     } else {
       setIsLoading(false);
@@ -92,7 +95,7 @@ export default function EditFilament() {
   return (
     <>
       <Head>
-        <title>Filameter - Edit Filament</title>
+        <title>Filameter - Manage Filament</title>
         <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
@@ -101,7 +104,7 @@ export default function EditFilament() {
         <Header />
         <Container className="main-content">
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
-            {filamentIdToFetch && !duplicate ? (
+            {filamentIdToFetch && type === "" ? (
               filament ? (
                 <>
                   <h3 className="text-center">Edit Filament</h3>

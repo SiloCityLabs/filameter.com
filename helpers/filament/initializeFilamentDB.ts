@@ -30,7 +30,7 @@ export async function initializeFilamentDB() {
 
 // Schema for data validation using Joi
 export const filamentSchema = Joi.object({
-  _id: Joi.string().uuid().allow(""),
+  _id: Joi.string().allow(""),
   _rev: Joi.string().allow(""),
   filament: Joi.string().required(),
   material: Joi.string().required(),

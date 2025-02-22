@@ -23,6 +23,11 @@ const defaultNavLinks = [
   },
 ];
 
+const navbarBrand = {
+  title: "FilaMeter",
+  subtitle: "By SiloCityLabs",
+}
+
 function Header(props: HeaderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const { className, navLinks = defaultNavLinks, darkLinks = false } = props;
@@ -59,13 +64,10 @@ function Header(props: HeaderProps) {
     >
       <Container>
         <Navbar.Brand href="/">
-          Filameter
-          <span className="navbar-subtitle">By SiloCityLabs</span>
+          {navbarBrand.title}
+          {!isLoading && navbarBrand.subtitle && <span className="navbar-subtitle">{navbarBrand.subtitle}</span>}
         </Navbar.Brand>
-        <Navbar.Toggle
-          aria-controls="basic-navbar-nav"
-          className={darkLinks ? "black-toggler" : ""}
-        />
+        <Navbar.Toggle aria-controls="basic-navbar-nav" className={darkLinks ? 'black-toggler' : ""} />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             {navLinks.map((link, index) => (

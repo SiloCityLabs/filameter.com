@@ -229,7 +229,19 @@ export default function Spools() {
                         {(Object.keys(sortedFilaments).length > 0 &&
                           sortedFilaments.map((filament) => (
                             <tr key={`filament-${filament._id}`}>
-                              <td className="text-center">{filament._id}</td>
+                              <td className="text-center">
+                                {filament && filament._id && (
+                                  <OverlayTrigger
+                                    placement="bottom"
+                                    delay={{ show: 250, hide: 400 }}
+                                    overlay={<Tooltip style={{ position: "fixed" }}>{filament._id}</Tooltip>}
+                                  >
+                                    <span>
+                                      {filament._id.length > 5 ? filament._id.substring(0, 5) + "..." : filament._id}
+                                    </span>
+                                  </OverlayTrigger>
+                                )}
+                              </td>
                               <td className="text-center">
                                 {filament.filament}
                               </td>

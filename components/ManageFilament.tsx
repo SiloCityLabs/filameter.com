@@ -161,11 +161,9 @@ function ManageFilament({ data }: ManageFilamentProps) {
         </Form.Group>
 
         <div className="text-center mt-2 d-flex justify-content-center">
-          {isEdit && (
-            <Button href="/spools" variant="primary" className="me-2">
-              Back to Spools
-            </Button>
-          )}
+          <Button href="/spools" variant="primary" className="me-2">
+            {isEdit ? "Back to Spools" : "Cancel"}
+          </Button>
           <Button variant="primary" type="submit">
             Save
           </Button>

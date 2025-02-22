@@ -81,7 +81,7 @@ export default function EditFilament() {
   };
 
   useEffect(() => {
-    if (filamentIdToFetch && type === "") {
+    if (filamentIdToFetch && (type === "" || type === "duplicate")) {
       fetchFilament(filamentIdToFetch);
     } else {
       setIsLoading(false);

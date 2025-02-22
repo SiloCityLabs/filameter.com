@@ -178,7 +178,7 @@ export default function Spools() {
   return (
     <>
       <Head>
-        <title>Filameter - Spools</title>
+        <title>FilaMeter - Spools</title>
         <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
@@ -285,12 +285,12 @@ export default function Spools() {
                               </td>
                             </tr>
                           ))) || (
-                          <tr>
-                            <td colSpan={7} className="text-center">
-                              No Rows
-                            </td>
-                          </tr>
-                        )}
+                            <tr>
+                              <td colSpan={9} className="text-center">
+                                No Rows
+                              </td>
+                            </tr>
+                          )}
                       </tbody>
                     </Table>
                   </div>

@@ -1,6 +1,6 @@
 {
   "name": "filameter.com",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,6 +19,7 @@
     "pouchdb": "^9.0.0",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.3",
+    "react-content-loader": "^7.0.2",
     "react-dom": "^19.0.0",
     "react-gtm-module": "^2.0.11",
     "react-wheel-of-prizes-react19": "^1.0.13",

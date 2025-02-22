@@ -1,4 +1,4 @@
-# Filameter - Filament Inventory Manager
+# FilaMeter - Filament Inventory Manager
 
 Inspired by https://github.com/Donkie/Spoolman
 

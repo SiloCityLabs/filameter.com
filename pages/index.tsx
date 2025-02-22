@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Filameter</title>
+        <title>FilaMeter</title>
         <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />

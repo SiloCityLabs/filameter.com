@@ -95,7 +95,7 @@ export default function EditFilament() {
   return (
     <>
       <Head>
-        <title>Filameter - Manage Filament</title>
+        <title>FilaMeter - Manage Filament</title>
         <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />

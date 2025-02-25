@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
-import { generateGithubLink } from "@/helpers/_silabs/generateGithubLink";
 
 interface HeaderProps {
   className?: string;
@@ -16,6 +14,7 @@ const defaultNavLinks = [
     href: "https://shop.silocitylabs.com/products/spoolsense-a-filament-meter-for-your-spools-preorder",
     target: "",
   },
+  { label: "Feedback", href: "/feedback", target: "" },
   {
     label: "GitHub",
     href: "https://github.com/SiloCityLabs/filameter.com",
@@ -29,30 +28,7 @@ const navbarBrand = {
 }
 
 function Header(props: HeaderProps) {
-  const [isLoading, setIsLoading] = useState(true);
   const { className, navLinks = defaultNavLinks, darkLinks = false } = props;
-
-  const params = {
-    title: "My New Issue",
-    body: "This is a detailed description.\nWith multiple lines.",
-    labels: ["bug", "help wanted"],
-    assignees: "@Bana0615",
-    milestone: 1,
-    //template: "bug_report.md"
-  };
-  useEffect(() => {
-    const feedbackLink = generateGithubLink(
-      "Bana0615",
-      "bootstrap-nextjs-github-pages",
-      params
-    );
-    defaultNavLinks.push({
-      label: "Feedback",
-      href: feedbackLink,
-      target: "_blank",
-    });
-    setIsLoading(false);
-  }, []);
 
   return (
     <Navbar
@@ -65,7 +41,7 @@ function Header(props: HeaderProps) {
       <Container>
         <Navbar.Brand href="/">
           {navbarBrand.title}
-          {!isLoading && navbarBrand.subtitle && <span className="navbar-subtitle">{navbarBrand.subtitle}</span>}
+          {navbarBrand.subtitle && <span className="navbar-subtitle">{navbarBrand.subtitle}</span>}
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" className={darkLinks ? 'black-toggler' : ""} />
         <Navbar.Collapse id="basic-navbar-nav">

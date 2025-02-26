@@ -191,11 +191,11 @@ export default function Feedback() {
                 )}
 
                 <div className="text-center mt-2 d-flex justify-content-center">
-                  <Button href="/" variant="primary" className="me-2">
+                  <Button href="/" variant="secondary" className="me-2">
                     Cancel
                   </Button>
-                  <Button variant="primary" type="submit">
-                    Save
+                  <Button variant="secondary" type="submit">
+                    Create
                   </Button>
                 </div>
               </Form>

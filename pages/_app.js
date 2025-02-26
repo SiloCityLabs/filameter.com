@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "@/public/styles/_fw.css";
 import "@/public/styles/main.css";
-import "@/public/styles/material.css";
 
 const GA_TRACKING_ID = "G-ZSE5YNKGXV";
 

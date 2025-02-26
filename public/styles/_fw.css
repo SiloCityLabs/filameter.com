@@ -1,3 +1,41 @@
+@tailwind utilities;
+
+/* Sticky Footer */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+}
+
+.black-toggler .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.navbar-subtitle {
+  font-size: 0.75rem;
+  display: block;
+  margin-top: -0.2rem;
+}
+
+.beta-banner {
+  position: absolute;
+  top: 5px; /* Adjust as needed */
+  left: -15px; /* Adjust as needed */
+  background-color: rgba(255, 0, 0, 0.5); /* Red with 50% opacity */
+  color: black;
+  padding: 1px 8px;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  z-index: 10;
+  transform: rotate(-45deg);
+  white-space: nowrap;
+}
+
+/* Material Styles */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 .navbar {

@@ -16,8 +16,7 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
 import deleteFilament from "@/helpers/filament/deleteFilament";
 import getAllFilaments from "@/helpers/filament/getAllFilaments";
-import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
-import { migrateFilamentDB } from "@/helpers/filament/migrateFilamentDB";
+import { useDatabase } from "@/contexts/DatabaseContext";
 //Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -28,11 +27,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function Spools() {
+  const { db, isLoadingDB } = useDatabase();
   const [isLoading, setIsLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-  const [db, setDb] = useState(null);
   const [filaments, setFilaments] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -46,15 +45,6 @@ export default function Spools() {
       setShowAlert(true);
       setAlertMessage(alert_msg);
     }
-
-    async function init() {
-      const initializedDb = await initializeFilamentDB();
-      setDb(initializedDb);
-      if (initializedDb) {
-        await migrateFilamentDB(initializedDb);
-      }
-    }
-    init();
   }, []);
 
   useEffect(() => {

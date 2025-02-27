@@ -1,25 +1,29 @@
-export async function importDB(db, jsonData) {
+import PouchDB from "pouchdb";
+
+export async function importDB(db: PouchDB.Database | null, data: any[]) {
   if (!db) {
-    throw new Error("Database not initialized.");
+    console.error("Database not initialized.");
+    return;
   }
-
-  if (
-    !Array.isArray(jsonData) &&
-    typeof jsonData === "object" &&
-    jsonData !== null
-  ) {
-    //if jsonData is an object put it in an array
-    jsonData = [jsonData];
-  } else if (!Array.isArray(jsonData)) {
-    throw new Error(
-      "Invalid JSON data: must be an array of objects or a single object."
-    );
+  if (!data || data.length === 0) {
+    console.warn("No data to import.");
+    return;
   }
-
   try {
-    await db.bulkDocs(jsonData); // Use bulkDocs for efficient import
+    const result = await db.bulkDocs(data);
+    console.log("Import result:", result);
+
+    // Check for conflicts and errors
+    const errors = result.filter((res) => "error" in res); //check for errors
+    if (errors.length > 0) {
+      console.error("Import conflicts/errors:", errors);
+      // Handle conflicts (e.g., show an error message to the user)
+      throw new Error(
+        "Failed to import some documents due to conflicts or errors."
+      );
+    }
   } catch (error) {
-    console.error("PouchDB import error:", error);
-    throw error; // Re-throw the error to be caught in the component
+    console.error("Error during import:", error);
+    throw error; // Re-throw to handle in the calling function (ManageDatabase component)
   }
 }

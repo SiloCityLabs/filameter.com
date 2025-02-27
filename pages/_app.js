@@ -3,6 +3,14 @@ import { useRouter } from "next/router";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@/public/styles/_fw.css";
 import "@/public/styles/main.css";
+//DB
+import PouchDB from "pouchdb";
+import PouchDBFind from "pouchdb-find";
+import idbAdapter from "pouchdb-adapter-idb";
+import { DatabaseProvider } from "@/contexts/DatabaseContext";
+
+PouchDB.plugin(PouchDBFind);
+PouchDB.plugin(idbAdapter);
 
 const GA_TRACKING_ID = "G-ZSE5YNKGXV";
 
@@ -46,7 +54,9 @@ function MyApp({ Component, pageProps }) {
           />
         </>
       )}
-      <Component {...pageProps} />
+      <DatabaseProvider>
+        <Component {...pageProps} />
+      </DatabaseProvider>
     </>
   );
 }

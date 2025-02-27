@@ -3,14 +3,16 @@ import Head from "next/head";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
-import { migrateFilamentDB } from "@/helpers/filament/migrateFilamentDB";
+//DB
+import PouchDB from "pouchdb";
+import { testLocalDocs } from "@/helpers/filament/initializeFilamentDB";
+import { useDatabase } from "@/contexts/DatabaseContext";
 import { exportDB } from "@/helpers/exportDB";
 import { clearDB } from "@/helpers/clearDB";
 import { importDB } from "@/helpers/importDB";
 
 export default function ManageDatabase() {
-  const [db, setDb] = useState(null);
+  const { db, isLoadingDB } = useDatabase();
   const [isLoading, setIsLoading] = useState(true);
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -18,50 +20,50 @@ export default function ManageDatabase() {
     null
   );
 
-  useEffect(() => {
-    setIsLoading(false);
-
-    async function init() {
-      const initializedDb = await initializeFilamentDB();
-      setDb(initializedDb);
-      if (initializedDb) {
-        await migrateFilamentDB(initializedDb);
-      }
-    }
-    init();
-  }, []);
-
   const clearDatabase = async () => {
+    if (!db) return; // Don't proceed if db is null
     setIsSpinning(true);
-
-    setTimeout(() => {
-      clearDB(db);
+    try {
+      await clearDB(db);
       window.location.reload();
+    } catch (error) {
+      console.error("Error clearing database:", error);
+    } finally {
       setIsSpinning(false);
-    }, 1000);
+    }
   };
+
   const exportDatabase = async () => {
+    if (!db) return;
     setIsSpinning(true);
-
-    setTimeout(() => {
-      exportDB(db);
+    try {
+      await exportDB(db);
+    } catch (error) {
+      console.error("Failed to export", error);
+    } finally {
       setIsSpinning(false);
-    }, 1000);
+    }
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type === "application/json") {
-      setSelectedFile(file);
-      setImportStatus(null); // Reset status on new file selection
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type === "application/json") {
+        setSelectedFile(file);
+        setImportStatus(null); // Reset status on new file selection
+      } else {
+        setSelectedFile(null);
+        setImportStatus("error"); // Indicate invalid file type
+      }
     } else {
-      setSelectedFile(null);
-      setImportStatus("error"); // Indicate invalid file type
+      setSelectedFile(null); //No file selected
+      setImportStatus(null);
     }
   };
 
   const handleImport = async () => {
-    if (!selectedFile) {
+    if (!db || !selectedFile) {
       return;
     }
 
@@ -70,12 +72,24 @@ export default function ManageDatabase() {
 
     try {
       const data = await selectedFile.text();
-      let jsonData = JSON.parse(data);
-      jsonData = jsonData.map((doc) => {
-        const { _rev, ...rest } = doc;
-        return rest;
-      });
-      await importDB(db, jsonData);
+      const jsonData = JSON.parse(data);
+
+      // Handle both single array and object with 'regular' and 'local'
+      let docsToImport: any[] = [];
+      if (Array.isArray(jsonData)) {
+        docsToImport = jsonData; // It's a single array of docs
+      } else if (jsonData.regular && Array.isArray(jsonData.regular)) {
+        docsToImport = docsToImport.concat(jsonData.regular); //It has regular array
+
+        if (jsonData.local && Array.isArray(jsonData.local)) {
+          //Check for local array
+          docsToImport = docsToImport.concat(jsonData.local); //It has local array
+        }
+      } else {
+        throw new Error("Invalid JSON format for import.");
+      }
+
+      await importDB(db, docsToImport);
       setImportStatus("success");
     } catch (error) {
       console.error("Import error:", error);
@@ -108,9 +122,9 @@ export default function ManageDatabase() {
                     variant="danger"
                     className="w-50 me-2"
                     disabled={isSpinning}
-                    onClick={isSpinning ? undefined : clearDatabase}
+                    onClick={clearDatabase}
                   >
-                    {isSpinning ? "Clearing Database..." : "Clear Database"}
+                    Clear Database
                   </Button>
                 </Col>
                 <Col className="text-center">
@@ -118,9 +132,9 @@ export default function ManageDatabase() {
                     variant="info"
                     className="w-50 me-2"
                     disabled={isSpinning}
-                    onClick={isSpinning ? undefined : exportDatabase}
+                    onClick={exportDatabase}
                   >
-                    {isSpinning ? "Exporting Database..." : "Export Database"}
+                    Export Database
                   </Button>
                 </Col>
               </Row>
@@ -142,7 +156,7 @@ export default function ManageDatabase() {
                       onClick={handleImport}
                       disabled={!selectedFile || isSpinning}
                     >
-                      {isSpinning ? "Importing..." : "Import Data"}
+                      Import Data
                     </Button>
                     {importStatus === "success" && (
                       <p className="text-success mt-2">

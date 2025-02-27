@@ -20,6 +20,17 @@ export default function ManageDatabase() {
     null
   );
 
+  // Inside your ManageDatabase component, in the useEffect:
+
+  useEffect(() => {
+    (async () => {
+      if (isLoadingDB === false) {
+        const testResult = await testLocalDocs(db);
+        console.log("testLocalDocs result in component:", testResult);
+      }
+    })(); // Notice the () at the end to *immediately* call the async function
+  }, [isLoadingDB, db]); // <--- Corrected Dependencies!  Very important.
+
   const clearDatabase = async () => {
     if (!db) return; // Don't proceed if db is null
     setIsSpinning(true);

@@ -7,6 +7,7 @@ import ManageFilament from "@/components/ManageFilament";
 //DB
 import getFilamentById from "@/helpers/filament/getFilamentById";
 import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
+import { migrateFilamentDB } from "@/helpers/filament/migrateFilamentDB";
 //Types
 import { Filament } from "@/types/Filament";
 
@@ -49,6 +50,9 @@ export default function EditFilament() {
     async function init() {
       const initializedDb = await initializeFilamentDB();
       setDb(initializedDb);
+      if (initializedDb) {
+        await migrateFilamentDB(initializedDb);
+      }
     }
     init();
   }, []);

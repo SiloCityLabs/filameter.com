@@ -2,16 +2,6 @@ import React from "react";
 import { Nav } from "react-bootstrap";
 import Image from "next/image";
 
-const footer = {
-  copyright: {
-    name: "SiloCityLabs",
-    url: "https://silocitylabs.com/",
-  },
-  site: {
-    name: "filameter.com",
-    url: "https://filameter.com/",
-  },
-}
 function Footer() {
   const images = [
     {
@@ -40,7 +30,7 @@ function Footer() {
               padding: "7px",
             }}
           >
-            ©2025 Copyright: {footer.copyright.name}
+            ©2025 Copyright: {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT}
           </Nav.Item>
           <Nav.Item>
             <Nav.Link href="/terms">Terms</Nav.Link>
@@ -53,17 +43,17 @@ function Footer() {
           <a
             property="dct:title"
             rel="cc:attributionURL"
-            href={footer.site.url}
+            href={process.env.NEXT_PUBLIC_APP_URL}
           >
-            {footer.site.name}
+            {process.env.NEXT_PUBLIC_FOOTER_SITE}
           </a>{" "}
           by{" "}
           <a
             rel="cc:attributionURL dct:creator"
             property="cc:attributionName"
-            href={footer.copyright.url}
+            href={process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT_URL}
           >
-            {footer.copyright.name}
+            {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT}
           </a>{" "}
           is licensed under{" "}
           <a

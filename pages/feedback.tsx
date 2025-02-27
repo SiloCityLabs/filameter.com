@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import Select from 'react-select';
+import Select from "react-select";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { generateGithubLink } from "@/helpers/_silabs/generateGithubLink";
+//json
+import githubLabels from "@/json/github/labels.json";
+import githubAssignees from "@/json/github/assignees.json";
+import githubTemplates from "@/json/github/templates.json";
 
 type OptionType = {
   value: string;
@@ -20,27 +24,13 @@ const feedback = {
   body: "",
 };
 
-const githubAssignees: OptionType[] = [];
-
-const githubLabels: OptionType[] = [
-  { value: 'bug', label: 'Bug' },
-  { value: 'help wanted', label: 'Help Wanted' },
-  { value: 'feature', label: 'Feature Request' },
-  { value: 'enhancement', label: 'Enhancement' }
-];
-
-const githubTemplates: OptionType[] = [
-  { value: 'bug_report.md', label: 'Bug Report' },
-  { value: 'feature_request.md', label: 'Feature Request' },
-];
-
 const parseOptions = (
   valueString: string,
-  options: OptionType[],
+  options: OptionType[]
 ): OptionType[] => {
   if (!valueString) return [];
 
-  const uniqueValues = new Set(valueString.split(',').map((v) => v.trim()));
+  const uniqueValues = new Set(valueString.split(",").map((v) => v.trim()));
 
   return Array.from(uniqueValues)
     .map((value) => options.find((option) => option.value === value))
@@ -54,8 +44,8 @@ export default function Feedback() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const assigneesString = urlParams.get("assignees") ?? '';
-    const labelsString = urlParams.get('labels') ?? '';
+    const assigneesString = urlParams.get("assignees") ?? "";
+    const labelsString = urlParams.get("labels") ?? "";
 
     setFormData({
       title: urlParams.get("title") ?? "",
@@ -63,19 +53,19 @@ export default function Feedback() {
       labels: parseOptions(labelsString, githubLabels),
       template: urlParams.get("template") ?? "",
       body: urlParams.get("body") ?? "",
-    })
+    });
     setIsLoading(false);
   }, []);
 
   const handleInputChange = (e) => {
-    const value = (e.value ? e : e.target.value);
-    const label = (e.value ? "template" : e.target.name);
+    const value = e.value ? e : e.target.value;
+    const label = e.value ? "template" : e.target.name;
     setFormData({ ...formData, [label]: value });
   };
 
   const handleChangeSelect = (
     selectedOptions: any,
-    name: 'assignees' | 'labels'
+    name: "assignees" | "labels"
   ) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -88,13 +78,19 @@ export default function Feedback() {
 
     const feedbackData = {
       title: formData.title,
-      assignees: formData.assignees.map(item => item.value),
-      labels: formData.labels.map(item => item.value),
+      assignees: formData.assignees.map((item) => item.value),
+      labels: formData.labels.map((item) => item.value),
       template: formData.template,
       body: formData.body,
     };
 
-    router.replace(generateGithubLink("Bana0615", "bootstrap-nextjs-github-pages", feedbackData));
+    router.replace(
+      generateGithubLink(
+        process.env.NEXT_PUBLIC_APP_GITHUB_OWNER,
+        process.env.NEXT_PUBLIC_APP_GITHUB_REPO,
+        feedbackData
+      )
+    );
   };
 
   if (isLoading) {
@@ -110,7 +106,7 @@ export default function Feedback() {
         <meta name="keywords" content="" />
       </Head>
       <div className="main-container">
-        <Header />
+        <Header showBadge={true} />
         <Container className="main-content">
           <h3 className="text-center mt-4">Feedback</h3>
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
@@ -134,7 +130,7 @@ export default function Feedback() {
                       options={githubAssignees}
                       value={formData.assignees}
                       onChange={(selectedOptions) =>
-                        handleChangeSelect(selectedOptions, 'assignees')
+                        handleChangeSelect(selectedOptions, "assignees")
                       }
                       closeMenuOnSelect={false}
                       placeholder="None"
@@ -150,7 +146,7 @@ export default function Feedback() {
                       options={githubLabels}
                       value={formData.labels}
                       onChange={(selectedOptions) =>
-                        handleChangeSelect(selectedOptions, 'labels')
+                        handleChangeSelect(selectedOptions, "labels")
                       }
                       closeMenuOnSelect={false}
                       placeholder="None"
@@ -163,7 +159,7 @@ export default function Feedback() {
                     <Form.Label>Template:</Form.Label>
                     <Form.Select
                       name="template"
-                      value={formData.template || ''}
+                      value={formData.template || ""}
                       onChange={handleInputChange}
                     >
                       <option value="">None</option>
@@ -184,7 +180,6 @@ export default function Feedback() {
                       name="body"
                       value={formData.body}
                       onChange={handleInputChange}
-                      required
                       rows={5}
                     />
                   </Form.Group>

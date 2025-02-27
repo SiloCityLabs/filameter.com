@@ -5,7 +5,7 @@ import { Container, Row, Col, Spinner } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 //Components
-import CustomAlert from "@/components/bootstrap/CustomAlert";
+import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
 import getFilamentById from "@/helpers/filament/getFilamentById";
 import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
@@ -137,7 +137,7 @@ export default function SpoolSenseImport() {
         <link rel="manifest" href="/manifest.json" />
       </Head>
       <div className="main-container">
-        <Header />
+        <Header showBadge={true} />
         <Container className="main-content" fluid>
           <Row>
             <Col>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Form, Button } from "react-bootstrap";
 //Components
-import CustomAlert from "@/components/bootstrap/CustomAlert";
+import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //Types
 import { ManageFilamentProps, Filament } from "@/types/Filament";
 //DB

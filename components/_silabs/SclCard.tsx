@@ -13,7 +13,10 @@ type CardProps = {
 
 function SclCard(props: CardProps) {
   return (
-    <Card style={{ width: "18rem" }} className="mx-auto h-100 d-flex flex-column">
+    <Card
+      style={{ width: "18rem" }}
+      className="mx-auto h-100 d-flex flex-column"
+    >
       {/* <Card.Img variant="top" src="https://placehold.co/100x100" /> */}
       <Card.Body className="d-flex flex-column flex-grow-1">
         <Card.Title>{props.title}</Card.Title>

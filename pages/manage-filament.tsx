@@ -101,7 +101,7 @@ export default function EditFilament() {
         <meta name="keywords" content="" />
       </Head>
       <div className="main-container">
-        <Header />
+        <Header showBadge={true} />
         <Container className="main-content">
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
             {filamentIdToFetch && type === "" ? (

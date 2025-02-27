@@ -7,14 +7,14 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>FilaMeter</title>
+        <title>{process.env.NEXT_PUBLIC_APP_NAME}</title>
         <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
       </Head>
       <div className="main-container">
-        <Header />
-        <Container className="main-content">
+        <Header showBadge={true} />
+        <Container className="main-content mt-3">
           <Row className="shadow-lg p-3 bg-body rounded">
             <Col className="text-center">
               <p>

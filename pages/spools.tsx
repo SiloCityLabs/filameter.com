@@ -12,7 +12,7 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 //Components
-import CustomAlert from "@/components/bootstrap/CustomAlert";
+import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
 import deleteFilament from "@/helpers/filament/deleteFilament";
 import getAllFilaments from "@/helpers/filament/getAllFilaments";
@@ -184,7 +184,7 @@ export default function Spools() {
         <meta name="keywords" content="" />
       </Head>
       <div className="main-container">
-        <Header />
+        <Header showBadge={true} />
         <Container className="main-content">
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
             <div className="text-center">
@@ -234,10 +234,16 @@ export default function Spools() {
                                   <OverlayTrigger
                                     placement="bottom"
                                     delay={{ show: 250, hide: 400 }}
-                                    overlay={<Tooltip style={{ position: "fixed" }}>{filament._id}</Tooltip>}
+                                    overlay={
+                                      <Tooltip style={{ position: "fixed" }}>
+                                        {filament._id}
+                                      </Tooltip>
+                                    }
                                   >
                                     <span>
-                                      {filament._id.length > 5 ? filament._id.substring(0, 5) + "..." : filament._id}
+                                      {filament._id.length > 5
+                                        ? filament._id.substring(0, 5) + "..."
+                                        : filament._id}
                                     </span>
                                   </OverlayTrigger>
                                 )}
@@ -297,12 +303,12 @@ export default function Spools() {
                               </td>
                             </tr>
                           ))) || (
-                            <tr>
-                              <td colSpan={9} className="text-center">
-                                No Rows
-                              </td>
-                            </tr>
-                          )}
+                          <tr>
+                            <td colSpan={9} className="text-center">
+                              No Rows
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </Table>
                   </div>

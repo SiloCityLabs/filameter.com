@@ -9,8 +9,8 @@ This is a project to run a website, leveraging [Next.js](https://nextjs.org/), [
 To run the project locally:
 
 ```bash
-git clone https://github.com/yourusername/bootstrap-nextjs-github-pages.git
-cd bootstrap-nextjs-github-pages
+git clone git@github.com:SiloCityLabs/SiloCityPages.git
+cd SiloCityPages
 ```
 
 ```bash
@@ -25,9 +25,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to view the 
 
 ## Website Setup
 
-- Replace `YOUR_DOAMIN` with your domain
+- Copy .env.example and create .env.local and update values
 - Update package.json
 - Update manifest.json
+- Update sitemap.xml
 - Update GA_TRACKING_ID to implement Google Analytics
 
 ## Editing the Website

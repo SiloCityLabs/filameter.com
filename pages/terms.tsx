@@ -13,7 +13,7 @@ export default function Terms() {
         <meta name="keywords" content="terms and conditions" />
       </Head>
       <div className="main-container">
-        <Header />
+        <Header showBadge={true} />
         <Container className="main-content" fluid>
           <Row>
             <Col>

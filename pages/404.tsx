@@ -27,7 +27,7 @@ export default function NotFoundPage() {
         <link rel="manifest" href="/manifest.json" />
       </Head>
       <div className="main-container">
-        <Header />
+        <Header showBadge={true} />
         <Container className="main-content" fluid>
           <Row>
             <Col>

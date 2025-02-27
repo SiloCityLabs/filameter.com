@@ -1,4 +1,4 @@
-export async function exportPouchDB(db) {
+export async function exportDB(db) {
   const allDocs = await db.allDocs({ include_docs: true });
   const jsonData = JSON.stringify(allDocs.rows.map((row) => row.doc));
 

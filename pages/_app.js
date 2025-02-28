@@ -3,26 +3,28 @@ import { useRouter } from "next/router";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@/public/styles/_fw.css";
 import "@/public/styles/main.css";
-
-const GA_TRACKING_ID = "G-ZSE5YNKGXV";
+//DB
+import { DatabaseProvider } from "@/contexts/DatabaseContext";
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
+  const GA_TRACKING_ID = process.env.NEXT_PUBLIC_APP_GA_TRACKING_ID;
 
-  useEffect(() => {
-    const handleRouteChange = (url) => {
-      window.gtag("config", GA_TRACKING_ID, {
-        page_path: url,
-      });
-    };
+  if (GA_TRACKING_ID !== "") {
+    useEffect(() => {
+      const handleRouteChange = (url) => {
+        window.gtag("config", GA_TRACKING_ID, {
+          page_path: url,
+        });
+      };
 
-    router.events.on("routeChangeComplete", handleRouteChange);
+      router.events.on("routeChangeComplete", handleRouteChange);
 
-    // If the component is unmounted, unsubscribe from the event
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-    };
-  }, [router.events]);
+      return () => {
+        router.events.off("routeChangeComplete", handleRouteChange);
+      };
+    }, [router.events]);
+  }
 
   return (
     <>
@@ -46,7 +48,9 @@ function MyApp({ Component, pageProps }) {
           />
         </>
       )}
-      <Component {...pageProps} />
+      <DatabaseProvider>
+        <Component {...pageProps} />
+      </DatabaseProvider>
     </>
   );
 }

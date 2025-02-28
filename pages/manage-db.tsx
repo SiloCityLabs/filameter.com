@@ -19,6 +19,7 @@ export default function ManageDatabase() {
   const [importStatus, setImportStatus] = useState<"success" | "error" | null>(
     null
   );
+  const [exportError, setExportError] = useState<string | null>(null);
 
   // Inside your ManageDatabase component, in the useEffect:
 
@@ -28,8 +29,9 @@ export default function ManageDatabase() {
         const testResult = await testLocalDocs(db);
         console.log("testLocalDocs result in component:", testResult);
       }
-    })(); // Notice the () at the end to *immediately* call the async function
-  }, [isLoadingDB, db]); // <--- Corrected Dependencies!  Very important.
+    })();
+    setIsLoading(false);
+  }, [isLoadingDB, db]);
 
   const clearDatabase = async () => {
     if (!db) return; // Don't proceed if db is null
@@ -47,10 +49,12 @@ export default function ManageDatabase() {
   const exportDatabase = async () => {
     if (!db) return;
     setIsSpinning(true);
+    setExportError(null);
     try {
       await exportDB(db);
     } catch (error) {
       console.error("Failed to export", error);
+      setExportError("Failed to export the database. See console for details."); // Set error message
     } finally {
       setIsSpinning(false);
     }
@@ -147,6 +151,7 @@ export default function ManageDatabase() {
                   >
                     Export Database
                   </Button>
+                  {exportError && <p className="text-danger">{exportError}</p>}
                 </Col>
               </Row>
               <hr />

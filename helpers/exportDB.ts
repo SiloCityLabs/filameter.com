@@ -1,33 +1,43 @@
+// helpers/exportDB.ts
 import PouchDB from "pouchdb";
 
 export async function exportDB(db: PouchDB.Database) {
-  // 1. Get regular documents
-  const regularDocs = await db.allDocs({ include_docs: true });
-  console.log("regularDocs.rows:", regularDocs.rows); // Add this line
-  const regularDocsData = regularDocs.rows.map((row) => row.doc);
+  try {
+    // Fetch regular documents
+    const result = await db.allDocs({ include_docs: true });
+    const docs = result.rows
+      .filter((row) => row.doc && !row.id.startsWith("_design/")) // Exclude design docs
+      .map((row) => row.doc);
 
-  // 2. Get local documents
-  const localDocs = await db.allDocs({
-    include_docs: true,
-    startkey: "_local/",
-    endkey: "_local/\uffff",
-  });
-  console.log("localDocs.rows:", localDocs.rows); // Add this line
-  const localDocsData = localDocs.rows.map((row) => row.doc);
+    // Fetch local documents
+    const localResult = await db.allDocs({
+      include_docs: true,
+      startkey: "_local/",
+      endkey: "_local/\uffff",
+    });
+    const localDocs = localResult.rows
+      .filter((row) => row.doc) // No need to filter design docs here, as they won't match
+      .map((row) => row.doc);
 
-  // 3. Combine the results (optional: put them in separate arrays)
-  const allData = {
-    regular: regularDocsData,
-    local: localDocsData,
-  };
+    // Combine into a single object for export
+    const exportData = {
+      regular: docs,
+      local: localDocs,
+    };
 
-  // 4. Create Blob and trigger download (using combined data)
-  const jsonData = JSON.stringify(allData);
-  const blob = new Blob([jsonData], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `pouchdb_backup_${Date.now()}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+    // Create a Blob and trigger download
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `filameter-db-export-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Failed to export database:", error);
+    throw error;
+  }
 }

@@ -7,7 +7,11 @@ export async function exportDB(db: PouchDB.Database) {
     const result = await db.allDocs({ include_docs: true });
     const docs = result.rows
       .filter((row) => row.doc && !row.id.startsWith("_design/"))
-      .map((row) => row.doc);
+      .map((row) => {
+        const doc = { ...row.doc };
+        delete doc._rev;
+        return doc;
+      });
 
     // Fetch local documents
     let localDocs: PouchDB.Core.Document<any>[] = [];
@@ -17,7 +21,9 @@ export async function exportDB(db: PouchDB.Database) {
     for (const docId of knownLocalIds) {
       try {
         const doc = await db.get(docId);
-        localDocs.push(doc);
+        const updatedInfoDoc = { ...doc };
+        delete updatedInfoDoc._rev;
+        localDocs.push(updatedInfoDoc);
       } catch (err) {
         if (isPouchDBError(err) && err.name !== "not_found") {
           throw err;

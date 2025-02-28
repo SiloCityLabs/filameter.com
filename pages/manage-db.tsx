@@ -1,50 +1,61 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 //DB
-import PouchDB from "pouchdb";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { exportDB } from "@/helpers/exportDB";
-import { clearDB } from "@/helpers/clearDB";
 import { importDB } from "@/helpers/importDB";
+import PouchDB from "pouchdb";
 
 export default function ManageDatabase() {
-  const { db, isLoadingDB } = useDatabase();
-  const [isLoading, setIsLoading] = useState(true);
+  const { db, isReady } = useDatabase();
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState<"success" | "error" | null>(
     null
   );
   const [exportError, setExportError] = useState<string | null>(null);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [clearBeforeImport, setClearBeforeImport] = useState(false); // Re-add clearBeforeImport
+  const [triggerImport, setTriggerImport] = useState(false); // New state variable
 
+  // Load selectedFile from localStorage on component mount
   useEffect(() => {
-    setIsLoading(false);
+    if (typeof window !== "undefined" && localStorage.getItem("selectedFile")) {
+      const fileData = JSON.parse(localStorage.getItem("selectedFile")!);
+      //Need to use File constructor
+      const file = new File([new Blob([fileData.content])], fileData.name, {
+        type: fileData.type,
+      });
+
+      //check for triggerImport
+      const shouldTriggerImport =
+        localStorage.getItem("triggerImport") === "true";
+
+      setSelectedFile(file);
+      localStorage.removeItem("selectedFile");
+      if (shouldTriggerImport) {
+        setTriggerImport(true); // Set the trigger
+        localStorage.removeItem("triggerImport"); // Clear the flag
+      }
+    }
   }, []);
 
-  const clearDatabase = async () => {
+  useEffect(() => {
+    // This effect runs whenever triggerImport changes
+    if (triggerImport && db && selectedFile) {
+      handleImport(); // Call handleImport
+    }
+  }, [triggerImport, db, selectedFile]); // Depend on triggerImport
+
+  const exportDatabase = async () => {
     if (!db) return;
     setIsSpinning(true);
-    try {
-      await clearDB(db);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error clearing database:", error);
-    } finally {
-      setIsSpinning(false);
-    }
-  };
-
-  const handleExport = async () => {
-    if (!db || isLoading) return;
-
-    setIsSpinning(true);
     setExportError(null);
-
     try {
-      await exportDB(db as PouchDB.Database);
+      await exportDB(db);
     } catch (error) {
       console.error("Failed to export", error);
       setExportError("Failed to export the database. See console for details.");
@@ -59,14 +70,17 @@ export default function ManageDatabase() {
       const file = files[0];
       if (file.type === "application/json") {
         setSelectedFile(file);
-        setImportStatus(null);
+        setImportStatus(null); // Reset import status
+        setImportMessage(null); // Clear any previous message
       } else {
         setSelectedFile(null);
         setImportStatus("error");
+        setImportMessage("Invalid file type. Please select a JSON file.");
       }
     } else {
       setSelectedFile(null);
-      setImportStatus(null);
+      setImportStatus(null); // Reset
+      setImportMessage(null);
     }
   };
 
@@ -77,38 +91,58 @@ export default function ManageDatabase() {
 
     setIsSpinning(true);
     setImportStatus(null);
+    setImportMessage(null);
 
     try {
+      // Add this block back:
+      if (clearBeforeImport) {
+        // Convert file to storable string
+        const fileContent = await selectedFile.text();
+        const fileData = {
+          name: selectedFile.name,
+          type: selectedFile.type,
+          content: fileContent,
+        };
+        localStorage.setItem("selectedFile", JSON.stringify(fileData));
+        localStorage.setItem("clearDatabase", "true");
+        localStorage.setItem("triggerImport", "true"); // Set the trigger flag
+        window.location.reload();
+        return;
+      }
+
       const data = await selectedFile.text();
       const jsonData = JSON.parse(data);
 
-      // Handle both single array and object with 'regular' and 'local'
-      let docsToImport: any[] = [];
-      if (Array.isArray(jsonData)) {
-        docsToImport = jsonData; // It's a single array of docs
-      } else if (jsonData.regular && Array.isArray(jsonData.regular)) {
-        docsToImport = docsToImport.concat(jsonData.regular); //It has regular array
-
-        if (jsonData.local && Array.isArray(jsonData.local)) {
-          //Check for local array
-          docsToImport = docsToImport.concat(jsonData.local); //It has local array
-        }
+      if (
+        typeof jsonData === "object" &&
+        jsonData !== null &&
+        Array.isArray(jsonData.regular) &&
+        Array.isArray(jsonData.local)
+      ) {
+        await importDB(db, jsonData);
+        setImportStatus("success");
+        setImportMessage("Data imported successfully!");
+        // No more reload here!
       } else {
-        throw new Error("Invalid JSON format for import.");
+        setImportStatus("error");
+        setImportMessage(
+          "Invalid JSON format. Expected an object with 'regular' and 'local' arrays."
+        );
       }
-
-      await importDB(db, docsToImport);
-      setImportStatus("success");
     } catch (error) {
       console.error("Import error:", error);
       setImportStatus("error");
+      setImportMessage(
+        "Error importing data: " +
+          (error instanceof Error ? error.message : String(error))
+      );
     } finally {
       setIsSpinning(false);
     }
   };
 
-  if (isLoading) {
-    return <div className="text-center">Loading...</div>;
+  if (!isReady) {
+    return <div className="text-center">Loading database...</div>;
   }
 
   return (
@@ -127,20 +161,10 @@ export default function ManageDatabase() {
               <Row>
                 <Col className="text-center">
                   <Button
-                    variant="danger"
-                    className="w-50 me-2"
-                    disabled={isSpinning}
-                    onClick={clearDatabase}
-                  >
-                    Clear Database
-                  </Button>
-                </Col>
-                <Col className="text-center">
-                  <Button
                     variant="info"
                     className="w-50 me-2"
                     disabled={isSpinning}
-                    onClick={handleExport}
+                    onClick={exportDatabase}
                   >
                     Export Database
                   </Button>
@@ -160,6 +184,17 @@ export default function ManageDatabase() {
                         onChange={handleFileChange}
                       />
                     </Form.Group>
+
+                    <Form.Group className="mb-3">
+                      <Form.Check
+                        type="checkbox"
+                        id="clearBeforeImport"
+                        label="Clear database before import"
+                        checked={clearBeforeImport}
+                        onChange={(e) => setClearBeforeImport(e.target.checked)}
+                      />
+                    </Form.Group>
+
                     <Button
                       variant="primary"
                       onClick={handleImport}
@@ -167,14 +202,16 @@ export default function ManageDatabase() {
                     >
                       Import Data
                     </Button>
-                    {importStatus === "success" && (
-                      <p className="text-success mt-2">
-                        Data imported successfully!
-                      </p>
-                    )}
-                    {importStatus === "error" && (
-                      <p className="text-danger mt-2">
-                        Error importing data. Please check the file format.
+
+                    {importMessage && (
+                      <p
+                        className={
+                          importStatus === "success"
+                            ? "text-success mt-2"
+                            : "text-danger mt-2"
+                        }
+                      >
+                        {importMessage}
                       </p>
                     )}
                   </Form>

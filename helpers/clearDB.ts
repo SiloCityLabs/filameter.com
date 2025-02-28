@@ -1,14 +1,12 @@
-export async function clearDB(db) {
-  try {
-    if (!db) {
-      // Important: Check if db is valid
-      console.warn("Database not initialized. Cannot clear.");
-      return;
-    }
+// helpers/clearDB.ts
+import PouchDB from "pouchdb";
 
-    await db.destroy(); // Destroy the database
-    console.info(`Database "${db.name}" destroyed.`);
-  } catch (err) {
-    console.error("Error destroying database:", err);
+export async function clearDB(db: PouchDB.Database) {
+  try {
+    await db.destroy();
+    console.log("Database destroyed successfully.");
+  } catch (error) {
+    console.error("Error destroying database:", error);
+    throw error; // Re-throw to handle in the calling function
   }
 }

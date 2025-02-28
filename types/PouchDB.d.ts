@@ -8,7 +8,7 @@ export interface PouchDBError extends Error {
 
 export interface InfoSchema {
   version: number;
-  updated: number; // Use number for timestamps (milliseconds since epoch)
+  updated: number;
   synchash: string;
   plan: string;
   revision: number;

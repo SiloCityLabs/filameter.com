@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ManageFilament from "@/components/ManageFilament";
 //DB
 import getFilamentById from "@/helpers/filament/getFilamentById";
-import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
-import { migrateFilamentDB } from "@/helpers/filament/migrateFilamentDB";
+import { useDatabase } from "@/contexts/DatabaseContext";
 //Types
 import { Filament } from "@/types/Filament";
 
@@ -20,45 +19,40 @@ const defaultValue: Filament = {
   comments: "",
 };
 
-export default function EditFilament() {
-  const [db, setDb] = useState(null);
+export default function ManageFilamentPage() {
+  const { db, isLoadingDB } = useDatabase();
   const [filament, setFilament] = useState<Filament>(defaultValue);
   const [type, setType] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [filamentIdToFetch, setFilamentIdToFetch] = useState<string | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Keep this local loading state
 
   useEffect(() => {
+    // This useEffect is for handling URL parameters, and it's fine to run only once.
     const urlParams = new URLSearchParams(window.location.search);
     const currentId = urlParams.get("id");
-    const type = urlParams.get("type") ?? "";
+    const type_url = urlParams.get("type") ?? "";
     const usedWeight = urlParams.get("used_weight") ?? 0;
+
     setFilamentIdToFetch(currentId);
-    setType(type);
-    let overwriteObj = {};
+    setType(type_url);
+
+    let overwriteObj: Partial<Filament> = {}; // Use Partial<Filament>
 
     if (usedWeight) {
-      overwriteObj["used_weight"] = parseInt(usedWeight);
+      overwriteObj.used_weight = parseInt(usedWeight);
     }
-    if (currentId && type === "create") {
-      overwriteObj["_id"] = currentId;
+    if (currentId && type_url === "create") {
+      overwriteObj._id = currentId;
     }
     setFilament({ ...defaultValue, ...overwriteObj });
-
-    async function init() {
-      const initializedDb = await initializeFilamentDB();
-      setDb(initializedDb);
-      if (initializedDb) {
-        await migrateFilamentDB(initializedDb);
-      }
-    }
-    init();
+    setIsLoading(false); //set loading to false
   }, []);
 
   const fetchFilament = async (id: string) => {
-    setIsLoading(true);
+    setIsLoading(true); // Keep local loading state
     setError(null);
 
     if (db) {
@@ -79,21 +73,31 @@ export default function EditFilament() {
           setError("Failed to fetch filament.");
         }
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Keep local loading state
       }
+    } else {
+      setError("Database not available."); // Good to handle this case
     }
   };
 
   useEffect(() => {
-    if (filamentIdToFetch && (type === "" || type === "duplicate")) {
+    if (
+      !isLoadingDB &&
+      db &&
+      filamentIdToFetch &&
+      (type === "" || type === "duplicate")
+    ) {
       fetchFilament(filamentIdToFetch);
-    } else {
-      setIsLoading(false);
+    } else if (!isLoadingDB) {
+      setIsLoading(false); //all other situations we set loading to false.
     }
-  }, [filamentIdToFetch, db]);
+  }, [filamentIdToFetch, db, type, isLoadingDB]); // Correct dependencies
 
-  if (isLoading) {
+  if (isLoadingDB || isLoading) {
     return <div className="text-center">Loading...</div>;
+  }
+  if (error) {
+    return <div className="text-center">Error: {error}</div>;
   }
 
   return (
@@ -113,7 +117,7 @@ export default function EditFilament() {
                 <>
                   <h3 className="text-center">Edit Filament</h3>
                   <Col>
-                    <ManageFilament data={filament} />
+                    <ManageFilament data={filament} db={db} />
                   </Col>
                 </>
               ) : (
@@ -123,7 +127,7 @@ export default function EditFilament() {
               <>
                 <h3 className="text-center">Add Filament</h3>
                 <Col>
-                  <ManageFilament data={filament} />
+                  <ManageFilament data={filament} db={db} />
                 </Col>
               </>
             )}

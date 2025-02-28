@@ -7,7 +7,6 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 import { ManageFilamentProps, Filament } from "@/types/Filament";
 //DB
 import { saveFilament } from "@/helpers/filament/saveFilament";
-import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
 
 const defaultValue: Filament = {
   filament: "",
@@ -18,37 +17,40 @@ const defaultValue: Filament = {
   comments: "",
 };
 
-function ManageFilament({ data }: ManageFilamentProps) {
+function ManageFilament({ data, db }: ManageFilamentProps) {
   const router = useRouter();
   const [isEdit, setIsEdit] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-  const [db, setDb] = useState(null);
   const [formData, setFormData] = useState(
     data && Object.keys(data).length > 0 ? data : defaultValue
   );
   const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-    async function init() {
-      const initializedDb = await initializeFilamentDB();
-      setDb(initializedDb);
-    }
-    init();
-
     if (data?._id && data?._rev) {
       setIsEdit(true);
     }
   }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setFormErrors({});
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!db) {
+      setAlertVariant("danger");
+      setAlertMessage("Database not initialized.");
+      setShowAlert(true);
+      return;
+    }
+
     const type = isEdit ? "updated" : "added";
     const result = await saveFilament(db, formData);
 
@@ -58,17 +60,29 @@ function ManageFilament({ data }: ManageFilamentProps) {
 
       //Clear form data if adding
       if (!isEdit) {
-        setFormData(defaultValue);
         router.replace("/spools");
       }
     } else {
       console.error(`Error: Filament not ${type}:`, result.error);
-      if (typeof result.error === "object") {
+      if (
+        typeof result.error === "object" &&
+        result.error !== null &&
+        Array.isArray(result.error)
+      ) {
+        //more robust check
         const formattedErrors = {};
         result.error.forEach((err) => {
-          formattedErrors[err.path[0]] = err.message;
+          if (err?.path?.[0]) {
+            //check if path exists
+            formattedErrors[err.path[0]] = err.message;
+          }
         });
         setFormErrors(formattedErrors);
+      } else {
+        // Handle other error types (e.g., network errors)
+        setAlertVariant("danger");
+        setAlertMessage("An unexpected error occurred.");
+        setShowAlert(true);
       }
     }
   };

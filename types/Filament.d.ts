@@ -11,4 +11,5 @@ export type Filament = {
 
 export interface ManageFilamentProps {
   data?: Filament;
+  db: PouchDB.Database | null;
 }

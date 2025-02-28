@@ -1,25 +1,42 @@
-export async function importDB(db, jsonData) {
-  if (!db) {
-    throw new Error("Database not initialized.");
-  }
+// helpers/importDB.ts
+import PouchDB from "pouchdb";
 
-  if (
-    !Array.isArray(jsonData) &&
-    typeof jsonData === "object" &&
-    jsonData !== null
-  ) {
-    //if jsonData is an object put it in an array
-    jsonData = [jsonData];
-  } else if (!Array.isArray(jsonData)) {
-    throw new Error(
-      "Invalid JSON data: must be an array of objects or a single object."
-    );
-  }
-
+export async function importDB(
+  db: PouchDB.Database,
+  data: { regular: any[]; local: any[] }
+) {
   try {
-    await db.bulkDocs(jsonData); // Use bulkDocs for efficient import
+    const regularDocs = data.regular || [];
+    const localDocs = data.local || [];
+    const allDocs = regularDocs.concat(localDocs);
+
+    for (const doc of allDocs) {
+      try {
+        const result = await db.put(doc);
+      } catch (err: any) {
+        if (err.name === "conflict") {
+          try {
+            const existingDoc = await db.get(doc._id); // Get existing doc
+            const updateResult = await db.put({
+              ...doc,
+              _rev: existingDoc._rev,
+            });
+          } catch (innerErr: any) {
+            console.error(`Error updating document ${doc._id}:`, innerErr);
+            const message =
+              innerErr instanceof Error ? innerErr.message : String(innerErr);
+            throw new Error(`Failed to update document ${doc._id}: ${message}`);
+          }
+        } else {
+          console.error(`Error importing document ${doc._id}:`, err);
+          throw new Error(
+            `Failed to import document ${doc._id}: ${err.message}`
+          );
+        }
+      }
+    }
   } catch (error) {
-    console.error("PouchDB import error:", error);
-    throw error; // Re-throw the error to be caught in the component
+    console.error("Failed to import into database:", error);
+    throw error;
   }
 }

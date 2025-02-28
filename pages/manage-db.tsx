@@ -5,7 +5,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 //DB
 import PouchDB from "pouchdb";
-import { testLocalDocs } from "@/helpers/filament/initializeFilamentDB";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { exportDB } from "@/helpers/exportDB";
 import { clearDB } from "@/helpers/clearDB";
@@ -21,20 +20,12 @@ export default function ManageDatabase() {
   );
   const [exportError, setExportError] = useState<string | null>(null);
 
-  // Inside your ManageDatabase component, in the useEffect:
-
   useEffect(() => {
-    (async () => {
-      if (isLoadingDB === false) {
-        const testResult = await testLocalDocs(db);
-        console.log("testLocalDocs result in component:", testResult);
-      }
-    })();
     setIsLoading(false);
-  }, [isLoadingDB, db]);
+  }, []);
 
   const clearDatabase = async () => {
-    if (!db) return; // Don't proceed if db is null
+    if (!db) return;
     setIsSpinning(true);
     try {
       await clearDB(db);
@@ -46,15 +37,17 @@ export default function ManageDatabase() {
     }
   };
 
-  const exportDatabase = async () => {
-    if (!db) return;
+  const handleExport = async () => {
+    if (!db || isLoading) return;
+
     setIsSpinning(true);
     setExportError(null);
+
     try {
-      await exportDB(db);
+      await exportDB(db as PouchDB.Database);
     } catch (error) {
       console.error("Failed to export", error);
-      setExportError("Failed to export the database. See console for details."); // Set error message
+      setExportError("Failed to export the database. See console for details.");
     } finally {
       setIsSpinning(false);
     }
@@ -66,13 +59,13 @@ export default function ManageDatabase() {
       const file = files[0];
       if (file.type === "application/json") {
         setSelectedFile(file);
-        setImportStatus(null); // Reset status on new file selection
+        setImportStatus(null);
       } else {
         setSelectedFile(null);
-        setImportStatus("error"); // Indicate invalid file type
+        setImportStatus("error");
       }
     } else {
-      setSelectedFile(null); //No file selected
+      setSelectedFile(null);
       setImportStatus(null);
     }
   };
@@ -147,7 +140,7 @@ export default function ManageDatabase() {
                     variant="info"
                     className="w-50 me-2"
                     disabled={isSpinning}
-                    onClick={exportDatabase}
+                    onClick={handleExport}
                   >
                     Export Database
                   </Button>

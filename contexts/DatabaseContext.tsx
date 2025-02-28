@@ -1,4 +1,3 @@
-// contexts/DatabaseContext.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
@@ -30,34 +29,30 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
   useEffect(() => {
     const initializeDB = async () => {
       const dbName = "filament";
-      const adapter = "idb"; // CHANGE BACK TO 'idb'
+      const adapter = "idb";
 
       try {
-        // Check for the clear flag
         if (localStorage.getItem("clearDatabase") === "true") {
-          console.log("Clearing database...");
           localStorage.removeItem("clearDatabase");
-          const tempDB = new PouchDB(dbName, { adapter: adapter }); // Use 'idb'
+          const tempDB = new PouchDB(dbName, { adapter: adapter });
           await tempDB.destroy();
-          console.log("Database destroyed.");
         }
 
-        console.log(
+        console.info(
           `Initializing PouchDB with name: ${dbName}, adapter: ${adapter}`
         );
         const newDb = new PouchDB(dbName, { adapter: adapter }); // Use 'idb'
         const info = await newDb.info();
-        console.log("PouchDB info:", info);
         setDb(newDb);
         setIsReady(true);
       } catch (error) {
         console.error("Database initialization or destruction error:", error);
-        setIsReady(true); // Ensure isReady is set even on error
+        setIsReady(true);
       }
     };
 
     initializeDB();
-  }, []); // Empty dependency array
+  }, []);
 
   return (
     <DatabaseContext.Provider value={{ db, isReady }}>

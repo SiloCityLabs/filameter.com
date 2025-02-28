@@ -23,14 +23,13 @@ import {
   faPenToSquare,
   faTrash,
   faCopy,
-  IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function Spools() {
-  const { db, isLoadingDB } = useDatabase();
+  const { db, isReady } = useDatabase();
   const [isLoading, setIsLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
-  const [alertVariant, setAlertVariant] = useState("");
+  const [alertVariant, setAlertVariant] = useState("success"); // Defaulted to success
   const [alertMessage, setAlertMessage] = useState("");
   const [filaments, setFilaments] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +43,12 @@ export default function Spools() {
     if (alert_msg) {
       setShowAlert(true);
       setAlertMessage(alert_msg);
+      if (
+        alert_msg.toLowerCase().includes("error") ||
+        alert_msg.toLowerCase().includes("failed")
+      ) {
+        setAlertVariant("danger");
+      }
     }
   }, []);
 
@@ -54,27 +59,22 @@ export default function Spools() {
           const allFilaments = await getAllFilaments(db);
           setFilaments(allFilaments);
         } catch (err: unknown) {
-          if (typeof err === "string") {
-            setError(err);
-          } else if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError("Failed to fetch filaments.");
-          }
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to fetch filaments.";
+          setError(errorMessage);
         } finally {
           setIsLoading(false);
         }
       }
     }
-    fetchFilaments();
-  }, [db]);
+    // Only fetch if DB is ready
+    if (isReady) {
+      fetchFilaments();
+    }
+  }, [db, isReady]);
 
   const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this filament?"
-    );
-
-    if (!confirmDelete) {
+    if (!window.confirm("Are you sure you want to delete this filament?")) {
       return;
     }
 
@@ -83,47 +83,44 @@ export default function Spools() {
     if (db) {
       try {
         const success = await deleteFilament(db, id);
+        setShowAlert(true); //  Show alert in either case
         if (success) {
-          setShowAlert(true);
           setAlertMessage("Filament deleted successfully.");
+          setAlertVariant("success");
           // Update the list of filaments after deletion
           const updatedFilaments = await getAllFilaments(db);
           setFilaments(updatedFilaments);
         } else {
-          setShowAlert(true);
-          setAlertMessage("Filament not found or not deleted.");
+          setAlertMessage("Filament not found or deletion failed.");
           setAlertVariant("danger");
         }
       } catch (err: unknown) {
-        if (typeof err === "string") {
-          setError(err);
-        } else if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Failed to delete filament.");
-        }
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to delete filament.";
+        setError(errorMessage);
+        setAlertVariant("danger");
+        setAlertMessage(errorMessage);
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  const sortFilaments = (filamentsToSort: any) => {
-    if (!sortKey) return filamentsToSort; // No sorting needed
+  const sortFilaments = (filamentsToSort: any[]) => {
+    if (!sortKey) return filamentsToSort;
 
-    const sortedFilaments = [...filamentsToSort].sort((a, b) => {
+    return [...filamentsToSort].sort((a, b) => {
       const aValue = a[sortKey];
       const bValue = b[sortKey];
 
       if (typeof aValue === "string" && typeof bValue === "string") {
-        const comparison = aValue.localeCompare(bValue); // String comparison
+        const comparison = aValue.localeCompare(bValue);
         return sortDirection === "asc" ? comparison : -comparison;
       } else {
-        const comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0; // Numeric or other comparison
+        const comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
         return sortDirection === "asc" ? comparison : -comparison;
       }
     });
-    return sortedFilaments;
   };
 
   const handleSortClick = (key: string) => {
@@ -131,7 +128,7 @@ export default function Spools() {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortKey(key);
-      setSortDirection("asc"); // Default to ascending order for new sorts
+      setSortDirection("asc");
     }
   };
 
@@ -161,7 +158,7 @@ export default function Spools() {
     );
   };
 
-  if (isLoading) {
+  if (isLoading || !isReady) {
     return <div className="text-center">Loading...</div>;
   }
 
@@ -177,133 +174,111 @@ export default function Spools() {
         <Header showBadge={true} />
         <Container className="main-content">
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
-            <div className="text-center">
+            <Col>
               <CustomAlert
-                variant={alertVariant ? alertVariant : "success"}
+                variant={alertVariant}
                 message={alertMessage}
                 show={showAlert}
                 onClose={() => setShowAlert(false)}
               />
-            </div>
-            <Col className="text-right">
-              <Row>
-                <Col className="mb-2">
-                  <Button variant="primary" href="/manage-filament" size="sm">
-                    Add Filament
-                  </Button>
-                </Col>
-              </Row>
-              <Row>
-                <Col className="text-center">
-                  <div className="table-responsive">
-                    <Table striped bordered hover size="sm">
-                      <thead>
-                        <tr>
-                          {renderHeader("_id", "ID")}
-                          {renderHeader("filament", "Filament")}
-                          {renderHeader("material", "Material")}
-                          {renderHeader("used_weight", "Used Weight")}
-                          {renderHeader("total_weight", "Total Weight")}
-                          {renderHeader("calc_weight", "Weight Left")}
-                          {renderHeader("location", "Location")}
-                          {renderHeader("comments", "Comments")}
-                          <th
-                            className="text-center"
-                            style={{ cursor: "pointer" }}
-                          >
-                            Actions
-                          </th>
+            </Col>
+            <Col xs={12} className="text-end mb-2">
+              <Button variant="primary" href="/manage-filament" size="sm">
+                Add Filament
+              </Button>
+            </Col>
+            <Col xs={12}>
+              <div className="table-responsive">
+                <Table striped bordered hover size="sm">
+                  <thead>
+                    <tr>
+                      {renderHeader("_id", "ID")}
+                      {renderHeader("filament", "Filament")}
+                      {renderHeader("material", "Material")}
+                      {renderHeader("used_weight", "Used Weight")}
+                      {renderHeader("total_weight", "Total Weight")}
+                      {renderHeader("calc_weight", "Weight Left")}
+                      {renderHeader("location", "Location")}
+                      {renderHeader("comments", "Comments")}
+                      <th className="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedFilaments.length > 0 ? (
+                      sortedFilaments.map((filament) => (
+                        <tr key={`filament-${filament._id}`}>
+                          <td className="text-center">
+                            <OverlayTrigger
+                              placement="bottom"
+                              delay={{ show: 250, hide: 400 }}
+                              overlay={
+                                <Tooltip style={{ position: "fixed" }}>
+                                  {filament._id}
+                                </Tooltip>
+                              }
+                            >
+                              <span>
+                                {filament._id.length > 5
+                                  ? filament._id.substring(0, 5) + "..."
+                                  : filament._id}
+                              </span>
+                            </OverlayTrigger>
+                          </td>
+                          <td className="text-center">{filament.filament}</td>
+                          <td className="text-center">{filament.material}</td>
+                          <td className="text-center">
+                            {filament.used_weight}
+                          </td>
+                          <td className="text-center">
+                            {filament.total_weight}
+                          </td>
+                          <td className="text-center">
+                            {filament.calc_weight}
+                          </td>
+                          <td className="text-center">{filament.location}</td>
+                          <td className="text-center">{filament.comments}</td>
+                          <td className="text-center">
+                            {renderAction(
+                              "Edit",
+                              <a href={`/manage-filament?id=${filament._id}`}>
+                                <FontAwesomeIcon icon={faPenToSquare} />
+                              </a>
+                            )}
+                            <br className="d-md-none" />{" "}
+                            {renderAction(
+                              "Delete",
+                              <a
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleDelete(filament._id);
+                                }}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </a>
+                            )}
+                            <br className="d-md-none" />{" "}
+                            {renderAction(
+                              "Duplicate",
+                              <a
+                                href={`/manage-filament?id=${filament._id}&type=duplicate`}
+                              >
+                                <FontAwesomeIcon icon={faCopy} />
+                              </a>
+                            )}
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {(Object.keys(sortedFilaments).length > 0 &&
-                          sortedFilaments.map((filament) => (
-                            <tr key={`filament-${filament._id}`}>
-                              <td className="text-center">
-                                {filament && filament._id && (
-                                  <OverlayTrigger
-                                    placement="bottom"
-                                    delay={{ show: 250, hide: 400 }}
-                                    overlay={
-                                      <Tooltip style={{ position: "fixed" }}>
-                                        {filament._id}
-                                      </Tooltip>
-                                    }
-                                  >
-                                    <span>
-                                      {filament._id.length > 5
-                                        ? filament._id.substring(0, 5) + "..."
-                                        : filament._id}
-                                    </span>
-                                  </OverlayTrigger>
-                                )}
-                              </td>
-                              <td className="text-center">
-                                {filament.filament}
-                              </td>
-                              <td className="text-center">
-                                {filament.material}
-                              </td>
-                              <td className="text-center">
-                                {filament.used_weight}
-                              </td>
-                              <td className="text-center">
-                                {filament.total_weight}
-                              </td>
-                              <td className="text-center">
-                                {filament.calc_weight}
-                              </td>
-                              <td className="text-center">
-                                {filament.location}
-                              </td>
-                              <td className="text-center">
-                                {filament.comments}
-                              </td>
-                              <td className="text-center">
-                                {renderAction(
-                                  "Edit",
-                                  <a
-                                    href={`/manage-filament?id=${filament._id}`}
-                                  >
-                                    <FontAwesomeIcon icon={faPenToSquare} />
-                                  </a>
-                                )}
-                                <br className="d-md-none" />{" "}
-                                {renderAction(
-                                  "Delete",
-                                  <a
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleDelete(filament._id);
-                                    }}
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </a>
-                                )}
-                                <br className="d-md-none" />{" "}
-                                {renderAction(
-                                  "Duplicate",
-                                  <a
-                                    href={`/manage-filament?id=${filament._id}&type=duplicate`}
-                                  >
-                                    <FontAwesomeIcon icon={faCopy} />
-                                  </a>
-                                )}
-                              </td>
-                            </tr>
-                          ))) || (
-                          <tr>
-                            <td colSpan={9} className="text-center">
-                              No Rows
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </Table>
-                  </div>
-                </Col>
-              </Row>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={9} className="text-center">
+                          No Rows
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              </div>
             </Col>
           </Row>
         </Container>

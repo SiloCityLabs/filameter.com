@@ -20,39 +20,39 @@ const defaultValue: Filament = {
 };
 
 export default function ManageFilamentPage() {
-  const { db, isLoadingDB } = useDatabase();
+  const { db, isReady } = useDatabase(); // Use 'isReady'
   const [filament, setFilament] = useState<Filament>(defaultValue);
   const [type, setType] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [filamentIdToFetch, setFilamentIdToFetch] = useState<string | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(true); // Keep this local loading state
+  const [isLoading, setIsLoading] = useState(true); // Local loading state
 
   useEffect(() => {
-    // This useEffect is for handling URL parameters, and it's fine to run only once.
+    // Handle URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const currentId = urlParams.get("id");
     const type_url = urlParams.get("type") ?? "";
-    const usedWeight = urlParams.get("used_weight") ?? 0;
+    const usedWeight = urlParams.get("used_weight");
 
     setFilamentIdToFetch(currentId);
     setType(type_url);
 
-    let overwriteObj: Partial<Filament> = {}; // Use Partial<Filament>
+    let overwriteObj: Partial<Filament> = {};
 
     if (usedWeight) {
-      overwriteObj.used_weight = parseInt(usedWeight);
+      overwriteObj.used_weight = parseInt(usedWeight, 10);
     }
     if (currentId && type_url === "create") {
       overwriteObj._id = currentId;
     }
     setFilament({ ...defaultValue, ...overwriteObj });
-    setIsLoading(false); //set loading to false
+    setIsLoading(false); // Set loading to false after initial setup
   }, []);
 
   const fetchFilament = async (id: string) => {
-    setIsLoading(true); // Keep local loading state
+    setIsLoading(true);
     setError(null);
 
     if (db) {
@@ -73,27 +73,29 @@ export default function ManageFilamentPage() {
           setError("Failed to fetch filament.");
         }
       } finally {
-        setIsLoading(false); // Keep local loading state
+        setIsLoading(false);
       }
     } else {
-      setError("Database not available."); // Good to handle this case
+      setError("Database not available.");
     }
   };
 
   useEffect(() => {
     if (
-      !isLoadingDB &&
+      isReady && // Use 'isReady' here
       db &&
       filamentIdToFetch &&
       (type === "" || type === "duplicate")
     ) {
       fetchFilament(filamentIdToFetch);
-    } else if (!isLoadingDB) {
-      setIsLoading(false); //all other situations we set loading to false.
+    } else if (isReady) {
+      // Use 'isReady' here
+      setIsLoading(false);
     }
-  }, [filamentIdToFetch, db, type, isLoadingDB]); // Correct dependencies
+  }, [filamentIdToFetch, db, type, isReady]); // Include 'isReady' in dependencies
 
-  if (isLoadingDB || isLoading) {
+  if (isReady === false || isLoading) {
+    // More accurate check
     return <div className="text-center">Loading...</div>;
   }
   if (error) {

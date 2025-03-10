@@ -12,13 +12,13 @@ interface HeaderProps {
 const defaultNavLinks = [
   { label: "Home", href: "/", target: "" },
   { label: "Spools", href: "/spools", target: "" },
-  { label: "Import/Export", href: "/manage-db", target: "" },
+  { label: "Settings", href: "/settings", target: "" },
+  { label: "Feedback", href: "/feedback", target: "" },
   {
     label: "SpoolSense",
     href: "https://shop.silocitylabs.com/products/spoolsense-a-filament-meter-for-your-spools-preorder",
     target: "",
   },
-  { label: "Feedback", href: "/feedback", target: "" },
   {
     label: "GitHub",
     href: process.env.NEXT_PUBLIC_APP_GITHUB_URL,

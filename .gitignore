@@ -42,3 +42,5 @@ next-env.d.ts
 
 # Service Worker
 public/workbox-*
+public/sw.js
+public/sw.js.map

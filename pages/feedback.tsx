@@ -101,7 +101,6 @@ export default function Feedback() {
     <>
       <Head>
         <title>Feedback</title>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
       </Head>

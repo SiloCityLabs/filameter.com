@@ -12,7 +12,6 @@ export default function Settings() {
     <>
       <Head>
         <title>FilaMeter - Settings</title>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
       </Head>

@@ -9,7 +9,6 @@ export default function Privacy() {
     <>
       <Head>
         <title>Privacy Policy</title>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="This is the privacy policy." />
         <meta name="keywords" content="privacy policy" />
       </Head>

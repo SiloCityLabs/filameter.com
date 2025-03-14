@@ -7,8 +7,6 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>{process.env.NEXT_PUBLIC_APP_NAME}</title>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
       </Head>

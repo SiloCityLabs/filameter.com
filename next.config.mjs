@@ -1,23 +1,34 @@
 // next.config.mjs
-import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
-import * as dotenv from 'dotenv';
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
+import * as dotenv from "dotenv";
+import withPWA from "next-pwa";
+
+const pwaConfig = withPWA({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: false,
+  // disable: process.env.NODE_ENV === "development",
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = (phase, { defaultConfig }) => {
   if (phase === PHASE_DEVELOPMENT_SERVER) {
-    dotenv.config({ path: '.env.local' });
+    dotenv.config({ path: ".env.local" });
   } else {
-    dotenv.config({ path: '.env.production' });
+    dotenv.config({ path: ".env.production" });
   }
 
-  return {
+  const baseConfig = {
     ...defaultConfig,
     reactStrictMode: true,
-    output: 'export',
+    output: "export",
     images: {
-      unoptimized: true, // Disable image optimization
+      unoptimized: true,
     },
   };
+
+  return pwaConfig(baseConfig);
 };
 
 export default nextConfig;

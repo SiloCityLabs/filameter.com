@@ -41,9 +41,9 @@ export default function ImportExport() {
 
   useEffect(() => {
     if (triggerImport && db && selectedFile) {
-      handleImport(); // Call handleImport
+      handleImport();
     }
-  }, [triggerImport, db, selectedFile]); // Depend on triggerImport
+  }, [triggerImport, db, selectedFile]);
 
   const exportDatabase = async () => {
     if (!db) return;
@@ -74,7 +74,7 @@ export default function ImportExport() {
       }
     } else {
       setSelectedFile(null);
-      setImportStatus(null); // Reset
+      setImportStatus(null);
       setImportMessage(null);
     }
   };
@@ -98,7 +98,7 @@ export default function ImportExport() {
         };
         localStorage.setItem("selectedFile", JSON.stringify(fileData));
         localStorage.setItem("clearDatabase", "true");
-        localStorage.setItem("triggerImport", "true"); // Set the trigger flag
+        localStorage.setItem("triggerImport", "true");
         window.location.reload();
         return;
       }
@@ -144,7 +144,7 @@ export default function ImportExport() {
           <Row>
             <Col className="text-center">
               <Button
-                variant="info"
+                variant="primary"
                 className="w-50 me-2"
                 disabled={isSpinning}
                 onClick={exportDatabase}

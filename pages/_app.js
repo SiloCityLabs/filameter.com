@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@/public/styles/_fw.css";
 import "@/public/styles/main.css";
@@ -28,6 +29,10 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <>
+      <Head>
+        <title>{process.env.NEXT_PUBLIC_APP_NAME}</title>
+        <link rel="manifest" href="/manifest.json" />
+      </Head>
       {GA_TRACKING_ID !== "" && (
         <>
           <script

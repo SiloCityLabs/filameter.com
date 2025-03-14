@@ -24,7 +24,6 @@ export default function NotFoundPage() {
       <Head>
         <title>Page Not Found</title>
         <meta name="description" content="This page could not be found." />
-        <link rel="manifest" href="/manifest.json" />
       </Head>
       <div className="main-container">
         <Header showBadge={true} />

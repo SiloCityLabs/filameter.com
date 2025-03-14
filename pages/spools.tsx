@@ -166,7 +166,6 @@ export default function Spools() {
     <>
       <Head>
         <title>FilaMeter - Spools</title>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
       </Head>

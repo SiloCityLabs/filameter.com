@@ -8,7 +8,6 @@ export default function Terms() {
     <>
       <Head>
         <title>Terms And Conditions</title>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="This is the terms and conditions." />
         <meta name="keywords" content="terms and conditions" />
       </Head>

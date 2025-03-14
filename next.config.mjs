@@ -8,8 +8,6 @@ const pwaConfig = withPWA({
   register: true,
   skipWaiting: true,
   disable: false,
-  disable: false,
-  precachingManifest: false,
 });
 
 /** @type {import('next').NextConfig} */

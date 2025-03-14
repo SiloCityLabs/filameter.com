@@ -27,6 +27,8 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     data && Object.keys(data).length > 0 ? data : defaultValue
   );
   const [formErrors, setFormErrors] = useState({});
+  const [createMultiple, setCreateMultiple] = useState(false);
+  const [numberOfRows, setNumberOfRows] = useState(1);
 
   useEffect(() => {
     if (data?._id && data?._rev) {
@@ -52,7 +54,10 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     }
 
     const type = isEdit ? "updated" : "added";
-    const result = await saveFilament(db, formData);
+    let result;
+    for (let x = 0; x < numberOfRows; x++) {
+      result = await saveFilament(db, formData);
+    }
 
     if (result.success) {
       setShowAlert(true);
@@ -173,6 +178,29 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
             onChange={handleInputChange}
           />
         </Form.Group>
+        {!isEdit && (
+          <Form.Group controlId="createMultiple">
+            <Form.Check
+              type="checkbox"
+              label="Create multiple rows"
+              checked={createMultiple}
+              onChange={(e) => setCreateMultiple(e.target.checked)}
+            />
+          </Form.Group>
+        )}
+
+        {createMultiple && !isEdit && (
+          <Form.Group controlId="numberOfRows">
+            <Form.Label>Number of rows:</Form.Label>
+            <Form.Control
+              type="number"
+              value={numberOfRows}
+              onChange={(e) => setNumberOfRows(parseInt(e.target.value))}
+              min={1}
+              max={50}
+            />
+          </Form.Group>
+        )}
 
         <div className="text-center mt-2 d-flex justify-content-center">
           <Button href="/spools" variant="primary" className="me-2">

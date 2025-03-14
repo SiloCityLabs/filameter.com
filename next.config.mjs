@@ -8,7 +8,8 @@ const pwaConfig = withPWA({
   register: true,
   skipWaiting: true,
   disable: false,
-  // disable: process.env.NODE_ENV === "development",
+  disable: false,
+  precachingManifest: false,
 });
 
 /** @type {import('next').NextConfig} */

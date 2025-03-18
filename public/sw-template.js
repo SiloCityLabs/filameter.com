@@ -25,3 +25,9 @@ workbox.routing.setCatchHandler(async ({ event }) => {
   }
   return Response.error();
 });
+
+// Ensure manage-filament.html is precached
+workbox.precaching.precacheAndRoute([
+  { url: "/manage-filament.html", revision: null },
+  { url: "/offline.html", revision: null },
+]);

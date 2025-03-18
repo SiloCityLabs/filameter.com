@@ -6,7 +6,7 @@ module.exports = {
     "settings.html",
     "spools.html",
     "manage-filament.html", // Ensure this is included
-    "offline.html",
+    "offline.html", // Ensure this is included
   ],
   swDest: "public/sw.js",
 };

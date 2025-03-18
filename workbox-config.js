@@ -9,7 +9,7 @@ module.exports = {
   swDest: "public/sw.js",
   runtimeCaching: [
     {
-      urlPattern: /^.*\/manage-filament(\?.+)?$/,
+      urlPattern: /^.*\/manage-filament(\?.*)?$/, // Improved regex
       handler: "NetworkFirst",
       options: {
         cacheName: "manage-filament-cache",

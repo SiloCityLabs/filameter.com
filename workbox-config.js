@@ -1,17 +1,17 @@
-// module.exports = {
-//   globDirectory: "out",
-//   globPatterns: [
-//     "**/*.{js,css,png,jpg,jpeg,svg,woff,woff2,html,ico,json,xml,txt}",
-//   ],
-//   swDest: "public/sw.js",
-//   globIgnores: [
-//     "../workbox-config.js",
-//     "_next/dynamic-css-manifest.json", // Exclude this file
-//   ],
-// };
-
 module.exports = {
   globDirectory: "out",
   globPatterns: ["**/*.{js,css,html}"],
   swDest: "public/sw.js",
+  runtimeCaching: [
+    {
+      urlPattern: ({ url }) => url.pathname.startsWith("/manage-filament"),
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "manage-filament-cache",
+        expiration: {
+          maxEntries: 50,
+        },
+      },
+    },
+  ],
 };

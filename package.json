@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npx workbox injectManifest workbox-config.js && cp public/sw.js out/sw.js",
+    "build": "next build && workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-*.js out/",
     "start": "next start",
     "lint": "next lint"
   },

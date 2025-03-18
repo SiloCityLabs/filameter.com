@@ -19,7 +19,8 @@ module.exports = {
         plugins: [
           {
             fetchDidFail: async ({ request }) => {
-              console.error("Fetch failed for:", request.url);
+              console.warn("Failed request:", request);
+              console.warn("Fetch failed for:", request.url);
 
               // Serve the pre-cached /manage-filament.html for any /manage-filament request
               const cachedResponse = await caches.match(
@@ -45,7 +46,7 @@ module.exports = {
         plugins: [
           {
             fetchDidFail: async ({ request }) => {
-              console.error("Fetch failed for:", request.url);
+              console.warn("Fetch failed for:", request.url);
               return caches.match("/offline.html");
             },
           },

@@ -11,7 +11,8 @@ module.exports = {
   swDest: "public/sw.js",
   runtimeCaching: [
     {
-      urlPattern: /^.*\/manage-filament(\?.+)?$/,
+      // Match /manage-filament and /manage-filament?id=[uuid]
+      urlPattern: /^.*\/manage-filament/,
       handler: "NetworkFirst",
       options: {
         cacheName: "manage-filament-cache",

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -37,20 +37,13 @@ export default function Offline() {
                   It seems you are not connected to the internet. Please check
                   your connection and try again.
                 </p>
-                <button
+                <Button
                   onClick={() => window.location.reload()}
-                  style={{
-                    padding: "10px 20px",
-                    fontSize: "16px",
-                    backgroundColor: "#007BFF",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
+                  variant="primary"
+                  size="sm"
                 >
                   Retry
-                </button>
+                </Button>
               </div>
             </Col>
           </Row>

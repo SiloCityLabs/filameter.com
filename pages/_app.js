@@ -11,6 +11,15 @@ function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const GA_TRACKING_ID = process.env.NEXT_PUBLIC_APP_GA_TRACKING_ID;
 
+  //Register Service Worker for PWA
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js");
+      });
+    }
+  }, []);
+
   if (GA_TRACKING_ID !== "") {
     useEffect(() => {
       const handleRouteChange = (url) => {

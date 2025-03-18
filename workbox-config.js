@@ -12,7 +12,7 @@ module.exports = {
   runtimeCaching: [
     {
       // Match /manage-filament and /manage-filament?id=[uuid]
-      urlPattern: /^.*\/manage-filament/,
+      urlPattern: ({ url }) => url.pathname.startsWith("/manage-filament"),
       handler: "NetworkFirst",
       options: {
         cacheName: "manage-filament-cache",

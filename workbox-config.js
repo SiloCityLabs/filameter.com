@@ -1,3 +1,16 @@
+const loggingPlugin = {
+  cacheDidUpdate: async ({ cacheName, request, response }) => {
+    if (cacheName === "manage-filament-cache") {
+      caches.open(cacheName).then((cache) => {
+        cache.keys().then((keys) => {
+          console.log("SW: Cache Keys:", keys);
+        });
+      });
+    }
+    return response;
+  },
+};
+
 module.exports = {
   globDirectory: "out",
   globPatterns: [
@@ -13,9 +26,9 @@ module.exports = {
       handler: "NetworkFirst",
       options: {
         cacheName: "manage-filament-cache",
-        expiration: {
-          maxEntries: 50,
-        },
+        plugins: [
+          loggingPlugin, // Apply the logging plugin here (ExpirationPlugin removed)
+        ],
       },
     },
   ],

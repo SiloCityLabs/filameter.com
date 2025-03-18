@@ -8,5 +8,6 @@ module.exports = {
     "manage-filament.html", // Ensure this is included
     "offline.html", // Ensure this is included
   ],
+  swSrc: "public/sw-template.js",
   swDest: "public/sw.js",
 };

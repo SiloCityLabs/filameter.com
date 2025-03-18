@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && workbox generateSW workbox-config.js && cp public/sw.js out/sw.js",
+    "build": "next build && workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-a7e13a4a.js out/workbox-a7e13a4a.js",
     "start": "next start",
     "lint": "next lint"
   },

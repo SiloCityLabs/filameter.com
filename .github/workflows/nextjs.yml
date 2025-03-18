@@ -56,7 +56,7 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js (Production Mode)
-        run: npx --no-install next build && npx workbox generateSW workbox-config.js && cp public/sw.js out/sw.js
+        run: npx --no-install next build && npx workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-a7e13a4a.js out/workbox-a7e13a4a.js
         env:
           NODE_ENV: production
       - name: Upload artifact

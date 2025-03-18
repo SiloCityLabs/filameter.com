@@ -7,6 +7,7 @@ module.exports = {
     "spools.html",
   ],
   swDest: "public/sw.js",
+  navigateFallback: "offline.html",
   runtimeCaching: [
     {
       urlPattern: /^.*\/manage-filament(\?.*)?$/, // Improved regex

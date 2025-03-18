@@ -5,6 +5,8 @@ module.exports = {
     "index.html",
     "settings.html",
     "spools.html",
+    "manage-filament.html",
+    "offline.html",
   ],
   swDest: "public/sw.js",
   runtimeCaching: [
@@ -18,6 +20,19 @@ module.exports = {
             requestWillFetch: async ({ request }) => {
               console.log("Fetching:", request.url);
               return request;
+            },
+          },
+        ],
+      },
+    },
+    {
+      urlPattern: /.*/, // Match all other requests
+      handler: "NetworkOnly",
+      options: {
+        plugins: [
+          {
+            fetchDidFail: async () => {
+              return caches.match("/offline.html"); // Serve the fallback page
             },
           },
         ],

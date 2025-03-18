@@ -55,10 +55,8 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
-      - name: Install workbox
-        run: npm install workbox-cli
       - name: Build with Next.js (Production Mode)
-        run: npx --no-install next build && workbox generateSW workbox-config.js && cp public/sw.js out/sw.js
+        run: npx --no-install next build && npx workbox generateSW workbox-config.js && cp public/sw.js out/sw.js
         env:
           NODE_ENV: production
       - name: Upload artifact

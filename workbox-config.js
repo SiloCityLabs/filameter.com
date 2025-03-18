@@ -5,9 +5,23 @@ module.exports = {
     "index.html",
     "settings.html",
     "spools.html",
-    "manage-filament.html", // Ensure this is included
-    "offline.html", // Ensure this is included
   ],
-  swSrc: "public/sw-template.js",
   swDest: "public/sw.js",
+  runtimeCaching: [
+    {
+      urlPattern: /^.*\/manage-filament(\?.+)?$/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "manage-filament-cache",
+        plugins: [
+          {
+            requestWillFetch: async ({ request }) => {
+              console.log("Fetching:", request.url);
+              return request;
+            },
+          },
+        ],
+      },
+    },
+  ],
 };

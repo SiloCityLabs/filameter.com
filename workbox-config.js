@@ -5,13 +5,13 @@ module.exports = {
     "index.html",
     "settings.html",
     "spools.html",
-    "manage-filament.html",
+    "manage-filament.html", // Ensure this is included
     "offline.html",
   ],
   swDest: "public/sw.js",
   runtimeCaching: [
     {
-      // Match /manage-filament and /manage-filament?id=[uuid]
+      // Match /manage-filament
       urlPattern: ({ url }) => url.pathname.startsWith("/manage-filament"),
       handler: "NetworkFirst",
       options: {
@@ -32,8 +32,16 @@ module.exports = {
       options: {
         plugins: [
           {
-            fetchDidFail: async () => {
-              return caches.match("/offline.html"); // Serve the fallback page
+            fetchDidFail: async ({ request }) => {
+              console.error("Fetch failed for:", request.url);
+              const cachedResponse = await caches.match(
+                "/manage-filament.html"
+              );
+              if (cachedResponse) {
+                console.log("Serving cached response for:", request.url);
+                return cachedResponse;
+              }
+              return caches.match("/offline.html");
             },
           },
         ],

@@ -18,9 +18,17 @@ function MyApp({ Component, pageProps }) {
         navigator.serviceWorker.register("/sw.js");
       });
     }
+
+    if (navigator.onLine) {
+      console.log("You are online.");
+      // Perform online-specific actions
+    } else {
+      console.log("You are offline.");
+      // Perform offline-specific actions (e.g., display an offline message)
+    }
   }, []);
 
-  if (GA_TRACKING_ID !== "") {
+  if (GA_TRACKING_ID !== "" && navigator.onLine) {
     useEffect(() => {
       const handleRouteChange = (url) => {
         window.gtag("config", GA_TRACKING_ID, {

@@ -10,7 +10,6 @@ import { DatabaseProvider } from "@/contexts/DatabaseContext";
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const GA_TRACKING_ID = process.env.NEXT_PUBLIC_APP_GA_TRACKING_ID;
-  const isOnline = typeof window !== "undefined" && navigator.onLine;
 
   //Register Service Worker for PWA
   useEffect(() => {
@@ -19,17 +18,9 @@ function MyApp({ Component, pageProps }) {
         navigator.serviceWorker.register("/sw.js");
       });
     }
-
-    if (isOnline) {
-      console.log("You are online.");
-      // Perform online-specific actions
-    } else {
-      console.log("You are offline.");
-      // Perform offline-specific actions (e.g., display an offline message)
-    }
   }, []);
 
-  if (GA_TRACKING_ID !== "" && isOnline) {
+  if (GA_TRACKING_ID !== "") {
     useEffect(() => {
       const handleRouteChange = (url) => {
         window.gtag("config", GA_TRACKING_ID, {
@@ -51,7 +42,7 @@ function MyApp({ Component, pageProps }) {
         <title>{process.env.NEXT_PUBLIC_APP_NAME}</title>
         <link rel="manifest" href="/manifest.json" />
       </Head>
-      {GA_TRACKING_ID !== "" && isOnline && (
+      {GA_TRACKING_ID !== "" && (
         <>
           <script
             async

@@ -7,7 +7,7 @@
   "dir": "ltr",
   "theme_color": "#1368ff",
   "background_color": "#212429",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
   "start_url": "/",
@@ -43,13 +43,13 @@
     },
     {
       "src": "/images/screenshots/mobile-600x800.png",
-      "sizes": "640x480",
+      "sizes": "600x800",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
       "src": "/images/screenshots/mobile-375x667.png",
-      "sizes": "375x667",
+      "sizes": "375x1012",
       "type": "image/png",
       "form_factor": "narrow"
     }

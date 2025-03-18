@@ -19,7 +19,7 @@ const nextConfig = (phase, { defaultConfig }) => {
     },
   };
 
-  return pwaConfig(baseConfig);
+  return baseConfig;
 };
 
 export default nextConfig;

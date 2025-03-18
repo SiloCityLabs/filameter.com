@@ -26,9 +26,7 @@ module.exports = {
       handler: "NetworkFirst",
       options: {
         cacheName: "manage-filament-cache",
-        plugins: [
-          loggingPlugin, // Apply the logging plugin here (ExpirationPlugin removed)
-        ],
+        plugins: [loggingPlugin],
       },
     },
   ],

@@ -1,16 +1,3 @@
-const loggingPlugin = {
-  cacheDidUpdate: async ({ cacheName, request, response }) => {
-    if (cacheName === "manage-filament-cache") {
-      caches.open(cacheName).then((cache) => {
-        cache.keys().then((keys) => {
-          console.log("SW: Cache Keys:", keys);
-        });
-      });
-    }
-    return response;
-  },
-};
-
 module.exports = {
   globDirectory: "out",
   globPatterns: [
@@ -22,11 +9,18 @@ module.exports = {
   swDest: "public/sw.js",
   runtimeCaching: [
     {
-      urlPattern: /^.*\/manage-filament(\?.*)?$/,
+      urlPattern: /^.*\/manage-filament(\?.+)?$/,
       handler: "NetworkFirst",
       options: {
         cacheName: "manage-filament-cache",
-        plugins: [loggingPlugin],
+        plugins: [
+          {
+            requestWillFetch: async ({ request }) => {
+              console.log("Fetching:", request.url);
+              return request;
+            },
+          },
+        ],
       },
     },
   ],

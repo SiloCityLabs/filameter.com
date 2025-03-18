@@ -5,24 +5,23 @@ module.exports = {
     "index.html",
     "settings.html",
     "spools.html",
-    "manage-filament.html", // Pre-cached
+    "manage-filament.html", // Ensure this is included
     "offline.html",
   ],
   swDest: "public/sw.js",
   runtimeCaching: [
     {
-      // Handle /manage-filament and /manage-filament?id=[uuid]
-      urlPattern: ({ url }) => url.pathname.startsWith("/manage-filament"),
-      handler: "NetworkFirst", // Try network first, fallback to cache
+      // Match /manage-filament and /manage-filament?id=[uuid]
+      urlPattern: /^\/manage-filament(\?.*)?$/,
+      handler: "NetworkFirst",
       options: {
         cacheName: "manage-filament-cache",
         plugins: [
           {
             fetchDidFail: async ({ request }) => {
-              console.warn("Failed request:", request);
-              console.warn("Fetch failed for:", request.url);
+              console.error("Fetch failed for:", request.url);
 
-              // Serve the pre-cached /manage-filament.html for any /manage-filament request
+              // Serve the cached /manage-filament.html for any /manage-filament request
               const cachedResponse = await caches.match(
                 "/manage-filament.html"
               );
@@ -46,7 +45,7 @@ module.exports = {
         plugins: [
           {
             fetchDidFail: async ({ request }) => {
-              console.warn("Fetch failed for:", request.url);
+              console.error("Fetch failed for:", request.url);
               return caches.match("/offline.html");
             },
           },

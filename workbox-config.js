@@ -1,6 +1,6 @@
 module.exports = {
   globDirectory: "out",
-  globPatterns: ["**/*.{js,css,html}"],
+  globPatterns: ["**/*.{js,css,html}", "!manage-filament.html"],
   swDest: "public/sw.js",
   runtimeCaching: [
     {

@@ -10,7 +10,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
-  "start_url": "/",
+  "start_url": "/spools",
   "icons": [
     {
       "src": "images/logos/72x72.png",

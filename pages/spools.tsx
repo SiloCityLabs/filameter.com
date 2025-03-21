@@ -5,6 +5,7 @@ import {
   Row,
   Col,
   Table,
+  Form,
   Button,
   OverlayTrigger,
   Tooltip,
@@ -37,6 +38,7 @@ export default function Spools() {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [settings, setSettings] = useState<{ [key: string]: any }>({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -150,6 +152,16 @@ export default function Spools() {
 
   const sortedFilaments = sortFilaments(data);
 
+  const filteredFilaments = sortedFilaments.filter((filament) => {
+    const searchString = searchTerm.toLowerCase();
+    return (
+      filament._id.toLowerCase().includes(searchString) ||
+      filament.filament.toLowerCase().includes(searchString) ||
+      filament.material.toLowerCase().includes(searchString) ||
+      filament.location.toLowerCase().includes(searchString)
+    );
+  });
+
   const renderHeader = (key: string, title: string) => {
     if (settings.spoolHeaders && settings.spoolHeaders[title]) {
       return (
@@ -218,6 +230,16 @@ export default function Spools() {
               />
             </Col>
             <Col xs={12} className="text-end mb-2">
+              <Form.Control
+                type="text"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="sm"
+                style={{
+                  display: "inline-block",
+                }}
+              />
               <Button variant="primary" href="/manage-filament" size="sm">
                 Add Filament
               </Button>
@@ -239,8 +261,8 @@ export default function Spools() {
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedFilaments.length > 0 ? (
-                      sortedFilaments.map((filament) => (
+                    {filteredFilaments.length > 0 ? (
+                      filteredFilaments.map((filament) => (
                         <tr key={`filament-${filament._id}`}>
                           {settings.spoolHeaders &&
                             settings.spoolHeaders["ID"] && (

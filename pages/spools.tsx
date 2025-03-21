@@ -16,7 +16,7 @@ import Footer from "@/components/Footer";
 //Components
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
-import deleteFilament from "@/helpers/database/filament/deleteFilament";
+import deleteRow from "@/helpers/_silabs/pouchDb/deleteRow";
 import getAllFilaments from "@/helpers/database/filament/getAllFilaments";
 import getAllSettings from "@/helpers/database/settings/getAllSettings";
 import { useDatabase } from "@/contexts/DatabaseContext";
@@ -103,7 +103,7 @@ export default function Spools() {
     setError(null);
     if (dbs.filament) {
       try {
-        const success = await deleteFilament(dbs.filament, id);
+        const success = await deleteRow(dbs.filament, id, "filament");
         setShowAlert(true); //  Show alert in either case
         if (success) {
           setAlertMessage("Filament deleted successfully.");

@@ -9,7 +9,8 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
 import getFilamentById from "@/helpers/database/filament/getFilamentById";
 import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
-import { saveFilament } from "@/helpers/database/filament/saveFilament";
+import { save } from "@/helpers/_silabs/pouchDb/save";
+import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
 //Types
 import { Filament } from "@/types/Filament";
 
@@ -81,7 +82,12 @@ export default function SpoolSenseImport() {
         setFilament(fetchedFilament);
 
         //Update Data
-        const result = await saveFilament(db, fetchedFilament);
+        const result = await save(
+          db,
+          fetchedFilament,
+          filamentSchema,
+          "filament"
+        );
 
         if (result.success) {
           setShowAlert(true);

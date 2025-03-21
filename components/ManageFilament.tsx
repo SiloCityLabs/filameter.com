@@ -6,7 +6,8 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //Types
 import { ManageFilamentProps, Filament } from "@/types/Filament";
 //DB
-import { saveFilament } from "@/helpers/database/filament/saveFilament";
+import { save } from "@/helpers/_silabs/pouchDb/save";
+import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
 
 const defaultValue: Filament = {
   filament: "",
@@ -56,7 +57,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     const type = isEdit ? "updated" : "added";
     let result;
     for (let x = 0; x < numberOfRows; x++) {
-      result = await saveFilament(db, formData);
+      result = await save(db, formData, filamentSchema, "filament");
     }
 
     if (result.success) {

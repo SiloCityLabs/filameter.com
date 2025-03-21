@@ -165,15 +165,32 @@ export default function Spools() {
     }
   };
 
-  const renderAction = (tooltip: string, element: JSX.Element) => {
+  const renderAction = (
+    tooltip: string,
+    element: JSX.Element,
+    buttonText: string,
+    onClick?: () => void
+  ) => {
     return (
-      <OverlayTrigger
-        placement="bottom"
-        delay={{ show: 250, hide: 400 }}
-        overlay={<Tooltip style={{ position: "fixed" }}>{tooltip}</Tooltip>}
-      >
-        {element}
-      </OverlayTrigger>
+      <>
+        <OverlayTrigger
+          placement="bottom"
+          delay={{ show: 250, hide: 400 }}
+          overlay={<Tooltip style={{ position: "fixed" }}>{tooltip}</Tooltip>}
+        >
+          <span>
+            <span className="d-none d-md-inline-block">{element}</span>{" "}
+          </span>
+        </OverlayTrigger>
+        <Button
+          variant="primary"
+          size="sm"
+          className="d-inline-block d-md-none mb-1"
+          onClick={onClick}
+        >
+          {buttonText}
+        </Button>
+      </>
     );
   };
 
@@ -294,9 +311,12 @@ export default function Spools() {
                               "Edit",
                               <a href={`/manage-filament?id=${filament._id}`}>
                                 <FontAwesomeIcon icon={faPenToSquare} />
-                              </a>
+                              </a>,
+                              "Edit",
+                              () =>
+                                (window.location.href = `/manage-filament?id=${filament._id}`)
                             )}
-                            <br className="d-md-none" />{" "}
+                            <br className="d-md-none" />
                             {renderAction(
                               "Delete",
                               <a
@@ -307,16 +327,21 @@ export default function Spools() {
                                 }}
                               >
                                 <FontAwesomeIcon icon={faTrash} />
-                              </a>
+                              </a>,
+                              "Delete",
+                              () => handleDelete(filament._id)
                             )}
-                            <br className="d-md-none" />{" "}
+                            <br className="d-md-none" />
                             {renderAction(
                               "Duplicate",
                               <a
                                 href={`/manage-filament?id=${filament._id}&type=duplicate`}
                               >
                                 <FontAwesomeIcon icon={faCopy} />
-                              </a>
+                              </a>,
+                              "Duplicate",
+                              () =>
+                                (window.location.href = `/manage-filament?id=${filament._id}&type=duplicate`)
                             )}
                           </td>
                         </tr>

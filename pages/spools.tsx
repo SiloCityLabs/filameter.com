@@ -221,7 +221,7 @@ export default function Spools() {
         <Header showBadge={true} />
         <Container className="main-content">
           <Row className="shadow-lg p-3 bg-body rounded mt-4">
-            <Col>
+            <Col xs={12}>
               <CustomAlert
                 variant={alertVariant}
                 message={alertMessage}
@@ -229,17 +229,16 @@ export default function Spools() {
                 onClose={() => setShowAlert(false)}
               />
             </Col>
-            <Col xs={12} className="text-end mb-2">
+            <Col xs={12} md={8} className="text-end mb-2">
               <Form.Control
                 type="text"
                 placeholder="Search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 size="sm"
-                style={{
-                  display: "inline-block",
-                }}
               />
+            </Col>
+            <Col xs={12} md={4} className="text-end mb-2">
               <Button variant="primary" href="/manage-filament" size="sm">
                 Add Filament
               </Button>

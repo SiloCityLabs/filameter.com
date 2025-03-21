@@ -90,6 +90,13 @@ export default function ImportExport() {
 
     try {
       if (clearBeforeImport) {
+        if (
+          !window.confirm(
+            "Are you sure you want to clear the filament database?"
+          )
+        ) {
+          return;
+        }
         const fileContent = await selectedFile.text();
         const fileData = {
           name: selectedFile.name,

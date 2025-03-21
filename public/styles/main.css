@@ -1,0 +1,4 @@
+.custom-checkbox .form-check-input {
+  transform: scale(1.2);
+  border: 2px solid #007bff;
+}

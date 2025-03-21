@@ -9,6 +9,7 @@ import {
   Button,
   OverlayTrigger,
   Tooltip,
+  Pagination,
 } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -39,6 +40,8 @@ export default function Spools() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [settings, setSettings] = useState<{ [key: string]: any }>({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -168,7 +171,10 @@ export default function Spools() {
         <th
           className="text-center"
           style={{ cursor: "pointer" }}
-          onClick={() => handleSortClick(key)}
+          onClick={() => {
+            paginate(1);
+            handleSortClick(key);
+          }}
         >
           {title}{" "}
           {sortKey === key ? (sortDirection === "asc" ? "▲" : "▼") : "▲▼"}
@@ -210,6 +216,15 @@ export default function Spools() {
     return <div className="text-center">Loading...</div>;
   }
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredFilaments.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
   return (
     <>
       <Head>
@@ -234,7 +249,10 @@ export default function Spools() {
                 type="text"
                 placeholder="Search"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  paginate(1);
+                  setSearchTerm(e.target.value);
+                }}
                 size="sm"
               />
             </Col>
@@ -260,8 +278,8 @@ export default function Spools() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredFilaments.length > 0 ? (
-                      filteredFilaments.map((filament) => (
+                    {currentItems.length > 0 ? (
+                      currentItems.map((filament) => (
                         <tr key={`filament-${filament._id}`}>
                           {settings.spoolHeaders &&
                             settings.spoolHeaders["ID"] && (
@@ -376,6 +394,40 @@ export default function Spools() {
                 </Table>
               </div>
             </Col>
+            {filteredFilaments.length > 10 && (
+              <Col
+                xs={12}
+                className="d-flex justify-content-between align-items-center"
+              >
+                <Pagination size="sm" className="mb-0">
+                  {Array.from({
+                    length: Math.ceil(filteredFilaments.length / itemsPerPage),
+                  }).map((_, index) => (
+                    <Pagination.Item
+                      key={index + 1}
+                      active={index + 1 === currentPage}
+                      onClick={() => paginate(index + 1)}
+                    >
+                      {index + 1}
+                    </Pagination.Item>
+                  ))}
+                </Pagination>
+                <Form.Select
+                  className="m-0"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    paginate(1);
+                    setItemsPerPage(Number(e.target.value));
+                  }}
+                  size="sm"
+                  style={{ width: "auto" }}
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </Form.Select>
+              </Col>
+            )}
           </Row>
         </Container>
         <Footer />

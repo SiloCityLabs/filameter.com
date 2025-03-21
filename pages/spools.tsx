@@ -166,7 +166,7 @@ export default function Spools() {
   });
 
   const renderHeader = (key: string, title: string) => {
-    if (settings.spoolHeaders && settings.spoolHeaders[title]) {
+    if (!settings?.spoolHeaders || settings.spoolHeaders[title]) {
       return (
         <th
           className="text-center"
@@ -281,68 +281,60 @@ export default function Spools() {
                     {currentItems.length > 0 ? (
                       currentItems.map((filament) => (
                         <tr key={`filament-${filament._id}`}>
-                          {settings.spoolHeaders &&
-                            settings.spoolHeaders["ID"] && (
-                              <td className="text-center">
-                                <OverlayTrigger
-                                  placement="bottom"
-                                  delay={{ show: 250, hide: 400 }}
-                                  overlay={
-                                    <Tooltip style={{ position: "fixed" }}>
-                                      {filament._id}
-                                    </Tooltip>
-                                  }
-                                >
-                                  <span>
-                                    {filament._id.length > 5
-                                      ? filament._id.substring(0, 5) + "..."
-                                      : filament._id}
-                                  </span>
-                                </OverlayTrigger>
-                              </td>
-                            )}
-                          {settings.spoolHeaders &&
-                            settings.spoolHeaders["Filament"] && (
-                              <td className="text-center">
-                                {filament.filament}
-                              </td>
-                            )}
-                          {settings.spoolHeaders &&
-                            settings.spoolHeaders["Material"] && (
-                              <td className="text-center">
-                                {filament.material}
-                              </td>
-                            )}
-                          {settings.spoolHeaders &&
-                            settings.spoolHeaders["Used Weight"] && (
-                              <td className="text-center">
-                                {filament.used_weight}
-                              </td>
-                            )}
-                          {settings.spoolHeaders &&
-                            settings.spoolHeaders["Total Weight"] && (
-                              <td className="text-center">
-                                {filament.total_weight}
-                              </td>
-                            )}
-                          {settings.spoolHeaders &&
-                            settings.spoolHeaders["Weight Left"] && (
-                              <td className="text-center">
-                                {filament.calc_weight}
-                              </td>
-                            )}
-                          {settings.spoolHeaders &&
-                            settings.spoolHeaders["Location"] && (
-                              <td className="text-center">
-                                {filament.location}
-                              </td>
-                            )}
-                          {settings.spoolHeaders &&
-                            settings.spoolHeaders["Comments"] && (
-                              <td className="text-center">
-                                {filament.comments}
-                              </td>
-                            )}
+                          {(!settings?.spoolHeaders ||
+                            settings.spoolHeaders["ID"]) && (
+                            <td className="text-center">
+                              <OverlayTrigger
+                                placement="bottom"
+                                delay={{ show: 250, hide: 400 }}
+                                overlay={
+                                  <Tooltip style={{ position: "fixed" }}>
+                                    {filament._id}
+                                  </Tooltip>
+                                }
+                              >
+                                <span>
+                                  {filament._id.length > 5
+                                    ? filament._id.substring(0, 5) + "..."
+                                    : filament._id}
+                                </span>
+                              </OverlayTrigger>
+                            </td>
+                          )}
+                          {(!settings?.spoolHeaders ||
+                            settings.spoolHeaders["Filament"]) && (
+                            <td className="text-center">{filament.filament}</td>
+                          )}
+                          {(!settings?.spoolHeaders ||
+                            settings.spoolHeaders["Material"]) && (
+                            <td className="text-center">{filament.material}</td>
+                          )}
+                          {(!settings?.spoolHeaders ||
+                            settings.spoolHeaders["Used Weight"]) && (
+                            <td className="text-center">
+                              {filament.used_weight}
+                            </td>
+                          )}
+                          {(!settings?.spoolHeaders ||
+                            settings.spoolHeaders["Total Weight"]) && (
+                            <td className="text-center">
+                              {filament.total_weight}
+                            </td>
+                          )}
+                          {(!settings?.spoolHeaders ||
+                            settings.spoolHeaders["Weight Left"]) && (
+                            <td className="text-center">
+                              {filament.calc_weight}
+                            </td>
+                          )}
+                          {(!settings?.spoolHeaders ||
+                            settings.spoolHeaders["Location"]) && (
+                            <td className="text-center">{filament.location}</td>
+                          )}
+                          {(!settings?.spoolHeaders ||
+                            settings?.spoolHeaders["Comments"]) && (
+                            <td className="text-center">{filament.comments}</td>
+                          )}
                           <td className="text-center">
                             {renderAction(
                               "Edit",

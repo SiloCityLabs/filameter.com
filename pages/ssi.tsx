@@ -7,9 +7,10 @@ import Footer from "@/components/Footer";
 //Components
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
-import getFilamentById from "@/helpers/database/filament/getFilamentById";
+import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
-import { saveFilament } from "@/helpers/database/filament/saveFilament";
+import { save } from "@/helpers/_silabs/pouchDb/save";
+import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
 //Types
 import { Filament } from "@/types/Filament";
 
@@ -67,9 +68,14 @@ export default function SpoolSenseImport() {
 
     if (db) {
       try {
-        const fetchedFilament = await getFilamentById(db, id);
+        const fetchedFilament = await getDocumentByColumn(
+          db,
+          "_id",
+          id,
+          "filament"
+        );
         //No id = Create new filament and prefill used_weight
-        if (fetchedFilament === null) {
+        if (fetchedFilament[0] === null) {
           router.push(
             `/manage-filament?used_weight=${used}&id=${id}&type=create`
           );
@@ -77,11 +83,16 @@ export default function SpoolSenseImport() {
         }
 
         //Update used_weight
-        fetchedFilament.used_weight = used;
-        setFilament(fetchedFilament);
+        fetchedFilament[0].used_weight = used;
+        setFilament(fetchedFilament[0]);
 
         //Update Data
-        const result = await saveFilament(db, fetchedFilament);
+        const result = await save(
+          db,
+          fetchedFilament[0],
+          filamentSchema,
+          "filament"
+        );
 
         if (result.success) {
           setShowAlert(true);

@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ManageFilament from "@/components/ManageFilament";
 //DB
-import getFilamentById from "@/helpers/database/filament/getFilamentById";
+import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import { useDatabase } from "@/contexts/DatabaseContext";
 //Types
 import { Filament } from "@/types/Filament";
@@ -57,11 +57,17 @@ export default function ManageFilamentPage() {
 
     if (dbs.filament) {
       try {
-        const fetchedFilament = await getFilamentById(dbs.filament, id);
-        setFilament(fetchedFilament);
+        const fetchedFilament = await getDocumentByColumn(
+          dbs.filament,
+          "_id",
+          id,
+          "filament"
+        );
+        console.log(fetchedFilament[0]);
+        setFilament(fetchedFilament[0]);
 
         if (type === "duplicate") {
-          const { _id, _rev, ...filamentWithoutIdAndRev } = fetchedFilament;
+          const { _id, _rev, ...filamentWithoutIdAndRev } = fetchedFilament[0];
           setFilament(filamentWithoutIdAndRev);
         }
       } catch (err: unknown) {

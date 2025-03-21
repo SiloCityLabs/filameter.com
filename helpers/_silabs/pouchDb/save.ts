@@ -1,13 +1,18 @@
-import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
 import { v4 as uuidv4 } from "uuid";
+import Joi from "joi"; // Ensure you have Joi installed
 
-export const saveFilament = async (db, data) => {
+export const save = async (
+  db: PouchDB.Database,
+  data: any,
+  dbSchema: Joi.ObjectSchema,
+  type: string
+) => {
   if (db) {
     try {
-      const { error, value: validatedData } = filamentSchema.validate(data);
+      const { error, value: validatedData } = dbSchema.validate(data);
 
       if (error) {
-        console.error("Validation error:", error.details);
+        console.error(`Validation error for ${type}:`, error.details);
         return { success: false, error: error.details };
       }
 
@@ -23,12 +28,12 @@ export const saveFilament = async (db, data) => {
             doc._id = uuidv4();
           } else {
             console.error(
-              "Error getting existing document for update:",
+              `Error getting existing ${type} document for update:`,
               getErr
             );
             return {
               success: false,
-              error: "Error getting document for update.",
+              error: `Error getting ${type} document for update.`,
             };
           }
         }
@@ -39,7 +44,7 @@ export const saveFilament = async (db, data) => {
       const response = await db.put(doc);
       return { success: true, data: response };
     } catch (error: unknown) {
-      console.error("Error adding filament:", error);
+      console.error(`Error adding ${type}:`, error);
 
       if (error instanceof Error) {
         return { success: false, error: error.message };

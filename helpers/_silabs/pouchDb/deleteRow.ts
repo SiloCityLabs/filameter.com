@@ -1,8 +1,9 @@
 import PouchDB from "pouchdb";
 
-async function deleteFilament(
+async function deleteRow(
   db: PouchDB.Database,
-  id: string
+  id: string,
+  type: string
 ): Promise<boolean> {
   if (!db) {
     console.error("Database is not initialized.");
@@ -12,13 +13,13 @@ async function deleteFilament(
   try {
     const doc = await db.get(id);
     if (!doc) {
-      console.error(`Filament with ID ${id} not found for deletion.`);
+      console.error(`${type} with ID ${id} not found for deletion.`);
       return false;
     }
     const response = await db.remove(doc); // Delete the document
     return true;
   } catch (error: unknown) {
-    console.error(`Error deleting filament with ID ${id}:`, error);
+    console.error(`Error deleting ${type} with ID ${id}:`, error);
 
     if (error instanceof Error) {
       if (error.name === "NotFoundError") {
@@ -30,9 +31,9 @@ async function deleteFilament(
     } else if (typeof error === "string") {
       throw new Error(error);
     } else {
-      throw new Error("An unknown error occurred while deleting the filament.");
+      throw new Error(`An unknown error occurred while deleting the ${type}.`);
     }
   }
 }
 
-export default deleteFilament;
+export default deleteRow;

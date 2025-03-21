@@ -203,7 +203,7 @@ export default function Spools() {
         <Button
           variant="primary"
           size="sm"
-          className="d-inline-block d-md-none mb-1"
+          className="w-100 d-inline-block d-md-none mb-1"
           onClick={onClick}
         >
           {buttonText}

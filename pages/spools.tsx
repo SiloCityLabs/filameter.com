@@ -16,6 +16,7 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
 import deleteFilament from "@/helpers/database/filament/deleteFilament";
 import getAllFilaments from "@/helpers/database/filament/getAllFilaments";
+import getAllSettings from "@/helpers/database/settings/getAllSettings";
 import { useDatabase } from "@/contexts/DatabaseContext";
 //Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -35,6 +36,7 @@ export default function Spools() {
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [settings, setSettings] = useState<{ [key: string]: any }>({});
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -61,6 +63,20 @@ export default function Spools() {
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch data.";
+          setError(errorMessage);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+
+      //Get settings
+      if (dbs.settings) {
+        try {
+          const settings = await getAllSettings(dbs.settings);
+          setSettings(settings);
+        } catch (err: unknown) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to fetch settings.";
           setError(errorMessage);
         } finally {
           setIsLoading(false);
@@ -135,15 +151,18 @@ export default function Spools() {
   const sortedFilaments = sortFilaments(data);
 
   const renderHeader = (key: string, title: string) => {
-    return (
-      <th
-        className="text-center"
-        style={{ cursor: "pointer" }}
-        onClick={() => handleSortClick(key)}
-      >
-        {title} {sortKey === key ? (sortDirection === "asc" ? "▲" : "▼") : "▲▼"}
-      </th>
-    );
+    if (settings.spoolHeaders && settings.spoolHeaders[title]) {
+      return (
+        <th
+          className="text-center"
+          style={{ cursor: "pointer" }}
+          onClick={() => handleSortClick(key)}
+        >
+          {title}{" "}
+          {sortKey === key ? (sortDirection === "asc" ? "▲" : "▼") : "▲▼"}
+        </th>
+      );
+    }
   };
 
   const renderAction = (tooltip: string, element: JSX.Element) => {
@@ -161,6 +180,8 @@ export default function Spools() {
   if (isLoading || !isReady) {
     return <div className="text-center">Loading...</div>;
   }
+
+  console.log(settings);
 
   return (
     <>
@@ -206,36 +227,68 @@ export default function Spools() {
                     {sortedFilaments.length > 0 ? (
                       sortedFilaments.map((filament) => (
                         <tr key={`filament-${filament._id}`}>
-                          <td className="text-center">
-                            <OverlayTrigger
-                              placement="bottom"
-                              delay={{ show: 250, hide: 400 }}
-                              overlay={
-                                <Tooltip style={{ position: "fixed" }}>
-                                  {filament._id}
-                                </Tooltip>
-                              }
-                            >
-                              <span>
-                                {filament._id.length > 5
-                                  ? filament._id.substring(0, 5) + "..."
-                                  : filament._id}
-                              </span>
-                            </OverlayTrigger>
-                          </td>
-                          <td className="text-center">{filament.filament}</td>
-                          <td className="text-center">{filament.material}</td>
-                          <td className="text-center">
-                            {filament.used_weight}
-                          </td>
-                          <td className="text-center">
-                            {filament.total_weight}
-                          </td>
-                          <td className="text-center">
-                            {filament.calc_weight}
-                          </td>
-                          <td className="text-center">{filament.location}</td>
-                          <td className="text-center">{filament.comments}</td>
+                          {settings.spoolHeaders &&
+                            settings.spoolHeaders["ID"] && (
+                              <td className="text-center">
+                                <OverlayTrigger
+                                  placement="bottom"
+                                  delay={{ show: 250, hide: 400 }}
+                                  overlay={
+                                    <Tooltip style={{ position: "fixed" }}>
+                                      {filament._id}
+                                    </Tooltip>
+                                  }
+                                >
+                                  <span>
+                                    {filament._id.length > 5
+                                      ? filament._id.substring(0, 5) + "..."
+                                      : filament._id}
+                                  </span>
+                                </OverlayTrigger>
+                              </td>
+                            )}
+                          {settings.spoolHeaders &&
+                            settings.spoolHeaders["Filament"] && (
+                              <td className="text-center">
+                                {filament.filament}
+                              </td>
+                            )}
+                          {settings.spoolHeaders &&
+                            settings.spoolHeaders["Material"] && (
+                              <td className="text-center">
+                                {filament.material}
+                              </td>
+                            )}
+                          {settings.spoolHeaders &&
+                            settings.spoolHeaders["Used Weight"] && (
+                              <td className="text-center">
+                                {filament.used_weight}
+                              </td>
+                            )}
+                          {settings.spoolHeaders &&
+                            settings.spoolHeaders["Total Weight"] && (
+                              <td className="text-center">
+                                {filament.total_weight}
+                              </td>
+                            )}
+                          {settings.spoolHeaders &&
+                            settings.spoolHeaders["Weight Left"] && (
+                              <td className="text-center">
+                                {filament.calc_weight}
+                              </td>
+                            )}
+                          {settings.spoolHeaders &&
+                            settings.spoolHeaders["Location"] && (
+                              <td className="text-center">
+                                {filament.location}
+                              </td>
+                            )}
+                          {settings.spoolHeaders &&
+                            settings.spoolHeaders["Comments"] && (
+                              <td className="text-center">
+                                {filament.comments}
+                              </td>
+                            )}
                           <td className="text-center">
                             {renderAction(
                               "Edit",

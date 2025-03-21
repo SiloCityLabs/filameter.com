@@ -2,17 +2,18 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
 import idbAdapter from "pouchdb-adapter-idb";
+import { initializeSettingsDB } from "@/helpers/database/settings/initializeSettingsDB"; // Import settings initialization
 
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(idbAdapter);
 
 interface DatabaseContextProps {
-  db: PouchDB.Database | null;
+  dbs: { [key: string]: PouchDB.Database | null };
   isReady: boolean;
 }
 
 const DatabaseContext = createContext<DatabaseContextProps>({
-  db: null,
+  dbs: {},
   isReady: false,
 });
 
@@ -25,27 +26,34 @@ interface DatabaseProviderProps {
 export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
   children,
 }) => {
-  const [db, setDb] = useState<PouchDB.Database | null>(null);
+  const [dbs, setDbs] = useState<{ [key: string]: PouchDB.Database | null }>(
+    {}
+  );
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const initializeDB = async () => {
-      const dbName = "filament";
+    const initializeDBs = async () => {
+      const filamentDbName = "filament";
       const adapter = "idb";
 
       try {
         if (localStorage.getItem("clearDatabase") === "true") {
           localStorage.removeItem("clearDatabase");
-          const tempDB = new PouchDB(dbName, { adapter: adapter });
-          await tempDB.destroy();
+          const tempFilamentDB = new PouchDB(filamentDbName, {
+            adapter: adapter,
+          });
+          await tempFilamentDB.destroy();
         }
 
-        console.info(
-          `Initializing PouchDB with name: ${dbName}, adapter: ${adapter}`
-        );
-        const newDb = new PouchDB(dbName, { adapter: adapter }); // Use 'idb'
-        const info = await newDb.info();
-        setDb(newDb);
+        const newFilamentDb = new PouchDB(filamentDbName, { adapter: adapter });
+        await newFilamentDb.info();
+
+        const settingsDb = await initializeSettingsDB();
+
+        setDbs({
+          filament: newFilamentDb,
+          settings: settingsDb,
+        });
         setIsReady(true);
       } catch (error) {
         console.error("Database initialization or destruction error:", error);
@@ -53,11 +61,11 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
       }
     };
 
-    initializeDB();
+    initializeDBs();
   }, []);
 
   return (
-    <DatabaseContext.Provider value={{ db, isReady }}>
+    <DatabaseContext.Provider value={{ dbs, isReady }}>
       {children}
     </DatabaseContext.Provider>
   );

@@ -7,9 +7,9 @@ import Footer from "@/components/Footer";
 //Components
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
-import getFilamentById from "@/helpers/filament/getFilamentById";
-import { initializeFilamentDB } from "@/helpers/filament/initializeFilamentDB";
-import { saveFilament } from "@/helpers/filament/saveFilament";
+import getFilamentById from "@/helpers/database/filament/getFilamentById";
+import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
+import { saveFilament } from "@/helpers/database/filament/saveFilament";
 //Types
 import { Filament } from "@/types/Filament";
 

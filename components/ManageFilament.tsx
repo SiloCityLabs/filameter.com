@@ -6,7 +6,7 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //Types
 import { ManageFilamentProps, Filament } from "@/types/Filament";
 //DB
-import { saveFilament } from "@/helpers/filament/saveFilament";
+import { saveFilament } from "@/helpers/database/filament/saveFilament";
 
 const defaultValue: Filament = {
   filament: "",
@@ -184,6 +184,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
               type="checkbox"
               label="Create multiple rows"
               checked={createMultiple}
+              className="custom-checkbox my-3"
               onChange={(e) => setCreateMultiple(e.target.checked)}
             />
           </Form.Group>

@@ -3,7 +3,8 @@ import Head from "next/head";
 import { Container, Row, Col, Tabs, Tab } from "react-bootstrap";
 import Header from "@/components/Header";
 //Components
-import ImportExport from "@/components/ImportExport";
+import ImportExport from "@/components/settings/ImportExport";
+import MainSettings from "@/components/settings/MainSettings";
 
 export default function Settings() {
   const [key, setKey] = useState<string>("settings");
@@ -27,7 +28,7 @@ export default function Settings() {
                 className="mb-3"
               >
                 <Tab eventKey="settings" title="Settings">
-                  Hey this is settings
+                  <MainSettings />
                 </Tab>
                 <Tab eventKey="import-export" title="Import/Export">
                   <ImportExport />

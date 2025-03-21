@@ -6,7 +6,7 @@ import { exportDB } from "@/helpers/exportDB";
 import { importDB } from "@/helpers/importDB";
 
 export default function ImportExport() {
-  const { db, isReady } = useDatabase();
+  const { dbs, isReady } = useDatabase();
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState<"success" | "error" | null>(
@@ -40,17 +40,17 @@ export default function ImportExport() {
   }, []);
 
   useEffect(() => {
-    if (triggerImport && db && selectedFile) {
+    if (triggerImport && dbs.filament && selectedFile) {
       handleImport();
     }
-  }, [triggerImport, db, selectedFile]);
+  }, [triggerImport, dbs.filament, selectedFile]);
 
   const exportDatabase = async () => {
-    if (!db) return;
+    if (!dbs.filament) return;
     setIsSpinning(true);
     setExportError(null);
     try {
-      await exportDB(db);
+      await exportDB(dbs.filament);
     } catch (error) {
       console.error("Failed to export", error);
       setExportError("Failed to export the database. See console for details.");
@@ -80,7 +80,7 @@ export default function ImportExport() {
   };
 
   const handleImport = async () => {
-    if (!db || !selectedFile) {
+    if (!dbs.filament || !selectedFile) {
       return;
     }
 
@@ -112,7 +112,7 @@ export default function ImportExport() {
         Array.isArray(jsonData.regular) &&
         Array.isArray(jsonData.local)
       ) {
-        await importDB(db, jsonData);
+        await importDB(dbs.filament, jsonData);
         setImportStatus("success");
         setImportMessage("Data imported successfully!");
       } else {
@@ -138,73 +138,71 @@ export default function ImportExport() {
   }
 
   return (
-    <Container className="main-content mt-3">
-      <Row className="shadow-lg p-3 bg-body rounded">
-        <Col>
-          <Row>
-            <Col className="text-center">
-              <Button
-                variant="primary"
-                className="w-25 me-2"
-                disabled={isSpinning}
-                onClick={exportDatabase}
-              >
-                Export Database
-              </Button>
-              {exportError && <p className="text-danger">{exportError}</p>}
-            </Col>
-          </Row>
-          <hr />
-          <Row>
-            <Col>
-              <Form>
-                <Form.Group controlId="formFile" className="mb-3 text-center">
-                  <Form.Label>Import JSON Database</Form.Label>
-                  <Form.Control
-                    type="file"
-                    accept=".json"
-                    onChange={handleFileChange}
-                  />
-                </Form.Group>
+    <Row>
+      <Col>
+        <Row>
+          <Col className="text-center">
+            <Button
+              variant="primary"
+              className="w-25 me-2"
+              disabled={isSpinning}
+              onClick={exportDatabase}
+            >
+              Export Database
+            </Button>
+            {exportError && <p className="text-danger">{exportError}</p>}
+          </Col>
+        </Row>
+        <hr />
+        <Row>
+          <Col>
+            <Form>
+              <Form.Group controlId="formFile" className="mb-3 text-center">
+                <Form.Label>Import JSON Database</Form.Label>
+                <Form.Control
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileChange}
+                />
+              </Form.Group>
 
-                <Form.Group className="my-3">
-                  <Form.Check
-                    type="checkbox"
-                    id="clearBeforeImport"
-                    label="Clear database before import"
-                    className="custom-checkbox"
-                    checked={clearBeforeImport}
-                    onChange={(e) => setClearBeforeImport(e.target.checked)}
-                  />
-                </Form.Group>
+              <Form.Group className="my-3">
+                <Form.Check
+                  type="checkbox"
+                  id="clearBeforeImport"
+                  label="Clear database before import"
+                  className="custom-checkbox"
+                  checked={clearBeforeImport}
+                  onChange={(e) => setClearBeforeImport(e.target.checked)}
+                />
+              </Form.Group>
 
-                <div className="text-center">
-                  <Button
-                    variant="primary"
-                    onClick={handleImport}
-                    className="w-25 me-2"
-                    disabled={!selectedFile || isSpinning}
-                  >
-                    Import Data
-                  </Button>
-                </div>
+              <div className="text-center">
+                <Button
+                  variant="primary"
+                  onClick={handleImport}
+                  className="w-25 me-2"
+                  disabled={!selectedFile || isSpinning}
+                >
+                  Import Data
+                </Button>
+              </div>
 
-                {importMessage && (
-                  <p
-                    className={
-                      importStatus === "success"
-                        ? "text-success mt-2"
-                        : "text-danger mt-2"
-                    }
-                  >
-                    {importMessage}
-                  </p>
-                )}
-              </Form>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Container>
+              {importMessage && (
+                <p
+                  className={
+                    importStatus === "success"
+                      ? "text-success mt-2"
+                      : "text-danger mt-2"
+                  }
+                >
+                  {importMessage}
+                </p>
+              )}
+            </Form>
+          </Col>
+        </Row>
+      </Col>
+    </Row>
   );
 }

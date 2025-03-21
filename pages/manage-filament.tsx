@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ManageFilament from "@/components/ManageFilament";
 //DB
-import getFilamentById from "@/helpers/filament/getFilamentById";
+import getFilamentById from "@/helpers/database/filament/getFilamentById";
 import { useDatabase } from "@/contexts/DatabaseContext";
 //Types
 import { Filament } from "@/types/Filament";
@@ -20,7 +20,7 @@ const defaultValue: Filament = {
 };
 
 export default function ManageFilamentPage() {
-  const { db, isReady } = useDatabase(); // Use 'isReady'
+  const { dbs, isReady } = useDatabase(); // Use 'isReady'
   const [filament, setFilament] = useState<Filament>(defaultValue);
   const [type, setType] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -55,9 +55,9 @@ export default function ManageFilamentPage() {
     setIsLoading(true);
     setError(null);
 
-    if (db) {
+    if (dbs.filament) {
       try {
-        const fetchedFilament = await getFilamentById(db, id);
+        const fetchedFilament = await getFilamentById(dbs.filament, id);
         setFilament(fetchedFilament);
 
         if (type === "duplicate") {
@@ -83,7 +83,7 @@ export default function ManageFilamentPage() {
   useEffect(() => {
     if (
       isReady && // Use 'isReady' here
-      db &&
+      dbs.filament &&
       filamentIdToFetch &&
       (type === "" || type === "duplicate")
     ) {
@@ -92,7 +92,7 @@ export default function ManageFilamentPage() {
       // Use 'isReady' here
       setIsLoading(false);
     }
-  }, [filamentIdToFetch, db, type, isReady]); // Include 'isReady' in dependencies
+  }, [filamentIdToFetch, dbs, type, isReady]);
 
   if (isReady === false || isLoading) {
     // More accurate check
@@ -118,7 +118,7 @@ export default function ManageFilamentPage() {
                 <>
                   <h3 className="text-center">Edit Filament</h3>
                   <Col>
-                    <ManageFilament data={filament} db={db} />
+                    <ManageFilament data={filament} db={dbs.filament} />
                   </Col>
                 </>
               ) : (
@@ -128,7 +128,7 @@ export default function ManageFilamentPage() {
               <>
                 <h3 className="text-center">Add Filament</h3>
                 <Col>
-                  <ManageFilament data={filament} db={db} />
+                  <ManageFilament data={filament} db={dbs.filament} />
                 </Col>
               </>
             )}

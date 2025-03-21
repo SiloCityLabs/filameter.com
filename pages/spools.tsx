@@ -14,8 +14,8 @@ import Footer from "@/components/Footer";
 //Components
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
-import deleteFilament from "@/helpers/filament/deleteFilament";
-import getAllFilaments from "@/helpers/filament/getAllFilaments";
+import deleteFilament from "@/helpers/database/filament/deleteFilament";
+import getAllFilaments from "@/helpers/database/filament/getAllFilaments";
 import { useDatabase } from "@/contexts/DatabaseContext";
 //Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -26,12 +26,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function Spools() {
-  const { db, isReady } = useDatabase();
+  const { dbs, isReady } = useDatabase();
   const [isLoading, setIsLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("success"); // Defaulted to success
   const [alertMessage, setAlertMessage] = useState("");
-  const [filaments, setFilaments] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -53,14 +53,14 @@ export default function Spools() {
   }, []);
 
   useEffect(() => {
-    async function fetchFilaments() {
-      if (db) {
+    async function fetchData() {
+      if (dbs.filament) {
         try {
-          const allFilaments = await getAllFilaments(db);
-          setFilaments(allFilaments);
+          const allData = await getAllFilaments(dbs.filament);
+          setData(allData);
         } catch (err: unknown) {
           const errorMessage =
-            err instanceof Error ? err.message : "Failed to fetch filaments.";
+            err instanceof Error ? err.message : "Failed to fetch data.";
           setError(errorMessage);
         } finally {
           setIsLoading(false);
@@ -69,9 +69,9 @@ export default function Spools() {
     }
     // Only fetch if DB is ready
     if (isReady) {
-      fetchFilaments();
+      fetchData();
     }
-  }, [db, isReady]);
+  }, [dbs, isReady]);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this filament?")) {
@@ -80,16 +80,16 @@ export default function Spools() {
 
     setIsLoading(true);
     setError(null);
-    if (db) {
+    if (dbs.filament) {
       try {
-        const success = await deleteFilament(db, id);
+        const success = await deleteFilament(dbs.filament, id);
         setShowAlert(true); //  Show alert in either case
         if (success) {
           setAlertMessage("Filament deleted successfully.");
           setAlertVariant("success");
           // Update the list of filaments after deletion
-          const updatedFilaments = await getAllFilaments(db);
-          setFilaments(updatedFilaments);
+          const updatedFilaments = await getAllFilaments(dbs.filament);
+          setData(updatedFilaments);
         } else {
           setAlertMessage("Filament not found or deletion failed.");
           setAlertVariant("danger");
@@ -106,10 +106,10 @@ export default function Spools() {
     }
   };
 
-  const sortFilaments = (filamentsToSort: any[]) => {
-    if (!sortKey) return filamentsToSort;
+  const sortFilaments = (dataToSort: any[]) => {
+    if (!sortKey) return dataToSort;
 
-    return [...filamentsToSort].sort((a, b) => {
+    return [...dataToSort].sort((a, b) => {
       const aValue = a[sortKey];
       const bValue = b[sortKey];
 
@@ -132,7 +132,7 @@ export default function Spools() {
     }
   };
 
-  const sortedFilaments = sortFilaments(filaments);
+  const sortedFilaments = sortFilaments(data);
 
   const renderHeader = (key: string, title: string) => {
     return (

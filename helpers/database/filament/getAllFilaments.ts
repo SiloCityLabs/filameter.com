@@ -13,7 +13,7 @@ async function getAllFilaments(db: PouchDB.Database): Promise<any[]> {
     });
 
     //Add calculated weight
-    const filaments = result.rows
+    const data = result.rows
       .filter((row) => row.doc && !row.id.startsWith("_design/"))
       .map((row) => {
         const doc = row.doc;
@@ -32,7 +32,7 @@ async function getAllFilaments(db: PouchDB.Database): Promise<any[]> {
       })
       .filter((doc) => doc !== null);
 
-    return filaments;
+    return data;
   } catch (error: unknown) {
     console.error("Error getting all filaments:", error);
 

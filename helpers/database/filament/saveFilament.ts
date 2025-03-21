@@ -1,11 +1,10 @@
-import { filamentSchema } from "@/helpers/filament/initializeFilamentDB";
+import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
 import { v4 as uuidv4 } from "uuid";
 
-export const saveFilament = async (db, filamentData) => {
+export const saveFilament = async (db, data) => {
   if (db) {
     try {
-      const { error, value: validatedData } =
-        filamentSchema.validate(filamentData);
+      const { error, value: validatedData } = filamentSchema.validate(data);
 
       if (error) {
         console.error("Validation error:", error.details);
@@ -14,10 +13,10 @@ export const saveFilament = async (db, filamentData) => {
 
       let doc = { ...validatedData };
 
-      if (filamentData._id && filamentData._rev) {
+      if (data._id && data._rev) {
         try {
-          const existingDoc = await db.get(filamentData._id);
-          doc._id = filamentData._id;
+          const existingDoc = await db.get(data._id);
+          doc._id = data._id;
           doc._rev = existingDoc._rev;
         } catch (getErr: unknown) {
           if (getErr instanceof Error && getErr.name === "NotFoundError") {
@@ -34,7 +33,7 @@ export const saveFilament = async (db, filamentData) => {
           }
         }
       } else {
-        doc._id = filamentData._id ? filamentData._id : uuidv4();
+        doc._id = data._id ? data._id : uuidv4();
       }
 
       const response = await db.put(doc);

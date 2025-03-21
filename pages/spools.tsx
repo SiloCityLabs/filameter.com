@@ -198,8 +198,6 @@ export default function Spools() {
     return <div className="text-center">Loading...</div>;
   }
 
-  console.log(settings);
-
   return (
     <>
       <Head>

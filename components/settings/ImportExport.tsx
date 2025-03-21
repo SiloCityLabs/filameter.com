@@ -140,17 +140,19 @@ export default function ImportExport() {
   return (
     <Row>
       <Col>
-        <Row>
-          <Col className="text-center">
-            <Button
-              variant="primary"
-              className="w-25 me-2"
-              disabled={isSpinning}
-              onClick={exportDatabase}
-            >
-              Export Database
-            </Button>
-            {exportError && <p className="text-danger">{exportError}</p>}
+        <Row className="justify-content-center">
+          <Col xs={12} sm={6} md={3}>
+            <div className="d-flex justify-content-center">
+              <Button
+                variant="primary"
+                className="w-100"
+                disabled={isSpinning}
+                onClick={exportDatabase}
+              >
+                Export Database
+              </Button>
+              {exportError && <p className="text-danger">{exportError}</p>}
+            </div>
           </Col>
         </Row>
         <hr />
@@ -176,17 +178,20 @@ export default function ImportExport() {
                   onChange={(e) => setClearBeforeImport(e.target.checked)}
                 />
               </Form.Group>
-
-              <div className="text-center">
-                <Button
-                  variant="primary"
-                  onClick={handleImport}
-                  className="w-25 me-2"
-                  disabled={!selectedFile || isSpinning}
-                >
-                  Import Data
-                </Button>
-              </div>
+              <Row className="justify-content-center">
+                <Col xs={12} sm={6} md={3}>
+                  <div className="d-flex justify-content-center">
+                    <Button
+                      variant="primary"
+                      onClick={handleImport}
+                      className="w-100"
+                      disabled={!selectedFile || isSpinning}
+                    >
+                      Import Data
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
 
               {importMessage && (
                 <p

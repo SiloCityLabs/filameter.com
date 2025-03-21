@@ -63,9 +63,6 @@ export default function MainSettings() {
       newData.spoolHeaders[header] = isChecked;
       return newData;
     });
-
-    console.log("Checkbox changed:", header, isChecked);
-    console.log("Updated data:", data);
   };
 
   const save = async () => {
@@ -129,16 +126,18 @@ export default function MainSettings() {
             ))}
           </Col>
         </Row>
-        <Row className="mt-5">
-          <Col className="text-center">
-            <Button
-              variant="primary"
-              className="w-25 me-2"
-              disabled={isSpinning}
-              onClick={save}
-            >
-              Save Settings
-            </Button>
+        <Row className="mt-5 justify-content-center">
+          <Col xs={12} sm={6} md={3}>
+            <div className="d-flex justify-content-center">
+              <Button
+                variant="primary"
+                className="w-100"
+                disabled={isSpinning}
+                onClick={save}
+              >
+                Save Settings
+              </Button>
+            </div>
           </Col>
         </Row>
       </Col>

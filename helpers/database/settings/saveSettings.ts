@@ -27,7 +27,6 @@ async function saveSettings(
     );
 
     await Promise.all(settingsToSave);
-    console.log("Settings saved to database:", settings);
   } catch (error: unknown) {
     console.error("Error saving settings to database:", error);
     if (error instanceof Error) {

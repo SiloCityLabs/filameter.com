@@ -1,4 +1,3 @@
-import Head from "next/head";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -6,10 +5,6 @@ import Footer from "@/components/Footer";
 export default function Home() {
   return (
     <>
-      <Head>
-        <meta name="description" content="" />
-        <meta name="keywords" content="" />
-      </Head>
       <div className="main-container">
         <Header showBadge={true} />
         <Container className="main-content mt-3">

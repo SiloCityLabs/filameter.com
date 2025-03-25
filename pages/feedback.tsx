@@ -101,8 +101,6 @@ export default function Feedback() {
     <>
       <Head>
         <title>Feedback</title>
-        <meta name="description" content="" />
-        <meta name="keywords" content="" />
       </Head>
       <div className="main-container">
         <Header showBadge={true} />

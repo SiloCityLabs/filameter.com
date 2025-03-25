@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -51,6 +52,8 @@ function MyApp({ Component, pageProps }) {
       <Head>
         <title>{process.env.NEXT_PUBLIC_APP_NAME}</title>
         <link rel="manifest" href="/manifest.json" />
+        <meta name="description" content={process.env.NEXT_PUBLIC_APP_DESC} />
+        <meta name="keywords" content={process.env.NEXT_PUBLIC_APP_KEYWORDS} />
       </Head>
       {GA_TRACKING_ID !== "" && (
         <>

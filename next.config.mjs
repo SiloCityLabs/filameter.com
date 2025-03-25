@@ -17,6 +17,20 @@ const nextConfig = (phase, { defaultConfig }) => {
     images: {
       unoptimized: true,
     },
+    webpack: (config, { dev, isServer }) => {
+      // Only apply these changes during development and on the client-side
+      if (dev && !isServer) {
+        config.watchOptions = {
+          ignored: [
+            "**/node_modules/**", // Exclude node_modules
+            "**/.next/**", // Exclude Next.js build directory
+            "**/out/**", // Exclude the output directory
+          ],
+        };
+      }
+
+      return config;
+    },
   };
 
   return baseConfig;

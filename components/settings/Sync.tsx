@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Form, Button } from "react-bootstrap";
+//Helpers
+import { isValidEmail } from "@/helpers/isValidEmail";
+import { setupSync } from "@/helpers/sync/setupSync";
 //Components
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
-import getAllSettings from "@/helpers/database/settings/getAllSettings";
+import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import saveSettings from "@/helpers/database/settings/saveSettings";
 import { useDatabase } from "@/contexts/DatabaseContext";
 
@@ -16,13 +19,25 @@ export default function Sync() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const [initialType, setInitialType] = useState("");
+  const [syncEmail, setSyncEmail] = useState("");
+
+  const handleEmailChange = (event) => {
+    setSyncEmail(event.target.value);
+  };
 
   useEffect(() => {
     async function fetchData() {
       if (dbs.settings) {
         try {
-          const allData = await getAllSettings(dbs.settings);
-          setData(allData);
+          const sclSync = await getDocumentByColumn(
+            dbs.settings,
+            "name",
+            "scl-sync",
+            "settings"
+          );
+          console.log("sclSync", sclSync);
+          setData(sclSync);
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch settings.";
@@ -61,6 +76,38 @@ export default function Sync() {
     }
   };
 
+  const createSync = async (email) => {
+    if (!isValidEmail(email)) {
+      setError("Invalid email address.");
+      setShowAlert(true);
+      setAlertVariant("danger");
+      setAlertMessage("Invalid Email!");
+      return;
+    }
+
+    console.log("createSync with email:", email);
+
+    try {
+      //perform async tasks
+      const response = await setupSync(email);
+      console.log("response", response);
+      setShowAlert(true);
+      setAlertVariant("success");
+      setAlertMessage("Sync Created!");
+    } catch (error) {
+      setError("Sync failed.");
+      setShowAlert(true);
+      setAlertVariant("danger");
+      setAlertMessage("Sync Failed!");
+    }
+  };
+
+  const existingKey = async () => {
+    console.log("createSync");
+
+    return;
+  };
+
   if (!isReady || isLoading) {
     return <div className="text-center">Loading database...</div>;
   }
@@ -74,30 +121,76 @@ export default function Sync() {
           show={showAlert}
           onClose={() => setShowAlert(false)}
         />
-        <h4 className="text-center">Spools: Show/Hide Columns</h4>
-        <hr />
-        <Row className="justify-content-center">
-          <Col className="d-flex flex-wrap justify-content-center">
-            {tableHeaders.map((header) => (
-              <div
-                key={header}
-                className="d-flex"
-                style={{ width: "50%", maxWidth: "150px" }}
+        {initialType === "" && (
+          <Row className="justify-content-center align-items-center">
+            <Col xs="auto">
+              <Button
+                variant="primary"
+                className="w-100"
+                disabled={isSpinning}
+                onClick={() => setInitialType("setup")}
               >
-                <Form.Check
-                  type="checkbox"
-                  id={`checkbox-${header.replace(/\s/g, "")}`}
-                  label={header}
-                  className="me-2 custom-checkbox"
-                  checked={data?.spoolHeaders?.[header] || false}
-                  onChange={(e) =>
-                    handleCheckboxChange(header, e.target.checked)
-                  }
+                Setup Sync
+              </Button>
+            </Col>
+            <Col xs="auto" className="text-center">
+              OR
+            </Col>
+            <Col xs="auto">
+              <Button
+                variant="primary"
+                className="w-100"
+                disabled={isSpinning}
+                onClick={() => setInitialType("key")}
+              >
+                Use Existing Key
+              </Button>
+            </Col>
+          </Row>
+        )}
+        {initialType === "setup" && (
+          <Row className="justify-content-center align-items-center">
+            <Col xs={12} md={6}>
+              <Form.Group controlId="syncEmail">
+                <Form.Label>Sync Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="Enter sync email"
+                  value={syncEmail}
+                  onChange={handleEmailChange}
+                  required
                 />
-              </div>
-            ))}
-          </Col>
-        </Row>
+              </Form.Group>
+            </Col>
+            <Row className="justify-content-center align-items-center mt-3">
+              <Col xs="auto">
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={() => setInitialType("")}
+                >
+                  Cancel
+                </Button>
+              </Col>
+              <Col xs="auto">
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={async () => {
+                    await createSync(syncEmail);
+                  }}
+                >
+                  Finish Setup
+                </Button>
+              </Col>
+            </Row>
+          </Row>
+        )}
+        {initialType === "key" && (
+          <Row className="justify-content-center align-items-center">key</Row>
+        )}
         <Row className="mt-5 justify-content-center">
           <Col xs={12} sm={6} md={3}>
             <div className="d-flex justify-content-center">

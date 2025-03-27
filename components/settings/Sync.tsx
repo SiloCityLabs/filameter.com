@@ -91,6 +91,13 @@ export default function Sync() {
       //perform async tasks
       const response = await setupSync(email);
       console.log("response", response);
+
+      if (response.status === "error") {
+        setShowAlert(true);
+        setAlertVariant("danger");
+        setAlertMessage(response.error);
+        return;
+      }
       setShowAlert(true);
       setAlertVariant("success");
       setAlertMessage("Sync Created!");

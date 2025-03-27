@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import Head from "next/head";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@/public/styles/_fw.css";
 import "@/public/styles/main.css";

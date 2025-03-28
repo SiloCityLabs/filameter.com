@@ -39,8 +39,7 @@ export default function SpoolSenseImport() {
     setFilamentId(currentId);
 
     if (
-      (currentId === null) ||
-      (currentId != null)
+      (currentId === null)
     ) {
       setError(true);
       setShowAlert(true);

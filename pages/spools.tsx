@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import Head from "next/head";
 import {
   Container,
@@ -27,6 +27,9 @@ import {
   faTrash,
   faCopy,
 } from "@fortawesome/free-solid-svg-icons";
+//Types
+import { sclSettings } from "@/types/_fw";
+import { Filament } from "@/types/Filament";
 
 export default function Spools() {
   const { dbs, isReady } = useDatabase();
@@ -34,11 +37,10 @@ export default function Spools() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("success"); // Defaulted to success
   const [alertMessage, setAlertMessage] = useState("");
-  const [data, setData] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<Filament[]>([]);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [settings, setSettings] = useState<{ [key: string]: any }>({});
+  const [settings, setSettings] = useState<sclSettings>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -65,10 +67,13 @@ export default function Spools() {
         try {
           const allData = await getAllFilaments(dbs.filament);
           setData(allData);
+          console.log("allData", allData);
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch data.";
-          setError(errorMessage);
+          setAlertMessage(errorMessage);
+          setShowAlert(true);
+          setAlertVariant("danger");
         } finally {
           setIsLoading(false);
         }
@@ -82,7 +87,9 @@ export default function Spools() {
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch settings.";
-          setError(errorMessage);
+          setAlertMessage(errorMessage);
+          setShowAlert(true);
+          setAlertVariant("danger");
         } finally {
           setIsLoading(false);
         }
@@ -100,7 +107,6 @@ export default function Spools() {
     }
 
     setIsLoading(true);
-    setError(null);
     if (dbs.filament) {
       try {
         const success = await deleteRow(dbs.filament, id, "filament");
@@ -118,17 +124,18 @@ export default function Spools() {
       } catch (err: unknown) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to delete filament.";
-        setError(errorMessage);
         setAlertVariant("danger");
         setAlertMessage(errorMessage);
+        setShowAlert(true);
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  const sortFilaments = (dataToSort: any[]) => {
+  const sortFilaments = (dataToSort: Filament[]) => {
     if (!sortKey) return dataToSort;
+    console.log("dataToSort", dataToSort);
 
     return [...dataToSort].sort((a, b) => {
       const aValue = a[sortKey];
@@ -157,12 +164,20 @@ export default function Spools() {
 
   const filteredFilaments = sortedFilaments.filter((filament) => {
     const searchString = searchTerm.toLowerCase();
-    return (
-      filament._id.toLowerCase().includes(searchString) ||
-      filament.filament.toLowerCase().includes(searchString) ||
-      filament.material.toLowerCase().includes(searchString) ||
-      filament.location.toLowerCase().includes(searchString)
-    );
+    const idMatch = filament._id
+      ? filament._id.toLowerCase().includes(searchString)
+      : false;
+    const filamentMatch = filament.filament
+      ? filament.filament.toLowerCase().includes(searchString)
+      : false;
+    const materialMatch = filament.material
+      ? filament.material.toLowerCase().includes(searchString)
+      : false;
+    const locationMatch = filament.location
+      ? filament.location.toLowerCase().includes(searchString)
+      : false;
+
+    return idMatch || filamentMatch || materialMatch || locationMatch;
   });
 
   const renderHeader = (key: string, title: string) => {
@@ -294,9 +309,11 @@ export default function Spools() {
                                 }
                               >
                                 <span>
-                                  {filament._id.length > 5
-                                    ? filament._id.substring(0, 5) + "..."
-                                    : filament._id}
+                                  {filament._id
+                                    ? filament._id.length > 5
+                                      ? filament._id.substring(0, 5) + "..."
+                                      : filament._id
+                                    : ""}
                                 </span>
                               </OverlayTrigger>
                             </td>
@@ -324,7 +341,7 @@ export default function Spools() {
                           {(!settings?.spoolHeaders ||
                             settings.spoolHeaders["Weight Left"]) && (
                             <td className="text-center">
-                              {filament.calc_weight}
+                              {filament?.calc_weight || ""}
                             </td>
                           )}
                           {(!settings?.spoolHeaders ||
@@ -352,13 +369,13 @@ export default function Spools() {
                                 href="#"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  handleDelete(filament._id);
+                                  handleDelete(filament?._id || "");
                                 }}
                               >
                                 <FontAwesomeIcon icon={faTrash} />
                               </a>,
                               "Delete",
-                              () => handleDelete(filament._id)
+                              () => handleDelete(filament?._id || "")
                             )}
                             <br className="d-md-none" />
                             {renderAction(

@@ -6,6 +6,8 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 import getAllSettings from "@/helpers/database/settings/getAllSettings";
 import saveSettings from "@/helpers/database/settings/saveSettings";
 import { useDatabase } from "@/contexts/DatabaseContext";
+//Types
+import { sclSettings } from "@/types/_fw";
 
 const tableHeaders = [
   "ID",
@@ -17,10 +19,6 @@ const tableHeaders = [
   "Location",
   "Comments",
 ];
-
-type sclSettings = {
-  [key: string]: string | number | boolean | object;
-};
 
 export default function MainSettings() {
   const { dbs, isReady } = useDatabase();

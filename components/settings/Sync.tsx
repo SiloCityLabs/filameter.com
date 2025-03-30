@@ -9,10 +9,8 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import saveSettings from "@/helpers/database/settings/saveSettings";
 import { useDatabase } from "@/contexts/DatabaseContext";
-
-type sclSettings = {
-  [key: string]: string | number | boolean | object;
-};
+//Types
+import { sclSettings } from "@/types/_fw";
 
 export default function Sync() {
   const { dbs, isReady } = useDatabase();

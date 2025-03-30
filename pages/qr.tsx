@@ -34,13 +34,11 @@ export default function SpoolSenseImport() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentId = urlParams.get("id");
-    setFilamentId(currentId);
-
-    if (
-      (currentId === null)
-    ) {
+    if (!router.isReady) return;
+  
+    const currentId = router.query.id as string | undefined;
+  
+    if (!currentId) {
       setError(true);
       setShowAlert(true);
       setAlertMessage("Missing Data");
@@ -48,13 +46,16 @@ export default function SpoolSenseImport() {
       setIsLoading(false);
       return;
     }
-
+  
+    setFilamentId(currentId);
+  
     async function init() {
       const initializedDb = await initializeFilamentDB();
       setDb(initializedDb);
     }
     init();
-  }, []);
+  }, [router.isReady]);
+  
 
   const fetchFilament = async (id: string) => {
     setIsLoading(true);
@@ -113,7 +114,7 @@ export default function SpoolSenseImport() {
   return (
     <>
       <Head>
-        <title>Spool Sense QR Scane</title>
+        <title>Spool Sense QR Scan</title>
         <meta name="description" content="This page could not be found." />
       </Head>
       <div className="main-container">

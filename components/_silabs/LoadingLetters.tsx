@@ -18,8 +18,6 @@ export function LoadingLetters({
   const [displayText, setDisplayText] = React.useState<string>(
     placeholderChar.repeat(text.length)
   );
-  const [intervalId, setIntervalId] = React.useState<number | null>(null);
-  const [timeoutId, setTimeoutId] = React.useState<number | null>(null);
   const validLetters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -39,36 +37,35 @@ export function LoadingLetters({
       }
       setDisplayText(newText);
 
-      if (currentText[currentIndex] === text[currentIndex]) {
+      if (
+        currentIndex < text.length &&
+        currentText[currentIndex] === text[currentIndex]
+      ) {
         currentIndex++;
       }
 
       currentText =
         currentText.substring(0, currentIndex) +
-        text[currentIndex] +
+        (currentIndex < text.length ? text[currentIndex] : "") +
         currentText.substring(currentIndex + 1);
     };
 
     const id = window.setInterval(randomizeLetters, interval);
-    setIntervalId(id);
 
     const timeout = window.setTimeout(() => {
-      window.clearInterval(id); // Stop the interval
-      setIntervalId(null);
-      setDisplayText(text); // Ensure the final text is displayed
+      window.clearInterval(id);
+      setDisplayText(text);
     }, loadingDuration);
-    setTimeoutId(timeout);
 
-    // Cleanup function: Clear the interval and timeout when the component unmounts or when loadingDuration/interval changes
     return () => {
-      if (intervalId) {
-        window.clearInterval(intervalId);
+      if (id) {
+        window.clearInterval(id);
       }
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
+      if (timeout) {
+        window.clearTimeout(timeout);
       }
     };
-  }, [text, loadingDuration, interval, placeholderChar]); // Re-run the effect if these props change.  Crucial!
+  }, [text, loadingDuration, interval, placeholderChar]);
 
   return <span className={className}>{displayText}</span>;
 }

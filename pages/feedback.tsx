@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import Select from "react-select";
+import Select, { MultiValue } from "react-select";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { generateGithubLink } from "@/helpers/_silabs/generateGithubLink";
@@ -64,16 +64,16 @@ export default function Feedback() {
   };
 
   const handleChangeSelect = (
-    selectedOptions: any,
+    selectedOptions: MultiValue<OptionType> | null,
     name: "assignees" | "labels"
   ) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      [name]: selectedOptions as OptionType[],
+      [name]: selectedOptions || [],
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const feedbackData = {

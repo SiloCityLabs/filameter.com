@@ -1,4 +1,3 @@
-// next.config.mjs
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 import * as dotenv from "dotenv";
 
@@ -28,6 +27,13 @@ const nextConfig = (phase, { defaultConfig }) => {
           ],
         };
       }
+
+      // Add the exclusion for _fw.css
+      config.module.rules.forEach((rule) => {
+        if (rule.test && rule.test.toString().includes(".css")) {
+          rule.exclude = [/_fw\.css$/, /bootstrap\.min\.css$/, /main\.css$/];
+        }
+      });
 
       return config;
     },

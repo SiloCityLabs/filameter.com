@@ -84,21 +84,21 @@ export default function Sync() {
     }
   };
 
-  const createSync = async (email) => {
-    if (!isValidEmail(email)) {
+  const createSync = async () => {
+    if (!isValidEmail(syncEmail)) {
       setShowAlert(true);
       setAlertVariant("danger");
       setAlertMessage("Invalid Email!");
       return;
     }
 
-    console.log("createSync with email:", email);
+    console.log("createSync with email:", syncEmail);
 
     try {
-      const response = await setupSync(email);
+      const response = await setupSync(syncEmail);
       console.log("response", response);
       if (response.status === "success") {
-        data.email = email;
+        data.email = syncEmail;
         data.syncKey = response.key;
         console.log("data", data);
         setData(data);
@@ -197,7 +197,7 @@ export default function Sync() {
                   className="w-100"
                   disabled={isSpinning}
                   onClick={async () => {
-                    await createSync(syncEmail);
+                    await createSync();
                   }}
                 >
                   Finish Setup

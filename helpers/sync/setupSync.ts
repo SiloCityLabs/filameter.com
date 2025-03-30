@@ -5,10 +5,6 @@ export async function setupSync(email: string): Promise<any> {
   console.log("NEXT_PUBLIC_APP_FILAMETER_SYNC_APP", app);
   console.log("email", email);
 
-  return {
-    key: "6HBIcqlZJhUByUr2poo1Xo1dumMl55YJ",
-    status: "success",
-  };
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -34,16 +30,3 @@ export async function setupSync(email: string): Promise<any> {
     throw error; // Rethrow the error to be handled by the caller
   }
 }
-
-// Example usage:
-async function exampleUsage() {
-  try {
-    const userEmail = "test@example.com"; // Replace with the actual email
-    const result = await setupSync(userEmail);
-    console.log("API response:", result);
-  } catch (error) {
-    console.error("Failed to create sync:", error);
-  }
-}
-
-exampleUsage();

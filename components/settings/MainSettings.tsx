@@ -18,12 +18,15 @@ const tableHeaders = [
   "Comments",
 ];
 
+type sclSettings = {
+  [key: string]: string | number | boolean | object;
+};
+
 export default function MainSettings() {
   const { dbs, isReady } = useDatabase();
   const [isSpinning, setIsSpinning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<{ [key: string]: any }>({});
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<sclSettings>({});
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -35,7 +38,7 @@ export default function MainSettings() {
           const allData = await getAllSettings(dbs.settings);
           if (!allData.spoolHeaders) {
             allData.spoolHeaders = {};
-            tableHeaders.forEach((header, index) => {
+            tableHeaders.forEach((header) => {
               allData.spoolHeaders[header] = true;
             });
           }
@@ -43,7 +46,9 @@ export default function MainSettings() {
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch settings.";
-          setError(errorMessage);
+          setAlertMessage(errorMessage);
+          setShowAlert(true);
+          setAlertVariant("danger");
         } finally {
           setIsLoading(false);
         }
@@ -78,10 +83,12 @@ export default function MainSettings() {
     } catch (error: unknown) {
       console.error("Error saving settings:", error);
       if (error instanceof Error) {
-        setError(error.message);
+        setAlertMessage(error.message);
       } else {
-        setError("An unknown error occurred while saving settings.");
+        setAlertMessage("An unknown error occurred while saving settings.");
       }
+      setShowAlert(true);
+      setAlertVariant("danger");
     } finally {
       setIsSpinning(false);
       setShowAlert(true);

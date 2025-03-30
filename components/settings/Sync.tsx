@@ -10,12 +10,15 @@ import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import saveSettings from "@/helpers/database/settings/saveSettings";
 import { useDatabase } from "@/contexts/DatabaseContext";
 
+type sclSettings = {
+  [key: string]: string | number | boolean | object;
+};
+
 export default function Sync() {
   const { dbs, isReady } = useDatabase();
   const [isSpinning, setIsSpinning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<{ [key: string]: any }>({});
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<sclSettings>({});
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -41,7 +44,9 @@ export default function Sync() {
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch settings.";
-          setError(errorMessage);
+          setAlertMessage(errorMessage);
+          setShowAlert(true);
+          setAlertVariant("danger");
         } finally {
           setIsLoading(false);
         }
@@ -65,10 +70,12 @@ export default function Sync() {
     } catch (error: unknown) {
       console.error("Error saving settings:", error);
       if (error instanceof Error) {
-        setError(error.message);
+        setAlertMessage(error.message);
       } else {
-        setError("An unknown error occurred while saving settings.");
+        setAlertMessage("An unknown error occurred while saving settings.");
       }
+      setShowAlert(true);
+      setAlertVariant("danger");
     } finally {
       setIsSpinning(false);
       setShowAlert(true);
@@ -78,7 +85,6 @@ export default function Sync() {
 
   const createSync = async (email) => {
     if (!isValidEmail(email)) {
-      setError("Invalid email address.");
       setShowAlert(true);
       setAlertVariant("danger");
       setAlertMessage("Invalid Email!");
@@ -102,18 +108,18 @@ export default function Sync() {
       setAlertVariant("success");
       setAlertMessage("Sync Created!");
     } catch (error) {
-      setError("Sync failed.");
+      console.error("Failed to export", error);
       setShowAlert(true);
       setAlertVariant("danger");
       setAlertMessage("Sync Failed!");
     }
   };
 
-  const existingKey = async () => {
-    console.log("createSync");
+  // const existingKey = async () => {
+  //   console.log("createSync");
 
-    return;
-  };
+  //   return;
+  // };
 
   if (!isReady || isLoading) {
     return <div className="text-center">Loading database...</div>;

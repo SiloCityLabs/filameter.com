@@ -11,16 +11,6 @@ import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
 import { save } from "@/helpers/_silabs/pouchDb/save";
 import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
-//Types
-import { Filament } from "@/types/Filament";
-
-const defaultValue: Filament = {
-  filament: "",
-  material: "",
-  used_weight: 0,
-  location: "",
-  comments: "",
-};
 
 export default function SpoolSenseImport() {
   const router = useRouter();
@@ -28,7 +18,6 @@ export default function SpoolSenseImport() {
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [db, setDb] = useState(null);
-  const [filament, setFilament] = useState<Filament>(defaultValue);
   const [error, setError] = useState<boolean>(false);
   const [filamentId, setFilamentId] = useState<string | null>(null);
   const [usedWeight, setUsedWeight] = useState<number | null>(null);
@@ -84,7 +73,6 @@ export default function SpoolSenseImport() {
 
         //Update used_weight
         fetchedFilament[0].used_weight = used;
-        setFilament(fetchedFilament[0]);
 
         //Update Data
         const result = await save(

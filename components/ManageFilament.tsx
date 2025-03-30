@@ -27,7 +27,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
   const [formData, setFormData] = useState(
     data && Object.keys(data).length > 0 ? data : defaultValue
   );
-  const [formErrors, setFormErrors] = useState({});
   const [createMultiple, setCreateMultiple] = useState(false);
   const [numberOfRows, setNumberOfRows] = useState(1);
 
@@ -35,13 +34,12 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     if (data?._id && data?._rev) {
       setIsEdit(true);
     }
-  }, []);
+  }, [data?._id, data?._rev]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setFormErrors({});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,17 +73,12 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         result.error !== null &&
         Array.isArray(result.error)
       ) {
-        //more robust check
-        const formattedErrors = {};
         result.error.forEach((err) => {
-          if (err?.path?.[0]) {
-            //check if path exists
-            formattedErrors[err.path[0]] = err.message;
-          }
+          setAlertMessage(err.message);
         });
-        setFormErrors(formattedErrors);
+        setAlertVariant("danger");
+        setShowAlert(true);
       } else {
-        // Handle other error types (e.g., network errors)
         setAlertVariant("danger");
         setAlertMessage("An unexpected error occurred.");
         setShowAlert(true);

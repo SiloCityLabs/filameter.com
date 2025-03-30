@@ -4,6 +4,11 @@ export async function setupSync(email: string): Promise<any> {
   console.log("NEXT_PUBLIC_APP_FILAMETER_SYNC_URL", url);
   console.log("NEXT_PUBLIC_APP_FILAMETER_SYNC_APP", app);
   console.log("email", email);
+
+  return {
+    key: "6HBIcqlZJhUByUr2poo1Xo1dumMl55YJ",
+    status: "success",
+  };
   try {
     const response = await fetch(url, {
       method: "POST",

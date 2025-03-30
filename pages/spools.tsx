@@ -67,7 +67,6 @@ export default function Spools() {
         try {
           const allData = await getAllFilaments(dbs.filament);
           setData(allData);
-          console.log("allData", allData);
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch data.";
@@ -135,7 +134,6 @@ export default function Spools() {
 
   const sortFilaments = (dataToSort: Filament[]) => {
     if (!sortKey) return dataToSort;
-    console.log("dataToSort", dataToSort);
 
     return [...dataToSort].sort((a, b) => {
       const aValue = a[sortKey];

@@ -37,8 +37,11 @@ export default function Sync() {
             "scl-sync",
             "settings"
           );
-          console.log("sclSync", sclSync);
-          setData(sclSync);
+          console.log("sclSync", sclSync[0]);
+          if (sclSync[0]) {
+            setData(JSON.parse(sclSync[0].value));
+            setInitialType("engaged");
+          }
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch settings.";
@@ -55,7 +58,7 @@ export default function Sync() {
     }
   }, [dbs, isReady]);
 
-  const save = async () => {
+  const save = async (saveData: sclSettings) => {
     if (!dbs.settings) {
       console.error("Database is not initialized.");
       return;
@@ -64,7 +67,7 @@ export default function Sync() {
     setIsSpinning(true);
 
     try {
-      await saveSettings(dbs.settings, data);
+      await saveSettings(dbs.settings, saveData);
     } catch (error: unknown) {
       console.error("Error saving settings:", error);
       if (error instanceof Error) {
@@ -92,11 +95,15 @@ export default function Sync() {
     console.log("createSync with email:", email);
 
     try {
-      //perform async tasks
       const response = await setupSync(email);
       console.log("response", response);
-
-      if (response.status === "error") {
+      if (response.status === "success") {
+        data.email = email;
+        data.syncKey = response.key;
+        console.log("data", data);
+        setData(data);
+        save({ "scl-sync": data });
+      } else if (response.status === "error") {
         setShowAlert(true);
         setAlertVariant("danger");
         setAlertMessage(response.error);
@@ -202,20 +209,12 @@ export default function Sync() {
         {initialType === "key" && (
           <Row className="justify-content-center align-items-center">key</Row>
         )}
-        <Row className="mt-5 justify-content-center">
-          <Col xs={12} sm={6} md={3}>
-            <div className="d-flex justify-content-center">
-              <Button
-                variant="primary"
-                className="w-100"
-                disabled={isSpinning}
-                onClick={save}
-              >
-                Save Settings
-              </Button>
-            </div>
-          </Col>
-        </Row>
+        {initialType === "engaged" && (
+          <Row className="justify-content-center align-items-center">
+            <Col xs="auto">Email: {data?.email}</Col>
+            <Col xs="auto">Key: {data?.syncKey}</Col>
+          </Row>
+        )}
       </Col>
     </Row>
   );

@@ -64,13 +64,11 @@ export default function ManageFilamentPage() {
             id,
             "filament"
           );
-          console.log(fetchedFilament[0]);
           setFilament(fetchedFilament[0]);
 
           if (type === "duplicate") {
             delete fetchedFilament[0]._id;
             delete fetchedFilament[0]._rev;
-            console.log("fetchedFilament[0]", fetchedFilament[0]);
             setFilament(fetchedFilament[0]);
           }
         } catch (err: unknown) {

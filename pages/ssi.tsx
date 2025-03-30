@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
@@ -51,73 +51,76 @@ export default function SpoolSenseImport() {
     init();
   }, []);
 
-  const fetchFilament = async (id: string, used: number) => {
-    setIsLoading(true);
-    setError(false);
+  const fetchFilament = useCallback(
+    async (id: string, used: number) => {
+      setIsLoading(true);
+      setError(false);
 
-    if (db) {
-      try {
-        const fetchedFilament = await getDocumentByColumn(
-          db,
-          "_id",
-          id,
-          "filament"
-        );
-        //No id = Create new filament and prefill used_weight
-        if (fetchedFilament[0] === null) {
-          router.push(
-            `/manage-filament?used_weight=${used}&id=${id}&type=create`
+      if (db) {
+        try {
+          const fetchedFilament = await getDocumentByColumn(
+            db,
+            "_id",
+            id,
+            "filament"
           );
-          return;
-        }
+          //No id = Create new filament and prefill used_weight
+          if (fetchedFilament[0] === null) {
+            router.push(
+              `/manage-filament?used_weight=${used}&id=${id}&type=create`
+            );
+            return;
+          }
 
-        //Update used_weight
-        fetchedFilament[0].used_weight = used;
+          //Update used_weight
+          fetchedFilament[0].used_weight = used;
 
-        //Update Data
-        const result = await save(
-          db,
-          fetchedFilament[0],
-          filamentSchema,
-          "filament"
-        );
-
-        if (result.success) {
-          setShowAlert(true);
-          setAlertVariant("success");
-          setAlertMessage(`Filament updated successfully`);
-          router.replace(
-            `/spools?alert_msg=Filament ${id} updated successfully`
+          //Update Data
+          const result = await save(
+            db,
+            fetchedFilament[0],
+            filamentSchema,
+            "filament"
           );
-        } else {
-          console.error(`Error: Filament not updating:`, result.error);
+
+          if (result.success) {
+            setShowAlert(true);
+            setAlertVariant("success");
+            setAlertMessage(`Filament updated successfully`);
+            router.replace(
+              `/spools?alert_msg=Filament ${id} updated successfully`
+            );
+          } else {
+            console.error(`Error: Filament not updating:`, result.error);
+            setShowAlert(true);
+            setAlertVariant("danger");
+            setAlertMessage("Error updating filament.");
+          }
+        } catch (err: unknown) {
+          let msg = "Failed to fetch filament.";
+          if (typeof err === "string") {
+            msg = err;
+          } else if (err instanceof Error) {
+            msg = err.message;
+          }
+
           setShowAlert(true);
+          setAlertMessage(msg);
           setAlertVariant("danger");
-          setAlertMessage("Error updating filament.");
+          setError(true);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (err: unknown) {
-        let msg = "Failed to fetch filament.";
-        if (typeof err === "string") {
-          msg = err;
-        } else if (err instanceof Error) {
-          msg = err.message;
-        }
-
-        setShowAlert(true);
-        setAlertMessage(msg);
-        setAlertVariant("danger");
-        setError(true);
-      } finally {
-        setIsLoading(false);
       }
-    }
-  };
+    },
+    [db, router]
+  );
 
   useEffect(() => {
     if (filamentId && db && usedWeight) {
       fetchFilament(filamentId, usedWeight);
     }
-  }, [filamentId, db, usedWeight]);
+  }, [filamentId, db, usedWeight, fetchFilament]);
 
   // Handle loading state
   if (isLoading) {

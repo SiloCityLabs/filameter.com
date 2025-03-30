@@ -37,8 +37,7 @@ export default function Sync() {
             "scl-sync",
             "settings"
           );
-          console.log("sclSync", sclSync[0]);
-          if (sclSync[0]) {
+          if (sclSync[0] && sclSync[0].value !== "") {
             setData(JSON.parse(sclSync[0].value));
             setInitialType("engaged");
           }
@@ -77,10 +76,9 @@ export default function Sync() {
       }
       setShowAlert(true);
       setAlertVariant("danger");
+      setShowAlert(true);
     } finally {
       setIsSpinning(false);
-      setShowAlert(true);
-      setAlertMessage("Settings Saved!");
     }
   };
 
@@ -92,17 +90,15 @@ export default function Sync() {
       return;
     }
 
-    console.log("createSync with email:", syncEmail);
-
     try {
+      setIsSpinning(true);
       const response = await setupSync(syncEmail);
-      console.log("response", response);
       if (response.status === "success") {
         data.email = syncEmail;
         data.syncKey = response.key;
-        console.log("data", data);
         setData(data);
         save({ "scl-sync": data });
+        setInitialType("engaged");
       } else if (response.status === "error") {
         setShowAlert(true);
         setAlertVariant("danger");
@@ -118,6 +114,7 @@ export default function Sync() {
       setAlertVariant("danger");
       setAlertMessage("Sync Failed!");
     }
+    setIsSpinning(false);
   };
 
   // const existingKey = async () => {
@@ -125,6 +122,19 @@ export default function Sync() {
 
   //   return;
   // };
+
+  const removeSync = async () => {
+    if (!window.confirm("Are you sure you want to remove your sync?")) {
+      return;
+    }
+
+    setData({});
+    save({ "scl-sync": "" });
+    setAlertMessage("Sync Removed");
+    setShowAlert(true);
+    setAlertVariant("info");
+    return;
+  };
 
   if (!isReady || isLoading) {
     return <div className="text-center">Loading database...</div>;
@@ -176,6 +186,7 @@ export default function Sync() {
                   placeholder="Enter sync email"
                   value={syncEmail}
                   onChange={handleEmailChange}
+                  disabled={isSpinning}
                   required
                 />
               </Form.Group>
@@ -210,10 +221,27 @@ export default function Sync() {
           <Row className="justify-content-center align-items-center">key</Row>
         )}
         {initialType === "engaged" && (
-          <Row className="justify-content-center align-items-center">
-            <Col xs="auto">Email: {data?.email}</Col>
-            <Col xs="auto">Key: {data?.syncKey}</Col>
-          </Row>
+          <>
+            <Row className="justify-content-center align-items-center">
+              <Col xs="auto">Email: {data?.email}</Col>
+              <Col xs="auto">Key: {data?.syncKey}</Col>
+            </Row>
+            <Row className="mt-4 justify-content-center align-items-center">
+              <Col xs="auto">
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={() => {
+                    setInitialType("");
+                    removeSync();
+                  }}
+                >
+                  Remove Sync
+                </Button>
+              </Col>
+            </Row>
+          </>
         )}
       </Col>
     </Row>

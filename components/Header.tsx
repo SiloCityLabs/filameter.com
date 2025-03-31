@@ -16,7 +16,7 @@ const defaultNavLinks = [
   { label: "Feedback", href: "/feedback", target: "" },
   {
     label: "Products",
-    href: "https://shop.silocitylabs.com/collections/3d-prints/filameter",
+    href: "https://shop.silocitylabs.com/collections/filameter",
     target: "",
   },
   {

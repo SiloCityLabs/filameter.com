@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Row, Col, Form, Button } from "react-bootstrap";
 //Helpers
 import { isValidEmail } from "@/helpers/isValidEmail";
-import { setupSync } from "@/helpers/sync/setupSync";
+import { setupSyncByEmail } from "@/helpers/sync/setupSyncByEmail";
+import { setupSyncByKey } from "@/helpers/sync/setupSyncByKey";
 //Components
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
@@ -22,9 +23,10 @@ export default function Sync() {
   const [alertMessage, setAlertMessage] = useState("");
   const [initialType, setInitialType] = useState("");
   const [syncEmail, setSyncEmail] = useState("");
+  const [syncKey, setSyncKey] = useState("");
 
-  const handleEmailChange = (event) => {
-    setSyncEmail(event.target.value);
+  const handleInputChange = (setter) => (event) => {
+    setter(event.target.value);
   };
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export default function Sync() {
 
     try {
       setIsSpinning(true);
-      const response = await setupSync(syncEmail);
+      const response = await setupSyncByEmail(syncEmail);
       if (response.status === "success") {
         data.email = syncEmail;
         data.syncKey = response.key;
@@ -117,11 +119,35 @@ export default function Sync() {
     setIsSpinning(false);
   };
 
-  // const existingKey = async () => {
-  //   console.log("createSync");
-
-  //   return;
-  // };
+  const existingKey = async () => {
+    try {
+      setIsSpinning(true);
+      const response = await setupSyncByKey(syncKey);
+      if (response.status === "success") {
+        let keyData = {
+          syncKey: response.token,
+          ...response.userData,
+        };
+        setData(keyData);
+        save({ "scl-sync": keyData });
+        setInitialType("engaged");
+      } else if (response.status === "error") {
+        setShowAlert(true);
+        setAlertVariant("danger");
+        setAlertMessage(response.error);
+        return;
+      }
+      setShowAlert(true);
+      setAlertVariant("success");
+      setAlertMessage("Sync setup with key!");
+    } catch (error) {
+      console.error("Failed to export", error);
+      setShowAlert(true);
+      setAlertVariant("danger");
+      setAlertMessage("Sync Failed!");
+    }
+    setIsSpinning(false);
+  };
 
   const removeSync = async () => {
     if (!window.confirm("Are you sure you want to remove your sync?")) {
@@ -156,7 +182,7 @@ export default function Sync() {
                 variant="primary"
                 className="w-100"
                 disabled={isSpinning}
-                onClick={() => setInitialType("setup")}
+                onClick={() => setInitialType("setupEmail")}
               >
                 Setup Sync
               </Button>
@@ -169,14 +195,14 @@ export default function Sync() {
                 variant="primary"
                 className="w-100"
                 disabled={isSpinning}
-                onClick={() => setInitialType("key")}
+                onClick={() => setInitialType("setupKey")}
               >
                 Use Existing Key
               </Button>
             </Col>
           </Row>
         )}
-        {initialType === "setup" && (
+        {initialType === "setupEmail" && (
           <Row className="justify-content-center align-items-center">
             <Col xs={12} md={6}>
               <Form.Group controlId="syncEmail">
@@ -185,7 +211,7 @@ export default function Sync() {
                   type="email"
                   placeholder="Enter sync email"
                   value={syncEmail}
-                  onChange={handleEmailChange}
+                  onChange={handleInputChange(setSyncEmail)}
                   disabled={isSpinning}
                   required
                 />
@@ -217,14 +243,53 @@ export default function Sync() {
             </Row>
           </Row>
         )}
-        {initialType === "key" && (
-          <Row className="justify-content-center align-items-center">key</Row>
+        {initialType === "setupKey" && (
+          <Row className="justify-content-center align-items-center">
+            <Col xs={12} md={6}>
+              <Form.Group controlId="syncKey">
+                <Form.Label>Sync Key</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter sync key"
+                  value={syncKey}
+                  onChange={handleInputChange(setSyncKey)}
+                  disabled={isSpinning}
+                  required
+                />
+              </Form.Group>
+            </Col>
+            <Row className="justify-content-center align-items-center mt-3">
+              <Col xs="auto">
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={() => setInitialType("")}
+                >
+                  Cancel
+                </Button>
+              </Col>
+              <Col xs="auto">
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={async () => {
+                    await existingKey();
+                  }}
+                >
+                  Finish Setup
+                </Button>
+              </Col>
+            </Row>
+          </Row>
         )}
         {initialType === "engaged" && (
           <>
             <Row className="justify-content-center align-items-center">
               <Col xs="auto">Email: {data?.email}</Col>
               <Col xs="auto">Key: {data?.syncKey}</Col>
+              <Col xs="auto">Account Type: {data?.accountType || "Free"}</Col>
             </Row>
             <Row className="mt-4 justify-content-center align-items-center">
               <Col xs="auto">

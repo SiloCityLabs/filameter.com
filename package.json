@@ -16,6 +16,7 @@
     "@types/pouchdb-find": "^7.3.3",
     "bootstrap": "^5.3.3",
     "dotenv": "^16.4.7",
+    "fflate": "^0.8.2",
     "joi": "^17.13.3",
     "next": "^15.2.4",
     "pouchdb": "^9.0.0",

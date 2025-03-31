@@ -1,4 +1,4 @@
-name: Lint
+name: CI (Lint & Build)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     branches: [main] # Trigger on pull requests targeting the main branch
 
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,3 +34,6 @@ jobs:
 
       - name: Type check
         run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import { Container, Row, Col } from "react-bootstrap";
 import Header from "@/components/Header";
@@ -39,7 +39,7 @@ export default function ManageFilamentPage() {
     setFilamentIdToFetch(currentId);
     setType(type_url);
 
-    let overwriteObj: Partial<Filament> = {};
+    const overwriteObj: Partial<Filament> = {};
 
     if (usedWeight) {
       overwriteObj.used_weight = parseInt(usedWeight, 10);
@@ -51,40 +51,43 @@ export default function ManageFilamentPage() {
     setIsLoading(false); // Set loading to false after initial setup
   }, []);
 
-  const fetchFilament = async (id: string) => {
-    setIsLoading(true);
-    setError(null);
+  const fetchFilament = useCallback(
+    async (id: string) => {
+      setIsLoading(true);
+      setError(null);
 
-    if (dbs.filament) {
-      try {
-        const fetchedFilament = await getDocumentByColumn(
-          dbs.filament,
-          "_id",
-          id,
-          "filament"
-        );
-        console.log(fetchedFilament[0]);
-        setFilament(fetchedFilament[0]);
+      if (dbs.filament) {
+        try {
+          const fetchedFilament = await getDocumentByColumn(
+            dbs.filament,
+            "_id",
+            id,
+            "filament"
+          );
+          setFilament(fetchedFilament[0]);
 
-        if (type === "duplicate") {
-          const { _id, _rev, ...filamentWithoutIdAndRev } = fetchedFilament[0];
-          setFilament(filamentWithoutIdAndRev);
+          if (type === "duplicate") {
+            delete fetchedFilament[0]._id;
+            delete fetchedFilament[0]._rev;
+            setFilament(fetchedFilament[0]);
+          }
+        } catch (err: unknown) {
+          if (typeof err === "string") {
+            setError(err);
+          } else if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError("Failed to fetch filament.");
+          }
+        } finally {
+          setIsLoading(false);
         }
-      } catch (err: unknown) {
-        if (typeof err === "string") {
-          setError(err);
-        } else if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Failed to fetch filament.");
-        }
-      } finally {
-        setIsLoading(false);
+      } else {
+        setError("Database not available.");
       }
-    } else {
-      setError("Database not available.");
-    }
-  };
+    },
+    [dbs.filament, type]
+  );
 
   useEffect(() => {
     if (
@@ -98,7 +101,7 @@ export default function ManageFilamentPage() {
       // Use 'isReady' here
       setIsLoading(false);
     }
-  }, [filamentIdToFetch, dbs, type, isReady]);
+  }, [filamentIdToFetch, dbs, type, isReady, fetchFilament]);
 
   if (isReady === false || isLoading) {
     // More accurate check

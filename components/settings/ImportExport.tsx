@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { useCallback, useState, useEffect } from "react";
+import { Row, Col, Button, Form } from "react-bootstrap";
 //DB
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { exportDB } from "@/helpers/exportDB";
@@ -14,14 +14,13 @@ export default function ImportExport() {
   );
   const [exportError, setExportError] = useState<string | null>(null);
   const [importMessage, setImportMessage] = useState<string | null>(null);
-  const [clearBeforeImport, setClearBeforeImport] = useState(false); // Re-add clearBeforeImport
-  const [triggerImport, setTriggerImport] = useState(false); // New state variable
+  const [clearBeforeImport, setClearBeforeImport] = useState(false);
+  const [triggerImport, setTriggerImport] = useState(false);
 
   // Load selectedFile from localStorage on component mount
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("selectedFile")) {
       const fileData = JSON.parse(localStorage.getItem("selectedFile")!);
-      //Need to use File constructor
       const file = new File([new Blob([fileData.content])], fileData.name, {
         type: fileData.type,
       });
@@ -33,17 +32,11 @@ export default function ImportExport() {
       setSelectedFile(file);
       localStorage.removeItem("selectedFile");
       if (shouldTriggerImport) {
-        setTriggerImport(true); // Set the trigger
-        localStorage.removeItem("triggerImport"); // Clear the flag
+        setTriggerImport(true);
+        localStorage.removeItem("triggerImport");
       }
     }
   }, []);
-
-  useEffect(() => {
-    if (triggerImport && dbs.filament && selectedFile) {
-      handleImport();
-    }
-  }, [triggerImport, dbs.filament, selectedFile]);
 
   const exportDatabase = async () => {
     if (!dbs.filament) return;
@@ -79,7 +72,7 @@ export default function ImportExport() {
     }
   };
 
-  const handleImport = async () => {
+  const handleImport = useCallback(async () => {
     if (!dbs.filament || !selectedFile) {
       return;
     }
@@ -138,7 +131,13 @@ export default function ImportExport() {
     } finally {
       setIsSpinning(false);
     }
-  };
+  }, [dbs.filament, selectedFile, clearBeforeImport]);
+
+  useEffect(() => {
+    if (triggerImport && dbs.filament && selectedFile) {
+      handleImport();
+    }
+  }, [triggerImport, dbs.filament, selectedFile, handleImport]);
 
   if (!isReady) {
     return <div className="text-center">Loading database...</div>;

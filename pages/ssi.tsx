@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
@@ -11,16 +11,6 @@ import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
 import { save } from "@/helpers/_silabs/pouchDb/save";
 import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
-//Types
-import { Filament } from "@/types/Filament";
-
-const defaultValue: Filament = {
-  filament: "",
-  material: "",
-  used_weight: 0,
-  location: "",
-  comments: "",
-};
 
 export default function SpoolSenseImport() {
   const router = useRouter();
@@ -28,7 +18,6 @@ export default function SpoolSenseImport() {
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [db, setDb] = useState(null);
-  const [filament, setFilament] = useState<Filament>(defaultValue);
   const [error, setError] = useState<boolean>(false);
   const [filamentId, setFilamentId] = useState<string | null>(null);
   const [usedWeight, setUsedWeight] = useState<number | null>(null);
@@ -62,74 +51,76 @@ export default function SpoolSenseImport() {
     init();
   }, []);
 
-  const fetchFilament = async (id: string, used: number) => {
-    setIsLoading(true);
-    setError(false);
+  const fetchFilament = useCallback(
+    async (id: string, used: number) => {
+      setIsLoading(true);
+      setError(false);
 
-    if (db) {
-      try {
-        const fetchedFilament = await getDocumentByColumn(
-          db,
-          "_id",
-          id,
-          "filament"
-        );
-        //No id = Create new filament and prefill used_weight
-        if (fetchedFilament[0] === null) {
-          router.push(
-            `/manage-filament?used_weight=${used}&id=${id}&type=create`
+      if (db) {
+        try {
+          const fetchedFilament = await getDocumentByColumn(
+            db,
+            "_id",
+            id,
+            "filament"
           );
-          return;
-        }
+          //No id = Create new filament and prefill used_weight
+          if (fetchedFilament[0] === null) {
+            router.push(
+              `/manage-filament?used_weight=${used}&id=${id}&type=create`
+            );
+            return;
+          }
 
-        //Update used_weight
-        fetchedFilament[0].used_weight = used;
-        setFilament(fetchedFilament[0]);
+          //Update used_weight
+          fetchedFilament[0].used_weight = used;
 
-        //Update Data
-        const result = await save(
-          db,
-          fetchedFilament[0],
-          filamentSchema,
-          "filament"
-        );
-
-        if (result.success) {
-          setShowAlert(true);
-          setAlertVariant("success");
-          setAlertMessage(`Filament updated successfully`);
-          router.replace(
-            `/spools?alert_msg=Filament ${id} updated successfully`
+          //Update Data
+          const result = await save(
+            db,
+            fetchedFilament[0],
+            filamentSchema,
+            "filament"
           );
-        } else {
-          console.error(`Error: Filament not updating:`, result.error);
+
+          if (result.success) {
+            setShowAlert(true);
+            setAlertVariant("success");
+            setAlertMessage(`Filament updated successfully`);
+            router.replace(
+              `/spools?alert_msg=Filament ${id} updated successfully`
+            );
+          } else {
+            console.error(`Error: Filament not updating:`, result.error);
+            setShowAlert(true);
+            setAlertVariant("danger");
+            setAlertMessage("Error updating filament.");
+          }
+        } catch (err: unknown) {
+          let msg = "Failed to fetch filament.";
+          if (typeof err === "string") {
+            msg = err;
+          } else if (err instanceof Error) {
+            msg = err.message;
+          }
+
           setShowAlert(true);
+          setAlertMessage(msg);
           setAlertVariant("danger");
-          setAlertMessage("Error updating filament.");
+          setError(true);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (err: unknown) {
-        let msg = "Failed to fetch filament.";
-        if (typeof err === "string") {
-          msg = err;
-        } else if (err instanceof Error) {
-          msg = err.message;
-        }
-
-        setShowAlert(true);
-        setAlertMessage(msg);
-        setAlertVariant("danger");
-        setError(true);
-      } finally {
-        setIsLoading(false);
       }
-    }
-  };
+    },
+    [db, router]
+  );
 
   useEffect(() => {
     if (filamentId && db && usedWeight) {
       fetchFilament(filamentId, usedWeight);
     }
-  }, [filamentId, db, usedWeight]);
+  }, [filamentId, db, usedWeight, fetchFilament]);
 
   // Handle loading state
   if (isLoading) {

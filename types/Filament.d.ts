@@ -5,6 +5,7 @@ export type Filament = {
   material: string;
   used_weight?: number;
   total_weight?: number;
+  calc_weight?: number;
   location?: string;
   comments: string;
 };

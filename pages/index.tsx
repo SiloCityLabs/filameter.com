@@ -1,4 +1,3 @@
-import Head from "next/head";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -6,10 +5,6 @@ import Footer from "@/components/Footer";
 export default function Home() {
   return (
     <>
-      <Head>
-        <meta name="description" content="" />
-        <meta name="keywords" content="" />
-      </Head>
       <div className="main-container">
         <Header showBadge={true} />
         <Container className="main-content mt-3">
@@ -37,13 +32,26 @@ export default function Home() {
                 keep your inventory up to date.
               </p>
               <p>
-                Whether you're managing a few spools or an extensive collection,
-                FilaMeter helps you stay organized and in control of your 3D
-                printing materials.
+                Whether you&apos;re managing a few spools or an extensive
+                collection, FilaMeter helps you stay organized and in control of
+                your 3D printing materials.
               </p>
-              <Button variant="primary" href="/spools" size="sm">
+              <Button
+                variant="primary"
+                href="/spools"
+                size="sm"
+                className="mt-3"
+              >
                 Manage Filament
-              </Button>
+              </Button> <br /> <br />
+              <p style={{ maxWidth: "600px", margin: "0 auto" }}>
+              <a href="https://shop.silocitylabs.com/discount/1GHIW2TI?redirect=%2Fproducts%2Ffilameter-labels%3Fvariant%3D50812497920300">Get 5 Free QR Labels for Your Filament Spools!</a> 🎉 <br />
+                Easily track and manage your filament spools with Filameter QR
+                Labels. Scan, log, and monitor your filament usage with a simple
+                tap. To help you get started, we&apos;re giving away 5 free
+                labels—no strings attached! <br /> <br />
+                Hurry—one use per customer while supplies last!
+              </p>
             </Col>
           </Row>
         </Container>

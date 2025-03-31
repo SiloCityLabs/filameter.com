@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 //Components
 import ImportExport from "@/components/settings/ImportExport";
 import MainSettings from "@/components/settings/MainSettings";
+import Sync from "@/components/settings/Sync";
 
 export default function Settings() {
   const [key, setKey] = useState<string>("settings");
@@ -32,6 +33,9 @@ export default function Settings() {
                 </Tab>
                 <Tab eventKey="import-export" title="Import/Export">
                   <ImportExport />
+                </Tab>
+                <Tab eventKey="scl-sync" title="Cloud Sync">
+                  <Sync />
                 </Tab>
               </Tabs>
             </Container>

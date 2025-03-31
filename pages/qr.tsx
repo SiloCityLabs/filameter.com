@@ -9,23 +9,13 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 // DB
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
-// Types
-import { Filament } from "@/types/Filament";
-
-const defaultValue: Filament = {
-  filament: "",
-  material: "",
-  used_weight: 0,
-  location: "",
-  comments: "",
-};
 
 export default function SpoolSenseImport() {
   const router = useRouter();
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-  const [db, setDb] = useState<any>(null);
+  const [db, setDb] = useState(null);
   const [filamentId, setFilamentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<boolean>(false);
@@ -66,16 +56,20 @@ export default function SpoolSenseImport() {
         "filament"
       );
 
-      const filamentDoc = Array.isArray(fetchedFilament) ? fetchedFilament[0] : null;
+      const filamentDoc = Array.isArray(fetchedFilament)
+        ? fetchedFilament[0]
+        : null;
 
       if (!filamentDoc) {
         router.push(`/manage-filament?id=${id}&type=create`);
       } else {
         router.push(`/manage-filament?id=${id}`);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch filament.";
       setShowAlert(true);
-      setAlertMessage(err?.message || "Failed to fetch filament.");
+      setAlertMessage(errorMessage);
       setAlertVariant("danger");
       setError(true);
     } finally {

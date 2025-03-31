@@ -124,7 +124,7 @@ export default function Sync() {
       setIsSpinning(true);
       const response = await setupSyncByKey(syncKey);
       if (response.status === "success") {
-        let keyData = {
+        const keyData = {
           syncKey: response.token,
           ...response.userData,
         };

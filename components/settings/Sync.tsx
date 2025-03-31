@@ -39,7 +39,7 @@ export default function Sync() {
             "scl-sync",
             "settings"
           );
-          if (sclSync[0] && sclSync[0].value !== "") {
+          if (sclSync && sclSync[0] && sclSync[0].value !== "") {
             setData(JSON.parse(sclSync[0].value));
             setInitialType("engaged");
           }

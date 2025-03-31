@@ -4,14 +4,12 @@ import Head from "next/head";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-//Components
+// Components
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
-//DB
+// DB
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
-import { save } from "@/helpers/_silabs/pouchDb/save";
-import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
-//Types
+// Types
 import { Filament } from "@/types/Filament";
 
 const defaultValue: Filament = {
@@ -27,17 +25,16 @@ export default function SpoolSenseImport() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-  const [db, setDb] = useState(null);
-  const [filament, setFilament] = useState<Filament>(defaultValue);
-  const [error, setError] = useState<boolean>(false);
+  const [db, setDb] = useState<any>(null);
   const [filamentId, setFilamentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
     if (!router.isReady) return;
-  
+
     const currentId = router.query.id as string | undefined;
-  
+
     if (!currentId) {
       setError(true);
       setShowAlert(true);
@@ -46,57 +43,43 @@ export default function SpoolSenseImport() {
       setIsLoading(false);
       return;
     }
-  
+
     setFilamentId(currentId);
-  
-    async function init() {
+
+    (async () => {
       const initializedDb = await initializeFilamentDB();
       setDb(initializedDb);
-    }
-    init();
+    })();
   }, [router.isReady]);
-  
 
   const fetchFilament = async (id: string) => {
+    if (!db) return;
+
     setIsLoading(true);
     setError(false);
 
-    if (db) {
-      try {
-        const fetchedFilament = await getDocumentByColumn(
-          db,
-          "_id",
-          id,
-          "filament"
-        );
-        //No id = Create new filament and prefill used_weight
-        if (fetchedFilament[0] === null) {
-          router.push(
-            `/manage-filament?id=${id}&type=create`
-          );
-          return;
-        }else{
-          //Send user to edit page
-          router.push(
-            `/manage-filament?id=${id}`
-          );
-          return;
-        }
-      } catch (err: unknown) {
-        let msg = "Failed to fetch filament.";
-        if (typeof err === "string") {
-          msg = err;
-        } else if (err instanceof Error) {
-          msg = err.message;
-        }
+    try {
+      const fetchedFilament = await getDocumentByColumn(
+        db,
+        "_id",
+        id,
+        "filament"
+      );
 
-        setShowAlert(true);
-        setAlertMessage(msg);
-        setAlertVariant("danger");
-        setError(true);
-      } finally {
-        setIsLoading(false);
+      const filamentDoc = Array.isArray(fetchedFilament) ? fetchedFilament[0] : null;
+
+      if (!filamentDoc) {
+        router.push(`/manage-filament?id=${id}&type=create`);
+      } else {
+        router.push(`/manage-filament?id=${id}`);
       }
+    } catch (err: any) {
+      setShowAlert(true);
+      setAlertMessage(err?.message || "Failed to fetch filament.");
+      setAlertVariant("danger");
+      setError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,7 +89,6 @@ export default function SpoolSenseImport() {
     }
   }, [filamentId, db]);
 
-  // Handle loading state
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -123,7 +105,6 @@ export default function SpoolSenseImport() {
           <Row>
             <Col>
               <h2 className="text-center my-2">Spool Sense QR Scan</h2>
-
               <Container
                 id="about-us"
                 className="shadow-lg p-3 mb-5 bg-body rounded text-center"

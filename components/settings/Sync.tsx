@@ -120,6 +120,12 @@ export default function Sync() {
   };
 
   const existingKey = async () => {
+    if (!syncKey) {
+      setShowAlert(true);
+      setAlertVariant("danger");
+      setAlertMessage("Key is required!");
+      return;
+    }
     try {
       setIsSpinning(true);
       const response = await setupSyncByKey(syncKey);

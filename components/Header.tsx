@@ -15,8 +15,8 @@ const defaultNavLinks = [
   { label: "Settings", href: "/settings", target: "" },
   { label: "Feedback", href: "/feedback", target: "" },
   {
-    label: "SpoolSense",
-    href: "https://shop.silocitylabs.com/products/spoolsense-a-filament-meter-for-your-spools-preorder",
+    label: "Products",
+    href: "https://shop.silocitylabs.com/collections/3d-prints/filameter",
     target: "",
   },
   {

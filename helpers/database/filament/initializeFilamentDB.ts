@@ -63,12 +63,12 @@ async function updateInfo(
 }
 
 // --- Migration Function ---
-async function migrateDatabase(db: PouchDB.Database) {
+export async function migrateFilamentDatabase(db: PouchDB.Database) {
   try {
     const info = await getInfo(db);
     const currentVersion = info.version;
 
-    // Migrations (Example)
+    // Migrations
     if (currentVersion < 1) {
       console.log("Migrating database to version 1...");
       // ... your migration logic for version 1 ...  (e.g., creating indexes)
@@ -94,7 +94,7 @@ export async function initializeFilamentDB(): Promise<PouchDB.Database | null> {
     const db = new PouchDB("filament", { adapter: "idb" });
 
     try {
-      await migrateDatabase(db);
+      await migrateFilamentDatabase(db);
       return db;
     } catch (error) {
       console.error("Failed to initialize and migrate database:", error);

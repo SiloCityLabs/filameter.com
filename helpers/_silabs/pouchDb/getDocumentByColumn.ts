@@ -19,24 +19,25 @@ async function getDocumentByColumn(
       selector: {
         [columnName]: columnValue,
       },
+      limit: 1,
     });
 
     if (result.docs.length > 0) {
-      return result.docs;
+      return result.docs[0];
     } else {
       return null; // No documents found
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(
-        `Error getting documents with ${columnName} = ${columnValue} for type ${type}:`,
+        `Error getting document with ${columnName} = ${columnValue} for type ${type}:`,
         error
       );
       throw new Error(error.message);
     } else if (typeof error === "string") {
       throw new Error(error);
     } else {
-      throw new Error(`An unknown error occurred while retrieving documents.`);
+      throw new Error(`An unknown error occurred while retrieving document.`);
     }
   }
 }

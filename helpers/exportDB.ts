@@ -1,7 +1,10 @@
 import PouchDB from "pouchdb";
 import { isPouchDBError } from "@/helpers/isPouchDBError";
 
-export async function exportDB(db: PouchDB.Database) {
+export async function exportDB(
+  db: PouchDB.Database,
+  returnFile: boolean = true
+): Promise<void | {}> {
   try {
     // Fetch regular documents
     const result = await db.allDocs({ include_docs: true });
@@ -35,6 +38,10 @@ export async function exportDB(db: PouchDB.Database) {
       regular: docs,
       local: localDocs,
     };
+
+    if (!returnFile) {
+      return exportData;
+    }
 
     // Create a Blob and trigger download (no change here)
     const dataStr = JSON.stringify(exportData, null, 2);

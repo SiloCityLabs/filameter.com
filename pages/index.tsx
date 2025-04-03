@@ -43,9 +43,13 @@ export default function Home() {
                 className="mt-3"
               >
                 Manage Filament
-              </Button> <br /> <br />
+              </Button>{" "}
+              <br /> <br />
               <p style={{ maxWidth: "600px", margin: "0 auto" }}>
-              <a href="https://shop.silocitylabs.com/discount/1GHIW2TI?redirect=%2Fproducts%2Ffilameter-labels%3Fvariant%3D50812497920300">Get 5 Free QR Labels for Your Filament Spools!</a> 🎉 <br />
+                <a href="https://shop.silocitylabs.com/discount/1GHIW2TI?redirect=%2Fproducts%2Ffilameter-labels%3Fvariant%3D50812497920300">
+                  Get 5 Free QR Labels for Your Filament Spools!
+                </a>{" "}
+                🎉 <br />
                 Easily track and manage your filament spools with Filameter QR
                 Labels. Scan, log, and monitor your filament usage with a simple
                 tap. To help you get started, we&apos;re giving away 5 free

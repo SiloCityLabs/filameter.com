@@ -4,12 +4,14 @@ import { Row, Col, Form, Button } from "react-bootstrap";
 import { isValidEmail } from "@/helpers/isValidEmail";
 import { setupSyncByEmail } from "@/helpers/sync/setupSyncByEmail";
 import { setupSyncByKey } from "@/helpers/sync/setupSyncByKey";
+import { pushData } from "@/helpers/sync/pushData";
 //Components
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 //DB
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import saveSettings from "@/helpers/database/settings/saveSettings";
 import { useDatabase } from "@/contexts/DatabaseContext";
+import { exportDB } from "@/helpers/exportDB";
 //Types
 import { sclSettings } from "@/types/_fw";
 
@@ -24,6 +26,7 @@ export default function Sync() {
   const [initialType, setInitialType] = useState("");
   const [syncEmail, setSyncEmail] = useState("");
   const [syncKey, setSyncKey] = useState("");
+  const [dbExport, setDbExport] = useState({});
 
   const handleInputChange = (setter) => (event) => {
     setter(event.target.value);
@@ -33,16 +36,22 @@ export default function Sync() {
     async function fetchData() {
       if (dbs.settings) {
         try {
+          //Get Sync Data
           const sclSync = await getDocumentByColumn(
             dbs.settings,
             "name",
             "scl-sync",
             "settings"
           );
-          if (sclSync && sclSync[0] && sclSync[0].value !== "") {
-            setData(JSON.parse(sclSync[0].value));
+          console.log("sclSync", sclSync);
+          if (sclSync && sclSync.value !== "") {
+            setData(JSON.parse(sclSync.value));
             setInitialType("engaged");
           }
+
+          //Get Filament
+          const exportData = (await exportDB(dbs.filament, false)) ?? {};
+          setDbExport(exportData);
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch settings.";
@@ -155,11 +164,37 @@ export default function Sync() {
     setIsSpinning(false);
   };
 
+  const syncData = async () => {
+    console.log("dbExport: ", dbExport);
+    try {
+      setIsSpinning(true);
+      const response = await pushData(data?.syncKey, dbExport);
+      if (response.status === "success") {
+        //hmmm
+      } else if (response.status === "error") {
+        setShowAlert(true);
+        setAlertVariant("danger");
+        setAlertMessage(response.error);
+        return;
+      }
+      setShowAlert(true);
+      setAlertVariant("success");
+      setAlertMessage("Data has been synced to the cloud!");
+    } catch (error) {
+      console.error("Failed to export", error);
+      setShowAlert(true);
+      setAlertVariant("danger");
+      setAlertMessage("Sync Failed!");
+    }
+    setIsSpinning(false);
+  };
+
   const removeSync = async () => {
     if (!window.confirm("Are you sure you want to remove your sync?")) {
       return;
     }
 
+    setInitialType("");
     setData({});
     save({ "scl-sync": "" });
     setAlertMessage("Sync Removed");
@@ -295,6 +330,7 @@ export default function Sync() {
             <Row className="justify-content-center align-items-center">
               <Col xs="auto">Email: {data?.email}</Col>
               <Col xs="auto">Key: {data?.syncKey}</Col>
+              <Col xs="auto">Last Synced?: Add a Date Bro</Col>
               <Col xs="auto">Account Type: {data?.accountType || "Free"}</Col>
             </Row>
             <Row className="mt-4 justify-content-center align-items-center">
@@ -304,11 +340,22 @@ export default function Sync() {
                   className="w-100"
                   disabled={isSpinning}
                   onClick={() => {
-                    setInitialType("");
                     removeSync();
                   }}
                 >
                   Remove Sync
+                </Button>
+              </Col>
+              <Col xs="auto">
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={async () => {
+                    await syncData();
+                  }}
+                >
+                  Sync Now
                 </Button>
               </Col>
             </Row>

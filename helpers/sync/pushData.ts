@@ -1,8 +1,6 @@
 export async function pushData(key: string, exportData: {}): Promise<any> {
   const url = process.env.NEXT_PUBLIC_APP_FILAMETER_SYNC_URL as string;
   const app = process.env.NEXT_PUBLIC_APP_FILAMETER_SYNC_APP as string;
-  console.log("pushData key: ", key);
-  console.log("pushData exportData: ", exportData);
 
   try {
     const response = await fetch(url, {

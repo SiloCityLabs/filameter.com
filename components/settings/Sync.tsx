@@ -43,7 +43,6 @@ export default function Sync() {
             "scl-sync",
             "settings"
           );
-          console.log("sclSync", sclSync);
           if (sclSync && sclSync.value !== "") {
             setData(JSON.parse(sclSync.value));
             setInitialType("engaged");
@@ -110,15 +109,14 @@ export default function Sync() {
         setData(data);
         save({ "scl-sync": data });
         setInitialType("engaged");
+        setAlertVariant("success");
+        setAlertMessage("Sync Created!");
       } else if (response.status === "error") {
         setShowAlert(true);
         setAlertVariant("danger");
         setAlertMessage(response.error);
-        return;
       }
       setShowAlert(true);
-      setAlertVariant("success");
-      setAlertMessage("Sync Created!");
     } catch (error) {
       console.error("Failed to export", error);
       setShowAlert(true);
@@ -146,15 +144,14 @@ export default function Sync() {
         setData(keyData);
         save({ "scl-sync": keyData });
         setInitialType("engaged");
+        setAlertVariant("success");
+        setAlertMessage("Sync setup with key!");
       } else if (response.status === "error") {
         setShowAlert(true);
         setAlertVariant("danger");
         setAlertMessage(response.error);
-        return;
       }
       setShowAlert(true);
-      setAlertVariant("success");
-      setAlertMessage("Sync setup with key!");
     } catch (error) {
       console.error("Failed to export", error);
       setShowAlert(true);
@@ -165,21 +162,19 @@ export default function Sync() {
   };
 
   const syncData = async () => {
-    console.log("dbExport: ", dbExport);
     try {
       setIsSpinning(true);
       const response = await pushData(data?.syncKey, dbExport);
       if (response.status === "success") {
-        //hmmm
+        //TODO: Do stuff
+        setAlertVariant("success");
+        setAlertMessage("Data has been synced to the cloud!");
       } else if (response.status === "error") {
         setShowAlert(true);
         setAlertVariant("danger");
         setAlertMessage(response.error);
-        return;
       }
       setShowAlert(true);
-      setAlertVariant("success");
-      setAlertMessage("Data has been synced to the cloud!");
     } catch (error) {
       console.error("Failed to export", error);
       setShowAlert(true);

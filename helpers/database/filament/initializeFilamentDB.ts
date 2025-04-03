@@ -9,7 +9,6 @@ const CURRENT_DB_VERSION = 1;
 async function getInfo(db: PouchDB.Database): Promise<InfoSchema> {
   try {
     const infoDoc = await db.get<InfoSchema>("_local/info");
-    console.log("getInfo infoDoc", infoDoc);
     return infoDoc;
   } catch (err) {
     if (isPouchDBError(err) && err.name === "not_found") {
@@ -35,7 +34,6 @@ async function updateInfo(
     let infoDoc;
     try {
       infoDoc = await db.get<InfoSchema>("_local/info");
-      console.log("updateInfo infoDoc", infoDoc);
       // Correctly update existing document, preserving _id and _rev
       const newInfoDoc: PouchDB.Core.Document<InfoSchema> = {
         ...updates,
@@ -65,14 +63,12 @@ async function updateInfo(
 }
 
 // --- Migration Function ---
-async function migrateDatabase(db: PouchDB.Database) {
+export async function migrateFilamentDatabase(db: PouchDB.Database) {
   try {
     const info = await getInfo(db);
     const currentVersion = info.version;
-    console.log("migrateDatabase info", info);
-    console.log("migrateDatabase currentVersion", currentVersion);
 
-    // Migrations (Example)
+    // Migrations
     if (currentVersion < 1) {
       console.log("Migrating database to version 1...");
       // ... your migration logic for version 1 ...  (e.g., creating indexes)
@@ -94,13 +90,11 @@ async function migrateDatabase(db: PouchDB.Database) {
 
 // --- Initialization Function ---
 export async function initializeFilamentDB(): Promise<PouchDB.Database | null> {
-  console.log("initializeFilamentDB");
   if (typeof window !== "undefined") {
     const db = new PouchDB("filament", { adapter: "idb" });
-    console.log("initializeFilamentDB 2");
 
     try {
-      await migrateDatabase(db);
+      await migrateFilamentDatabase(db);
       return db;
     } catch (error) {
       console.error("Failed to initialize and migrate database:", error);

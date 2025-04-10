@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
-// --- Metadata ---
-import type { Metadata } from "next";
 // --- Components ---
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 // --- DB ---
@@ -12,11 +10,6 @@ import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
 import { save } from "@/helpers/_silabs/pouchDb/save";
 import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
-
-export const metadata: Metadata = {
-  title: "Spool Sense Import",
-  description: "Importing Spool Sense data and updating filament records.",
-};
 
 // --- PouchDB Type ---
 type PouchDBInstance = PouchDB.Database | null;

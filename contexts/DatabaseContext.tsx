@@ -1,9 +1,11 @@
+"use client";
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
 import idbAdapter from "pouchdb-adapter-idb"; // Use 'pouchdb-adapter-indexeddb' for explicit modern adapter
-import { initializeSettingsDB } from "@/helpers/database/settings/initializeSettingsDB"; // Import settings initialization
-import { migrateFilamentDatabase } from "@/helpers/database/filament/initializeFilamentDB"; // Import the migration function
+import { initializeSettingsDB } from "@/helpers/database/settings/initializeSettingsDB";
+import { migrateFilamentDatabase } from "@/helpers/database/filament/initializeFilamentDB";
 
 PouchDB.plugin(PouchDBFind);
 PouchDB.plugin(idbAdapter);

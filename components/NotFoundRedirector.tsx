@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 
 // Define or import your redirects map
 const redirects: Record<string, string> = {
-  // Example: Key is the OLD path, Value is the NEW path
-  "/old": "/new",
+  "/inventory-list": "/spools",
 };
 
 export default function NotFoundRedirector() {

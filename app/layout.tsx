@@ -54,7 +54,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <DatabaseProvider>
           <div className="main-container">
-            <Header />
+            <Header showBadge={true} />
             <main className="main-content">
               {children} {/* Page content */}
             </main>

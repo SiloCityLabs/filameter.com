@@ -3,77 +3,89 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
-// Components
+// --- Components ---
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
-// DB
+// --- Context Hook ---
+import { useDatabase } from "@/contexts/DatabaseContext"; // Assuming this path is correct
+// ---DB Helpers ---
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
-import { initializeFilamentDB } from "@/helpers/database/filament/initializeFilamentDB";
 
-// --- Page Component ---
 export default function QrScanPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const { dbs, isReady: isDbReady, error: dbError } = useDatabase();
+  const filamentDb = dbs?.filament;
+
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-  const [db, setDb] = useState<PouchDB.Database | null>(null);
   const [filamentId, setFilamentId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  // Effect to get the ID from URL and initialize DB
   useEffect(() => {
+    setIsProcessing(true);
+    setLocalError(null);
+    setShowAlert(false);
+
     const currentId = searchParams?.get("id") ?? "";
 
     if (!currentId) {
-      setError(true);
+      setLocalError("Missing filament ID in URL.");
       setShowAlert(true);
       setAlertMessage("Missing filament ID in URL.");
       setAlertVariant("danger");
-      setIsLoading(false);
+      setIsProcessing(false);
       return;
     }
 
     setFilamentId(currentId);
-
-    // Initialize DB (async IIFE)
-    (async () => {
-      try {
-        const initializedDb = await initializeFilamentDB();
-        setDb(initializedDb);
-      } catch (dbError) {
-        console.error("Failed to initialize database:", dbError);
-        setError(true);
-        setShowAlert(true);
-        setAlertMessage("Database initialization failed.");
-        setAlertVariant("danger");
-        setIsLoading(false);
-      }
-    })();
   }, [searchParams]);
 
-  // Effect to fetch filament once ID and DB are ready
   useEffect(() => {
-    const fetchFilament = async (id: string) => {
-      if (!db) return;
+    if (!isDbReady || !filamentId) {
+      return;
+    }
 
-      setIsLoading(true);
-      setError(false);
+    if (dbError) {
+      console.error("Database context error:", dbError);
+      setLocalError("Database unavailable.");
+      setShowAlert(true);
+      // Use the error string directly from context
+      setAlertMessage(`Database error: ${dbError}`);
+      setAlertVariant("danger");
+      setIsProcessing(false);
+      return;
+    }
+
+    if (!filamentDb) {
+      console.error("Filament database instance not found in context.");
+      setLocalError("Required database (filament) is missing.");
+      setShowAlert(true);
+      setAlertMessage(
+        "Required database (filament) is missing after initialization."
+      );
+      setAlertVariant("danger");
+      setIsProcessing(false);
+      return;
+    }
+
+    const fetchFilament = async (id: string) => {
+      setLocalError(null);
 
       try {
         const fetchedFilament = await getDocumentByColumn(
-          db,
+          filamentDb,
           "_id",
           id,
           "filament"
         );
 
         const filamentDoc = Array.isArray(fetchedFilament)
-          ? fetchedFilament[0]
+          ? fetchedFilament
           : null;
 
-        // Redirect based on whether filament exists
         if (!filamentDoc) {
           router.push(`/manage-filament?id=${id}&type=create`);
         } else {
@@ -81,28 +93,33 @@ export default function QrScanPage() {
         }
       } catch (err: unknown) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch filament.";
+          err instanceof Error ? err.message : "Failed to fetch filament data.";
         console.error("Fetch filament error:", err);
+        setLocalError(errorMessage);
         setShowAlert(true);
         setAlertMessage(errorMessage);
         setAlertVariant("danger");
-        setError(true);
-        setIsLoading(false);
+        setIsProcessing(false);
       }
     };
 
-    if (filamentId && db) {
+    if (!localError) {
       fetchFilament(filamentId);
     }
-  }, [filamentId, db, router]);
+  }, [filamentId, filamentDb, isDbReady, dbError, router, localError]);
 
-  if (isLoading && !error) {
+  const isLoading = !isDbReady || isProcessing;
+  const hasError = !!localError || !!dbError;
+
+  if (isLoading && !hasError) {
     return (
       <Container className="text-center my-5">
         <Spinner animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
-        <p className="mt-2">Processing QR Code...</p>
+        <p className="mt-2">
+          {!isDbReady ? "Initializing database..." : "Processing QR Code..."}
+        </p>
       </Container>
     );
   }
@@ -124,25 +141,25 @@ export default function QrScanPage() {
                 onClose={() => setShowAlert(false)}
               />
 
-              {isLoading && !error && (
+              {isLoading && !hasError && (
                 <Col lg={8}>
                   <div className="text-center">
                     <Spinner animation="border" size="sm" className="me-2" />
-                    Processing...
+                    {!isDbReady ? "Initializing database..." : "Processing..."}
                   </div>
                 </Col>
               )}
 
-              {error && !isLoading && (
+              {hasError && !isLoading && (
                 <Col lg={8}>
                   <p className="text-danger">
-                    Could not process the QR code. Please try again or check the
-                    URL.
+                    Could not process the QR code.{" "}
+                    {localError || `Database error: ${dbError}`}
                   </p>
                 </Col>
               )}
 
-              {!isLoading && !error && (
+              {!isLoading && !hasError && (
                 <Col lg={8}>
                   <div className="text-center">
                     Redirecting...

@@ -165,7 +165,6 @@ function SpoolSenseImportContent() {
     // Only run when these specific dependencies change
   }, [filamentId, usedWeight, db, fetchFilament]);
 
-  // Render loading state
   if (isLoading) {
     return (
       <Container className="main-content" fluid>

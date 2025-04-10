@@ -37,6 +37,8 @@ FilaMeter helps 3D printing enthusiasts and makers track, manage, and optimize t
 
 Visit [filameter.com](https://filameter.com) or clone the repo to self-host.
 
+![Screenshot of filameter spools page](/public/images/screenshots/spools-4-9-25.png)
+
 🛠️ Setup Instructions
 ----------------------
 

@@ -1,7 +1,7 @@
 import PouchDB from "pouchdb";
 import Joi from "joi";
 import { isPouchDBError } from "@/helpers/isPouchDBError";
-//Types
+// --- Types ---
 import { InfoSchema } from "@/types/PouchDB";
 
 const CURRENT_DB_VERSION = 1;
@@ -35,11 +35,11 @@ async function updateInfo(
     try {
       infoDoc = await db.get<InfoSchema>("_local/info");
       // Correctly update existing document, preserving _id and _rev
-      const newInfoDoc: PouchDB.Core.Document<InfoSchema> = {
+      const newInfoDoc = {
         ...updates,
         _id: infoDoc._id,
         _rev: infoDoc._rev,
-      };
+      } as PouchDB.Core.PutDocument<InfoSchema>;
       await db.put(newInfoDoc);
     } catch (err) {
       if (isPouchDBError(err) && err.name === "not_found") {
@@ -78,6 +78,7 @@ export async function migrateFilamentDatabase(db: PouchDB.Database) {
     // Update db version (only if migrations were successful)
     if (currentVersion < CURRENT_DB_VERSION) {
       await updateInfo(db, {
+        ...info,
         version: CURRENT_DB_VERSION,
         updated: Date.now(),
       });

@@ -1,9 +1,6 @@
-import { Container, Row, Col, Button } from "react-bootstrap";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Offline",
-};
+import { Container, Row, Col, Button } from "react-bootstrap";
 
 export default function OfflinePage() {
   return (

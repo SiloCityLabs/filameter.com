@@ -35,9 +35,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to view the 
 
 You can modify the main content of the site by editing the following files:
 
-- pages/index.tsx: The main landing page of the website.
+- app/pages.tsx: The main landing page of the website.
 
-- pages/\_app.js: The layout file for shared elements like headers or footers.
+- app/layout.tsx: The layout file for shared elements like headers or footers.
 
 The project auto-updates changes as you edit.
 

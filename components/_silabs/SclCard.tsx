@@ -1,4 +1,5 @@
 import { Card, Button } from "react-bootstrap";
+import Link from "next/link";
 
 type CardProps = {
   title: string;
@@ -17,21 +18,22 @@ function SclCard(props: CardProps) {
       style={{ width: "18rem" }}
       className="mx-auto h-100 d-flex flex-column"
     >
-      {/* <Card.Img variant="top" src="https://placehold.co/100x100" /> */}
       <Card.Body className="d-flex flex-column flex-grow-1">
         <Card.Title>{props.title}</Card.Title>
         <Card.Text className="mb-3">{props.text}</Card.Text>
         <div className="d-grid gap-2 mt-auto">
           {props.buttons.map((button, index) => (
-            <Button
-              key={index}
-              variant={props.variant}
-              href={button.link}
-              size="sm"
-              disabled={button.disabled}
-            >
-              {button.btnText}
-            </Button>
+            <Link key={index} href={button.link} passHref>
+              <Button
+                key={index}
+                variant={props.variant}
+                size="sm"
+                disabled={button.disabled}
+                className="w-100"
+              >
+                {button.btnText}
+              </Button>
+            </Link>
           ))}
         </div>
       </Card.Body>

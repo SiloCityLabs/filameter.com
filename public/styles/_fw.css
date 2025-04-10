@@ -34,58 +34,55 @@
 }
 
 /* Material Styles */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
 
 .navbar {
-    box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
-        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
-        0px 1px 10px 0px rgba(0, 0, 0, 0.12);
-    /* Material Design shadow */
-    font-family: 'Roboto', sans-serif;
-    /* Use Roboto font */
+  box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  /* Material Design shadow */
+  font-family: "Roboto", sans-serif;
+  /* Use Roboto font */
 }
 
 .navbar-brand {
-    font-weight: 500;
-    /* Slightly bolder font weight */
+  font-weight: 500;
+  /* Slightly bolder font weight */
 }
 
 .navbar-nav .nav-link {
-    padding: 0.5rem 1rem;
-    /* Adjust padding as needed */
+  padding: 0.5rem 1rem;
+  /* Adjust padding as needed */
 }
 
 .btn {
-    font-weight: 500;
-    /* Medium font weight */
-    border-radius: 2px;
-    /* Slightly rounded corners */
-    transition: box-shadow 0.2s ease-in-out;
-    /* Add a transition for the shadow */
+  font-weight: 500;
+  /* Medium font weight */
+  border-radius: 2px;
+  /* Slightly rounded corners */
+  transition: box-shadow 0.2s ease-in-out;
+  /* Add a transition for the shadow */
 }
 
 /* Hover state */
 .btn:hover {
-    box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
-        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
-        0px 1px 10px 0px rgba(0, 0, 0, 0.12);
-    /* Material  
+  box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  /* Material  
    shadow on hover */
 }
 
 /* Focus state */
 .btn:focus {
-    outline: none;
-    /* Remove default outline */
-    box-shadow: 0px 0px 0px 3px rgba(63, 81, 181, 0.18);
-    /* Focus ring */
+  outline: none;
+  /* Remove default outline */
+  box-shadow: 0px 0px 0px 3px rgba(63, 81, 181, 0.18);
+  /* Focus ring */
 }
 
 /* Active state */
 .btn:active {
-    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
-        0px 8px 10px 1px rgba(0, 0, 0, 0.14),
-        0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-    /* More  
+  box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  /* More  
    pronounced shadow on active */
 }

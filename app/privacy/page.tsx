@@ -19,7 +19,7 @@ export default function PrivacyPage() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
 
   return (
-    <Container className="main-content py-3 py-md-5" fluid>
+    <Container className="py-3 py-md-5" fluid>
       <Row>
         <Col>
           <Container

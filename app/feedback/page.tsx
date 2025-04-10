@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function FeedbackPage() {
   return (
-    <Container className="main-content py-3 py-md-4">
+    <Container className="py-3 py-md-4">
       <h3 className="text-center mt-4">Feedback</h3>
       <Row className="justify-content-center mt-3">
         <Col md={10} lg={8}>

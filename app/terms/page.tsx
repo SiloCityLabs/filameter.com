@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <Container className="main-content py-3 py-md-5" fluid>
+    <Container className="py-3 py-md-5" fluid>
       <Row>
         <Col>
           <Container

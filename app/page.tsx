@@ -2,7 +2,7 @@ import { Container, Row, Col } from "react-bootstrap";
 
 export default function HomePage() {
   return (
-    <Container className="main-content mt-3 mb-3">
+    <Container className="mt-3 mb-3">
       <h3 className="text-center my-3">SiloCityPages</h3>
       <Row className="shadow-lg p-3 bg-body rounded">
         <Col lg={8} className="mx-auto">

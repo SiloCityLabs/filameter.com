@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <Container className="main-content text-center py-5">
+    <Container className="text-center py-5">
       <NotFoundRedirector />
 
       <Row className="justify-content-center">

@@ -1,13 +1,16 @@
-// app/layout.tsx
 import { Suspense } from "react";
+// --- Next ---
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+// --- Components ---
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import GoogleAnalytics from "@/components/_silabs/GoogleAnalytics";
+
+// --- Styles ---
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@/public/styles/_fw.css";
 import "./globals.css";
-import GoogleAnalytics from "@/components/_silabs/GoogleAnalytics";
 
 // --- Environment Variables ---
 const GA_TRACKING_ID = process.env.NEXT_PUBLIC_APP_GA_TRACKING_ID;

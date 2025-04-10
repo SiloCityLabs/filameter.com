@@ -1,4 +1,4 @@
-# FilaMeter - Filament Inventory Manager
+![FilaMeter - Filament Inventory Manager](/public/images/logos/filameter-banner.png)
 
 **Your Open Source Filament Inventory Manager for 3D Printing**
 

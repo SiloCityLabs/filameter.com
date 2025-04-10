@@ -28,7 +28,7 @@ async function getInfo(db: PouchDB.Database): Promise<InfoSchema> {
 
 async function updateInfo(
   db: PouchDB.Database,
-  updates: Partial<InfoSchema>
+  updates: InfoSchema
 ): Promise<void> {
   try {
     let infoDoc;

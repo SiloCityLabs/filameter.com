@@ -25,8 +25,9 @@ export async function exportDB(
       try {
         const doc = await db.get(docId);
         const updatedInfoDoc = { ...doc };
-        delete updatedInfoDoc._rev;
-        localDocs.push(updatedInfoDoc);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { _rev, ...docWithoutRev } = updatedInfoDoc;
+        localDocs.push(docWithoutRev);
       } catch (err) {
         if (isPouchDBError(err) && err.name !== "not_found") {
           throw err;

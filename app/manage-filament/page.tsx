@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
 import ManageFilament from "@/components/ManageFilament";
@@ -23,125 +23,120 @@ const defaultValue: Omit<Filament, "_id" | "_rev"> = {
 export default function ManageFilamentPage() {
   const { dbs, isReady } = useDatabase();
   const searchParams = useSearchParams();
-
-  // State
-  const [filament, setFilament] = useState<Filament>(defaultValue);
+  const [filament, setFilament] = useState<Filament | null>(null);
   const [operationType, setOperationType] = useState<
     "create" | "edit" | "duplicate"
   >("create");
   const [error, setError] = useState<string | null>(null);
-  const [filamentIdToFetch, setFilamentIdToFetch] = useState<string | null>(
-    null
-  );
   const [isLoading, setIsLoading] = useState(true);
 
-  // Read URL params and set initial state
   useEffect(() => {
+    if (!searchParams || !isReady) {
+      setIsLoading(!isReady);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
-    const currentId = searchParams?.get("id") ?? "";
-    const typeParam = searchParams?.get("type") ?? "";
-    const usedWeightParam = searchParams?.get("used_weight") ?? 0;
+    const currentId = searchParams.get("id") ?? null;
+    const typeParam = searchParams.get("type") ?? "";
+    const usedWeightParam = searchParams.get("used_weight") ?? "";
 
-    const initialFilamentData: Filament = { ...defaultValue };
     let determinedType: "create" | "edit" | "duplicate" = "create";
-
     if (currentId) {
-      setFilamentIdToFetch(currentId);
-      if (typeParam === "duplicate") {
-        determinedType = "duplicate";
-      } else if (typeParam === "create") {
-        determinedType = "create";
-        initialFilamentData._id = currentId;
-      } else {
-        determinedType = "edit";
-      }
+      if (typeParam === "duplicate") determinedType = "duplicate";
+      else if (typeParam === "create") determinedType = "create";
+      else determinedType = "edit";
     } else {
       determinedType = "create";
     }
 
-    // Apply used_weight if provided
-    if (usedWeightParam) {
-      const parsedWeight = parseInt(usedWeightParam, 10);
-      if (!isNaN(parsedWeight)) {
-        initialFilamentData.used_weight = parsedWeight;
-      }
-    }
-
-    setFilament(initialFilamentData);
     setOperationType(determinedType);
 
-    // If not fetching, initial setup is done
-    if (determinedType === "create") {
-      setIsLoading(false);
-    }
-  }, [searchParams]);
+    // --- Define Helper ---
+    const applyUsedWeight = (data: Filament): Filament => {
+      if (usedWeightParam) {
+        const parsedWeight = parseInt(usedWeightParam, 10);
+        if (!isNaN(parsedWeight)) {
+          return { ...data, used_weight: parsedWeight };
+        }
+      }
+      return data;
+    };
 
-  // Fetch data if needed (Edit or Duplicate)
-  const fetchFilament = useCallback(
-    async (id: string) => {
+    if (determinedType === "edit" || determinedType === "duplicate") {
+      if (!currentId) {
+        setError("Filament ID is missing for edit/duplicate operation.");
+        setFilament(applyUsedWeight({ ...defaultValue }));
+        setIsLoading(false);
+        return;
+      }
       if (!dbs.filament) {
-        setError("Database connection not available for fetching.");
+        setError("Database connection is not available.");
+        setFilament(applyUsedWeight({ ...defaultValue }));
         setIsLoading(false);
         return;
       }
 
-      setError(null);
+      // Fetch Data Asynchronously
+      const fetchData = async (id: string) => {
+        try {
+          // Assuming getDocumentByColumn returns the single document or null/throws
+          const fetchedData: Filament = await getDocumentByColumn(
+            dbs.filament!,
+            "_id",
+            id,
+            "filament"
+          );
 
-      try {
-        const results = await getDocumentByColumn(
-          dbs.filament,
-          "_id",
-          id,
-          "filament"
-        );
+          if (!fetchedData) {
+            // Check if data is actually found
+            throw new Error(`Filament with ID "${id}" not found.`);
+          }
 
-        if (!results || results.length === 0) {
-          throw new Error(`Filament with ID "${id}" not found.`);
+          if (determinedType === "duplicate") {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { _id, _rev, calc_weight, ...duplicableData } = fetchedData;
+            // Reset used_weight for duplicate, apply other fetched vals over default
+            setFilament(
+              applyUsedWeight({
+                ...defaultValue,
+                ...duplicableData,
+                used_weight: 0,
+              })
+            );
+          } else {
+            // --- Edit ---
+            setFilament(applyUsedWeight(fetchedData));
+          }
+        } catch (err: unknown) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "An unknown error occurred during fetch.";
+          console.error("Fetch filament error:", err);
+          setError(`Failed to load filament data: ${message}`);
+          setFilament(applyUsedWeight({ ...defaultValue }));
+        } finally {
+          setIsLoading(false);
         }
+      };
 
-        const fetchedData: Filament = results;
-
-        if (operationType === "duplicate") {
-          // For duplicate, remove _id and _rev, keep the rest
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { _id, _rev, ...duplicableData } = fetchedData;
-          setFilament({
-            ...defaultValue,
-            ...duplicableData,
-            used_weight: defaultValue.used_weight,
-          });
-        } else {
-          setFilament(fetchedData);
-        }
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "An unknown error occurred during fetch.";
-        console.error("Fetch filament error:", err);
-        setError(`Failed to load filament data: ${message}`);
-      } finally {
-        setIsLoading(false);
+      fetchData(currentId); // Execute the fetch
+    } else {
+      // Create Operation
+      const initialData: Filament = { ...defaultValue };
+      if (currentId && typeParam === "create") {
+        // Handle create with pre-filled ID if needed
+        initialData._id = currentId;
       }
-    },
-    [dbs.filament, operationType]
-  );
-
-  useEffect(() => {
-    if (
-      isReady &&
-      filamentIdToFetch &&
-      (operationType === "edit" || operationType === "duplicate")
-    ) {
-      fetchFilament(filamentIdToFetch);
-    } else if (isReady && operationType === "create") {
+      setFilament(applyUsedWeight(initialData));
       setIsLoading(false);
     }
-  }, [isReady, filamentIdToFetch, operationType, fetchFilament]);
+  }, [searchParams, isReady, dbs.filament]);
 
-  if (isLoading || (!isReady && operationType !== "create")) {
+  if (isLoading) {
     return (
       <Container className="text-center my-5">
         <Spinner animation="border" role="status">
@@ -152,22 +147,21 @@ export default function ManageFilamentPage() {
     );
   }
 
-  if (error && operationType !== "create") {
+  if (error) {
     return (
       <Container className="my-4">
         <Alert variant="danger">
           <Alert.Heading>Error Loading Filament</Alert.Heading>
           <p>{error}</p>
-          <hr />
-          <p className="mb-0">
-            Please check the filament ID or try again later. You can also{" "}
-            <Alert.Link href="/spools">return to the spools list</Alert.Link> or{" "}
-            <Alert.Link href="/manage-filament">
-              try adding a new filament
-            </Alert.Link>
-            .
-          </p>
         </Alert>
+      </Container>
+    );
+  }
+
+  if (!filament) {
+    return (
+      <Container className="my-4">
+        <Alert variant="warning">Could not initialize filament data.</Alert>
       </Container>
     );
   }

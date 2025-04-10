@@ -8,7 +8,7 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 // --- DB ---
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import { save } from "@/helpers/_silabs/pouchDb/save";
-import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
+import { filamentSchema } from "@/helpers/database/filament/migrateFilamentDB";
 // --- Context ---
 import { useDatabase } from "@/contexts/DatabaseContext";
 // --- Main Content Component ---

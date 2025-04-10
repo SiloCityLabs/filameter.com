@@ -9,7 +9,7 @@ import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 import { ManageFilamentProps, Filament } from "@/types/Filament";
 // --- DB ---
 import { save } from "@/helpers/_silabs/pouchDb/save";
-import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
+import { filamentSchema } from "@/helpers/database/filament/migrateFilamentDB";
 
 const defaultValue: Filament = {
   filament: "",

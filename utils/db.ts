@@ -1,7 +1,7 @@
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
 import idbAdapter from "pouchdb-adapter-idb";
-import { migrateFilamentDatabase } from "@/helpers/database/filament/initializeFilamentDB";
+import { migrateFilamentDB } from "@/helpers/database/filament/migrateFilamentDB";
 import { initializeSettingsDB } from "@/helpers/database/settings/initializeSettingsDB";
 
 // --- Initialize Plugins  ---
@@ -44,7 +44,7 @@ async function performInitialization(): Promise<{
   // --- Create/Open and Migrate Filament DB ---
   const filamentDb = new PouchDB(filamentDbName, { adapter });
   await filamentDb.info();
-  await migrateFilamentDatabase(filamentDb); // Run migrations
+  await migrateFilamentDB(filamentDb); // Run migrations
 
   // --- Initialize Settings DB ---
   const settingsDb = await initializeSettingsDB();

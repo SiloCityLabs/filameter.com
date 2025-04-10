@@ -63,7 +63,7 @@ async function updateInfo(
 }
 
 // --- Migration Function ---
-export async function migrateFilamentDatabase(db: PouchDB.Database) {
+export async function migrateFilamentDB(db: PouchDB.Database) {
   try {
     const info = await getInfo(db);
     const currentVersion = info.version;
@@ -86,26 +86,6 @@ export async function migrateFilamentDatabase(db: PouchDB.Database) {
   } catch (error) {
     console.error("Database migration error:", error);
     throw error;
-  }
-}
-
-// --- Initialization Function ---
-export async function initializeFilamentDB(): Promise<PouchDB.Database | null> {
-  if (typeof window !== "undefined") {
-    const db = new PouchDB("filament", { adapter: "idb" });
-
-    try {
-      await migrateFilamentDatabase(db);
-      return db;
-    } catch (error) {
-      console.error("Failed to initialize and migrate database:", error);
-      return null;
-    }
-  } else {
-    console.warn(
-      "Database initialization should only happen on the client-side."
-    );
-    return null;
   }
 }
 

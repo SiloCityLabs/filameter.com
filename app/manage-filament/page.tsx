@@ -104,7 +104,7 @@ export default function ManageFilamentPage() {
           throw new Error(`Filament with ID "${id}" not found.`);
         }
 
-        let fetchedData: Filament = results[0];
+        let fetchedData: Filament = results;
 
         if (operationType === "duplicate") {
           // For duplicate, remove _id and _rev, keep the rest

@@ -44,10 +44,6 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
           setDbs(initializedDbs);
           setIsReady(true);
           setError(null);
-        } else {
-          console.log(
-            "DatabaseProvider: Component unmounted before DBs resolved."
-          );
         }
       })
       .catch((initError) => {

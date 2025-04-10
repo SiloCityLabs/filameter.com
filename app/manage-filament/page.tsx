@@ -34,7 +34,6 @@ export default function ManageFilamentPage() {
     null
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
 
   // Read URL params and set initial state
   useEffect(() => {
@@ -45,7 +44,7 @@ export default function ManageFilamentPage() {
     const typeParam = searchParams?.get("type") ?? "";
     const usedWeightParam = searchParams?.get("used_weight") ?? 0;
 
-    let initialFilamentData: Filament = { ...defaultValue };
+    const initialFilamentData: Filament = { ...defaultValue };
     let determinedType: "create" | "edit" | "duplicate" = "create";
 
     if (currentId) {
@@ -85,11 +84,9 @@ export default function ManageFilamentPage() {
       if (!dbs.filament) {
         setError("Database connection not available for fetching.");
         setIsLoading(false);
-        setIsFetching(false);
         return;
       }
 
-      setIsFetching(true);
       setError(null);
 
       try {
@@ -104,10 +101,11 @@ export default function ManageFilamentPage() {
           throw new Error(`Filament with ID "${id}" not found.`);
         }
 
-        let fetchedData: Filament = results;
+        const fetchedData: Filament = results;
 
         if (operationType === "duplicate") {
           // For duplicate, remove _id and _rev, keep the rest
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { _id, _rev, ...duplicableData } = fetchedData;
           setFilament({
             ...defaultValue,
@@ -126,7 +124,6 @@ export default function ManageFilamentPage() {
         setError(`Failed to load filament data: ${message}`);
       } finally {
         setIsLoading(false);
-        setIsFetching(false);
       }
     },
     [dbs.filament, operationType]

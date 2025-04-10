@@ -59,8 +59,8 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
           setError(
             initError instanceof Error ? initError.message : String(initError)
           );
-          setDbs({}); // Ensure dbs are empty/null on error
-          setIsReady(true); // Still set ready=true to indicate the attempt finished
+          setDbs({});
+          setIsReady(true);
         } else {
           console.error(
             "DatabaseProvider: Component unmounted after DB init error:",
@@ -72,9 +72,6 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
     // Cleanup function just needs to handle the mount flag
     return () => {
       isMounted = false;
-      console.log(
-        "DatabaseProvider: Cleanup Effect Triggered (isMounted set to false)."
-      );
     };
   }, []);
 

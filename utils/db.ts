@@ -20,7 +20,6 @@ async function performInitialization(): Promise<{
   filament: PouchDB.Database;
   settings: PouchDB.Database;
 }> {
-  console.log("Singleton Initializer: Starting performInitialization...");
   const filamentDbName = "filament";
   const adapter = "idb";
 
@@ -48,19 +47,16 @@ async function performInitialization(): Promise<{
   await migrateFilamentDatabase(filamentDb); // Run migrations
 
   // --- Initialize Settings DB ---
-  console.log("Singleton Initializer: Initializing Settings DB...");
   const settingsDb = await initializeSettingsDB();
   if (!settingsDb) {
     throw new Error(
       "Singleton Initializer: Settings DB Initialization Failed (returned null)"
     );
   }
-  console.log("Singleton Initializer: Settings DB initialized.");
 
   // --- Store instances and return ---
   filamentDBInstance = filamentDb;
   settingsDBInstance = settingsDb;
-  console.log("Singleton Initializer: Initialization complete.");
   return { filament: filamentDBInstance, settings: settingsDBInstance };
 }
 
@@ -78,14 +74,7 @@ export function getDatabases(): Promise<{
 
   // If initialization promise doesn't exist, create it by calling performInitialization
   if (!initializationPromise) {
-    console.log(
-      "Singleton Initializer: No existing promise found. Starting initialization."
-    );
     initializationPromise = performInitialization();
-  } else {
-    console.log(
-      "Singleton Initializer: Initialization promise already exists. Returning it."
-    );
   }
 
   return initializationPromise;

@@ -1,52 +1,55 @@
-# FilaMeter - Filament Inventory Manager
+![FilaMeter - Filament Inventory Manager](/public/images/logos/filameter-banner.png)
 
-Inspired by https://github.com/Donkie/Spoolman
+**Your Open Source Filament Inventory Manager for 3D Printing**
 
-This is a project to run a website, leveraging [Next.js](https://nextjs.org/), [React Bootstrap](https://react-bootstrap.netlify.app/) and hosted on GitHub Pages.
+FilaMeter helps 3D printing enthusiasts and makers track, manage, and optimize their filament usage — locally and efficiently.
 
-## Getting Started
+🌟 Key Features
+---------------
 
-To run the project locally:
+*   📦 Track filament spools by type, weight, material and location
 
-```bash
-git clone git@github.com:SiloCityLabs/SiloCityPages.git
-cd SiloCityPages
-```
+*   🔢 [5 Free QR Code labels for every new user](https://shop.silocitylabs.com/discount/1GHIW2TI?redirect=%2Fproducts%2Ffilameter-labels%3Fvariant%3D50812497920300)
+    
+*   📉 Consumption tracking inputs
+    
+*   🏠 100% local-first — no account or cloud sync *required*
+    
+*   🔄 Import/Export for easy backups and migration
+    
+*   🌐 Responsive UI powered by Next.js + React + TailwindCSS + PouchDB
+    
 
-```bash
-npm install
-```
+🚀 Why FilaMeter?
+-----------------
 
-```bash
-npm run dev
-```
+*   No ads, subscriptions, or logins — just pure utility
+    
+*   Perfect for home labs, makerspaces, or small print farms
+  
+*   Run on Github Pages, Were not going anywhere anytime soon
+    
+*   Extendable and easy to self-host
+    
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the website.
+📲 Try it Out
+-------------
 
-## Website Setup
+Visit [filameter.com](https://filameter.com) or clone the repo to self-host.
 
-- Copy .env.example and create .env.local and update values
-- Update package.json
-- Update manifest.json
-- Update sitemap.xml
-- Update GA_TRACKING_ID to implement Google Analytics
+![Screenshot of filameter spools page](/public/images/screenshots/spools-4-9-25.png)
 
-## Editing the Website
+🛠️ Setup Instructions
+----------------------
 
-You can modify the main content of the site by editing the following files:
+- [Developer Setup](https://github.com/SiloCityLabs/filameter.com/wiki/Developer-Setup)
 
-- app/pages.tsx: The main landing page of the website.
+📢 Contributing
+---------------
 
-- app/layout.tsx: The layout file for shared elements like headers or footers.
+We welcome pull requests, issues, and feature ideas. Join the conversation or fork the project to make it your own.
 
-The project auto-updates changes as you edit.
+🧾 License
+----------
 
-## Deployment
-
-This website is hosted on GitHub Pages. To deploy updates create a PR, commit and push. When merged into master github actions will automatically build and deploy.
-
-## Features
-
-- **Optimized Performance**: Uses [next/font](https://nextjs.org/docs/basic-features/font-optimization) for automatic font optimization.
-
-- **Modern Framework**: Built with the power of Next.js and React.
+CC-BY-SA-4.0 — use it, remix it, share it.

@@ -1,21 +1,20 @@
 {
   "name": "filameter.com",
-  "version": "1.1.1",
+  "version": "1.1.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build && workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-*.js out/",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "qlint": "next lint --quiet"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@types/pouchdb-find": "^7.3.3",
     "bootstrap": "^5.3.3",
-    "dotenv": "^16.4.7",
     "fflate": "^0.8.2",
     "joi": "^17.13.3",
     "next": "^15.2.4",
@@ -26,22 +25,21 @@
     "react-bootstrap": "^2.10.9",
     "react-content-loader": "^7.0.2",
     "react-dom": "^19.0.0",
-    "react-gtm-module": "^2.0.11",
     "react-select": "^5.10.1",
-    "react-wheel-of-prizes-react19": "^1.0.13",
     "uuid": "^11.1.0",
     "workbox-expiration": "^7.3.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.17",
     "@types/node": "^22.13.14",
+    "@types/pouchdb": "^6.4.2",
+    "@types/pouchdb-find": "^7.3.3",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
+    "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.23.0",
     "eslint-config-next": "15.2.4",
     "postcss": "^8",
-    "tailwindcss": "^4.0.17",
     "typescript": "^5.8.2",
     "workbox-cli": "^7.3.0"
   }

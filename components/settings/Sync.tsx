@@ -34,8 +34,10 @@ export default function Sync() {
 
   useEffect(() => {
     async function fetchData() {
-      if (dbs.settings) {
+      if (dbs.settings && dbs.filament) {
         try {
+          setIsLoading(true);
+
           //Get Sync Data
           const sclSync = await getDocumentByColumn(
             dbs.settings,
@@ -48,7 +50,7 @@ export default function Sync() {
             setInitialType("engaged");
           }
 
-          //Get Filament
+          //Get Filament Export Data
           const exportData = (await exportDB(dbs.filament, false)) ?? {};
           setDbExport(exportData);
         } catch (err: unknown) {
@@ -62,14 +64,20 @@ export default function Sync() {
         }
       }
     }
+
     if (isReady) {
       fetchData();
+    } else {
+      setIsLoading(true);
     }
   }, [dbs, isReady]);
 
   const save = async (saveData: sclSettings) => {
-    if (!dbs.settings) {
-      console.error("Database is not initialized.");
+    if (!dbs?.settings) {
+      console.error("Settings database is not initialized.");
+      setAlertMessage("Database not ready. Cannot save settings.");
+      setAlertVariant("warning");
+      setShowAlert(true);
       return;
     }
 
@@ -86,7 +94,6 @@ export default function Sync() {
       }
       setShowAlert(true);
       setAlertVariant("danger");
-      setShowAlert(true);
     } finally {
       setIsSpinning(false);
     }

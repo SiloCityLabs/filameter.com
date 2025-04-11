@@ -1,7 +1,7 @@
 import PouchDB from "pouchdb";
 import Joi from "joi";
 import { isPouchDBError } from "@/helpers/isPouchDBError";
-//Types
+// --- Types ---
 import { InfoSchema } from "@/types/PouchDB";
 
 const CURRENT_DB_VERSION = 1;
@@ -28,18 +28,18 @@ async function getInfo(db: PouchDB.Database): Promise<InfoSchema> {
 
 async function updateInfo(
   db: PouchDB.Database,
-  updates: Partial<InfoSchema>
+  updates: InfoSchema
 ): Promise<void> {
   try {
     let infoDoc;
     try {
       infoDoc = await db.get<InfoSchema>("_local/info");
       // Correctly update existing document, preserving _id and _rev
-      const newInfoDoc: PouchDB.Core.Document<InfoSchema> = {
+      const newInfoDoc = {
         ...updates,
         _id: infoDoc._id,
         _rev: infoDoc._rev,
-      };
+      } as PouchDB.Core.PutDocument<InfoSchema>;
       await db.put(newInfoDoc);
     } catch (err) {
       if (isPouchDBError(err) && err.name === "not_found") {
@@ -63,7 +63,7 @@ async function updateInfo(
 }
 
 // --- Migration Function ---
-export async function migrateFilamentDatabase(db: PouchDB.Database) {
+export async function migrateFilamentDB(db: PouchDB.Database) {
   try {
     const info = await getInfo(db);
     const currentVersion = info.version;
@@ -78,6 +78,7 @@ export async function migrateFilamentDatabase(db: PouchDB.Database) {
     // Update db version (only if migrations were successful)
     if (currentVersion < CURRENT_DB_VERSION) {
       await updateInfo(db, {
+        ...info,
         version: CURRENT_DB_VERSION,
         updated: Date.now(),
       });
@@ -85,26 +86,6 @@ export async function migrateFilamentDatabase(db: PouchDB.Database) {
   } catch (error) {
     console.error("Database migration error:", error);
     throw error;
-  }
-}
-
-// --- Initialization Function ---
-export async function initializeFilamentDB(): Promise<PouchDB.Database | null> {
-  if (typeof window !== "undefined") {
-    const db = new PouchDB("filament", { adapter: "idb" });
-
-    try {
-      await migrateFilamentDatabase(db);
-      return db;
-    } catch (error) {
-      console.error("Failed to initialize and migrate database:", error);
-      return null;
-    }
-  } else {
-    console.warn(
-      "Database initialization should only happen on the client-side."
-    );
-    return null;
   }
 }
 

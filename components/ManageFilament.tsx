@@ -1,13 +1,15 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { Form, Button } from "react-bootstrap";
-//Components
+// --- Components ---
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
-//Types
+// --- Types ---
 import { ManageFilamentProps, Filament } from "@/types/Filament";
-//DB
+// --- DB ---
 import { save } from "@/helpers/_silabs/pouchDb/save";
-import { filamentSchema } from "@/helpers/database/filament/initializeFilamentDB";
+import { filamentSchema } from "@/helpers/database/filament/migrateFilamentDB";
 
 const defaultValue: Filament = {
   filament: "",

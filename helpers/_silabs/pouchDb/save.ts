@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import Joi from "joi"; // Ensure you have Joi installed
+import Joi from "joi";
 
 export const save = async (
   db: PouchDB.Database,

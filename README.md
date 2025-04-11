@@ -9,7 +9,7 @@ FilaMeter helps 3D printing enthusiasts and makers track, manage, and optimize t
 
 *   📦 Track filament spools by type, weight, material and location
 
-*   🔢 [5 Free QR Code labels for every new user](https://shop.silocitylabs.com/discount/1GHIW2TI?redirect=%2Fproducts%2Ffilameter-labels%3Fvariant%3D50812497920300)
+*   🆓 [5 Free QR Code labels for every new user](https://shop.silocitylabs.com/discount/1GHIW2TI?redirect=%2Fproducts%2Ffilameter-labels%3Fvariant%3D50812497920300)
     
 *   📉 Consumption tracking inputs
     
@@ -18,6 +18,8 @@ FilaMeter helps 3D printing enthusiasts and makers track, manage, and optimize t
 *   🔄 Import/Export for easy backups and migration
     
 *   🌐 Responsive UI powered by Next.js + React + TailwindCSS + PouchDB
+
+*   🔗 [Short URL for QR Code redirects](https://github.com/SiloCityLabs/filameter.com/wiki/Creating-QR-Codes)
     
 
 🚀 Why FilaMeter?

@@ -1,4 +1,4 @@
 [
-  { "value": "bug_report.md", "label": "Bug Report" },
-  { "value": "feature_request.md", "label": "Feature Request" }
+  { "value": "bug-request-template.md", "label": "Bug Report" },
+  { "value": "feature-request-template.md", "label": "Feature Request" }
 ]

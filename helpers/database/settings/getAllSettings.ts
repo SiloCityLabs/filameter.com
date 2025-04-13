@@ -1,16 +1,16 @@
-// helpers/database/settings/getAllSettings.ts
 import PouchDB from "pouchdb";
+import type { Setting } from "@/types/Settings";
 
 async function getAllSettings(
   db: PouchDB.Database
 ): Promise<{ [key: string]: any }> {
   if (!db) {
     console.error("Database is not initialized.");
-    return {}; // Return an empty object instead of an empty array
+    return {};
   }
 
   try {
-    const result = await db.allDocs({
+    const result = await db.allDocs<Setting>({
       include_docs: true,
       attachments: false,
     });

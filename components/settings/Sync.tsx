@@ -1,21 +1,26 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Form, Button } from "react-bootstrap";
-//Helpers
+// --- Components ---
+import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
+// --- Helpers ---
 import { isValidEmail } from "@/helpers/isValidEmail";
 import { setupSyncByEmail } from "@/helpers/sync/setupSyncByEmail";
 import { setupSyncByKey } from "@/helpers/sync/setupSyncByKey";
 import { pushData } from "@/helpers/sync/pushData";
-//Components
-import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
-//DB
+import { verify } from "@/helpers/sync/verify";
+// --- DB ---
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import saveSettings from "@/helpers/database/settings/saveSettings";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { exportDB } from "@/helpers/exportDB";
-//Types
-import { sclSettings } from "@/types/_fw";
+// --- Types ---
+import type { sclSettings } from "@/types/_fw";
 
-export default function Sync() {
+interface SyncProps {
+  verifyKey: string;
+}
+
+export default function Sync({ verifyKey }: SyncProps) {
   const { dbs, isReady } = useDatabase();
   const [isSpinning, setIsSpinning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,9 +50,24 @@ export default function Sync() {
             "scl-sync",
             "settings"
           );
+
           if (sclSync && sclSync.value !== "") {
-            setData(JSON.parse(sclSync.value));
-            setInitialType("engaged");
+            const syncData = JSON.parse(sclSync.value);
+            setData(syncData);
+
+            if (syncData.needsVerification) {
+              //Setup sync via key verification
+              if (verifyKey) {
+                verifySync(syncData.email, verifyKey);
+              } else {
+                setInitialType("needs-verification");
+                setAlertVariant("info");
+                setAlertMessage("Check your email for a verification code");
+                setShowAlert(true);
+              }
+            } else {
+              setInitialType("engaged");
+            }
           }
 
           //Get Filament Export Data
@@ -99,6 +119,45 @@ export default function Sync() {
     }
   };
 
+  const verifySync = async (email: string, key: string) => {
+    if (!email && !key) {
+      setShowAlert(true);
+      setAlertVariant("danger");
+      setAlertMessage("Key & Email are required!");
+      return;
+    }
+
+    try {
+      setIsSpinning(true);
+      const response = await verify(email, key);
+      if (response.status === "success") {
+        data.email = email;
+        data.needsVerification = false;
+        data.syncKey = response.key;
+        setData(data);
+        save({ "scl-sync": data });
+        setInitialType("engaged");
+        setAlertVariant("success");
+        setAlertMessage(response.message);
+      } else if (response.status === "error") {
+        setAlertVariant("danger");
+        setAlertMessage(response.error);
+      }
+      setShowAlert(true);
+    } catch (error: unknown) {
+      console.error("Error verifying sync:", error);
+      if (error instanceof Error) {
+        setAlertMessage(error.message);
+      } else {
+        setAlertMessage("An unknown error occurred while verifying sync.");
+      }
+      setShowAlert(true);
+      setAlertVariant("danger");
+    } finally {
+      setIsSpinning(false);
+    }
+  };
+
   const createSync = async () => {
     if (!isValidEmail(syncEmail)) {
       setShowAlert(true);
@@ -110,16 +169,15 @@ export default function Sync() {
     try {
       setIsSpinning(true);
       const response = await setupSyncByEmail(syncEmail);
-      if (response.status === "success") {
+      if (response.status === "message") {
         data.email = syncEmail;
-        data.syncKey = response.key;
+        data.needsVerification = true;
         setData(data);
         save({ "scl-sync": data });
-        setInitialType("engaged");
-        setAlertVariant("success");
-        setAlertMessage("Sync Created!");
+        setInitialType("needs-verification");
+        setAlertVariant("info");
+        setAlertMessage(response.msg);
       } else if (response.status === "error") {
-        setShowAlert(true);
         setAlertVariant("danger");
         setAlertMessage(response.error);
       }
@@ -332,7 +390,7 @@ export default function Sync() {
             <Row className="justify-content-center align-items-center">
               <Col xs="auto">Email: {data?.email}</Col>
               <Col xs="auto">Key: {data?.syncKey}</Col>
-              <Col xs="auto">Last Synced?: Add a Date Bro</Col>
+              <Col xs="auto">Last Synced?: {data?.lastSynced ?? "N/A"}</Col>
               <Col xs="auto">Account Type: {data?.accountType || "Free"}</Col>
             </Row>
             <Row className="mt-4 justify-content-center align-items-center">
@@ -358,6 +416,30 @@ export default function Sync() {
                   }}
                 >
                   Sync Now
+                </Button>
+              </Col>
+            </Row>
+          </>
+        )}
+        {initialType === "needs-verification" && (
+          <>
+            <Row className="justify-content-center align-items-center">
+              <Col xs="auto">Email: {data?.email}</Col>
+              <Col xs="auto">Key: {data?.syncKey ?? "N/A"}</Col>
+              <Col xs="auto">Last Synced?: {data?.lastSynced ?? "N/A"}</Col>
+              <Col xs="auto">Account Type: Unverified</Col>
+            </Row>
+            <Row className="mt-4 justify-content-center align-items-center">
+              <Col xs="auto">
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={() => {
+                    removeSync();
+                  }}
+                >
+                  Remove Sync
                 </Button>
               </Col>
             </Row>

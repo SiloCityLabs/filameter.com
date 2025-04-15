@@ -32,8 +32,6 @@ function SpoolSenseImportContent() {
 
     const currentId = searchParams?.get("id") ?? null;
     const usedWeightParam = searchParams?.get("used") ?? null;
-    console.log("currentId", currentId);
-    console.log("usedWeightParam", usedWeightParam);
 
     setFilamentId(currentId);
 

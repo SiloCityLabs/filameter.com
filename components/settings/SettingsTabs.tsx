@@ -1,18 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { Tabs, Tab } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { Tabs, Tab, Spinner } from "react-bootstrap";
+// --- Next ---
+import { useSearchParams } from "next/navigation";
 // --- Components ---
 import ImportExport from "@/components/settings/ImportExport";
 import MainSettings from "@/components/settings/MainSettings";
 import Sync from "@/components/settings/Sync";
 
 export default function SettingsTabs() {
+  const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(true);
   const [key, setKey] = useState<string>("settings");
+  const [verifyKey, setVerifyKey] = useState<string>("");
+
+  useEffect(() => {
+    const keyParam = searchParams?.get("key") ?? "";
+    if (keyParam !== "") {
+      setVerifyKey(keyParam);
+      setKey("scl-sync");
+    }
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="text-center p-5">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading Settings...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <Tabs
-      id="controlled-tab-example"
       activeKey={key}
       onSelect={(k) => setKey(k ?? "settings")}
       className="mb-3"
@@ -24,7 +47,7 @@ export default function SettingsTabs() {
         <ImportExport />
       </Tab>
       <Tab eventKey="scl-sync" title="Cloud Sync">
-        <Sync />
+        <Sync verifyKey={verifyKey ?? ""} />
       </Tab>
     </Tabs>
   );

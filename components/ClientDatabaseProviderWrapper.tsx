@@ -2,6 +2,7 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
+import Spinner from "react-bootstrap/Spinner";
 
 const DynamicDatabaseProviderInternal = dynamic(
   () =>
@@ -9,7 +10,11 @@ const DynamicDatabaseProviderInternal = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="text-center p-5">Loading Database Context...</div>
+      <div className="text-center p-5">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading Database Context...</span>
+        </Spinner>
+      </div>
     ),
   }
 );

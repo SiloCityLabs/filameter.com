@@ -1,8 +1,19 @@
+// --- PouchDB ---
 import PouchDB from "pouchdb";
 import PouchFind from "pouchdb-find";
 
 PouchDB.plugin(PouchFind);
 
+/**
+ * Retrieves a document from the database based on a specific column's value.
+ *
+ * @param {PouchDB.Database} db - The PouchDB database instance.
+ * @param {string} columnName - The name of the column to search in.
+ * @param {any} columnValue - The value to search for in the specified column.
+ * @param {string} type - The type of the document (used for error reporting).
+ *
+ * @returns {Promise<any | null>} A promise that resolves to the found document or null if not found.
+ */
 async function getDocumentByColumn(
   db: PouchDB.Database,
   columnName: string,

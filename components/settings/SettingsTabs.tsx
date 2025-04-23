@@ -22,7 +22,7 @@ export default function SettingsTabs() {
       setKey("scl-sync");
     }
     setIsLoading(false);
-  }, []);
+  }, [searchParams]);
 
   if (isLoading) {
     return (

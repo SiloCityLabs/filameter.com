@@ -1,4 +1,7 @@
+// --- Next ---
 import type { Metadata } from "next";
+// --- Layout ---
+import PageLayout from "@/components/PageLayout";
 
 export const metadata: Metadata = {
   title: "Spool Sense Import",
@@ -6,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function SsiLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <PageLayout headerShowBadge={true}>{children}</PageLayout>
+    </>
+  );
 }

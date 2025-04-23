@@ -1,7 +1,9 @@
 "use client";
 
+// --- React ---
 import React from "react";
 import { Nav } from "react-bootstrap";
+// --- Next ---
 import Image from "next/image";
 
 export default function Footer() {

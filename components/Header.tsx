@@ -1,6 +1,8 @@
 "use client";
-import { Container, Nav, Navbar, Badge } from "react-bootstrap";
+
+// --- React ---
 import React from "react";
+import { Container, Nav, Navbar, Badge } from "react-bootstrap";
 
 interface HeaderProps {
   className?: string;

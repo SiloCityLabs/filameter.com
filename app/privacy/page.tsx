@@ -1,6 +1,8 @@
+// --- React ---
+import { Container, Row, Col } from "react-bootstrap";
+// --- Next ---
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Container, Row, Col } from "react-bootstrap";
 // --- Layout ---
 import PageLayout from "@/components/PageLayout";
 

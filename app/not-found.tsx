@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
+// --- React ---
 import { Container, Row, Col, Button } from "react-bootstrap";
+// --- Next ---
+import type { Metadata } from "next";
 import Link from "next/link";
-import NotFoundRedirector from "@/components/NotFoundRedirector";
 // --- Layout ---
 import PageLayout from "@/components/PageLayout";
+// --- Components ---
+import NotFoundRedirector from "@/components/NotFoundRedirector";
 
 export const metadata: Metadata = {
   title: "Page Not Found",

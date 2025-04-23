@@ -1,12 +1,14 @@
 "use client";
 
+// --- React ---
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
+// --- Next ---
+import { useRouter, useSearchParams } from "next/navigation";
 // --- Components ---
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 // --- Context Hook ---
-import { useDatabase } from "@/contexts/DatabaseContext"; // Assuming this path is correct
+import { useDatabase } from "@/contexts/DatabaseContext";
 // ---DB Helpers ---
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 

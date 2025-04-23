@@ -1,6 +1,8 @@
 "use client";
 
+// --- React ---
 import { useEffect } from "react";
+// --- Next ---
 import { useRouter } from "next/navigation";
 
 // Define or import your redirects map

@@ -1,8 +1,7 @@
 "use client";
 
+// --- React ---
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Container,
   Row,
@@ -15,6 +14,9 @@ import {
   Pagination,
   Spinner,
 } from "react-bootstrap";
+// --- Next ---
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 // --- Components ---
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 // --- DB ---

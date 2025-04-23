@@ -5,9 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-*.js out/",
-    "start": "next start",
     "lint": "next lint",
-    "qlint": "next lint --quiet"
+    "qlint": "next lint --quiet",
+    "start": "next start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -17,7 +20,7 @@
     "bootstrap": "^5.3.3",
     "fflate": "^0.8.2",
     "joi": "^17.13.3",
-    "next": "^15.2.4",
+    "next": "^15.3.1",
     "pouchdb": "^9.0.0",
     "pouchdb-adapter-idb": "^9.0.0",
     "pouchdb-find": "^9.0.0",
@@ -30,6 +33,7 @@
     "workbox-expiration": "^7.3.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.13.14",
     "@types/pouchdb": "^6.4.2",
     "@types/pouchdb-find": "^7.3.3",
@@ -38,8 +42,12 @@
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.23.0",
-    "eslint-config-next": "15.2.4",
+    "eslint-config-next": "15.3.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8",
+    "ts-jest": "^29.3.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "workbox-cli": "^7.3.0"
   }

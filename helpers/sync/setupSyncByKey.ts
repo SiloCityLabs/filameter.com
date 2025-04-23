@@ -1,5 +1,3 @@
-import { fetchAndDecompressGzip } from "@/helpers/sync/fetchAndDecompressGzip";
-
 export async function setupSyncByKey(key: string): Promise<any> {
   const url = process.env.NEXT_PUBLIC_APP_FILAMETER_SYNC_URL as string;
   const app = process.env.NEXT_PUBLIC_APP_FILAMETER_SYNC_APP as string;
@@ -22,11 +20,6 @@ export async function setupSyncByKey(key: string): Promise<any> {
     }
 
     const data = await response.json();
-
-    if (data.status === "success") {
-      const accountData = await fetchAndDecompressGzip(data.url);
-      return { ...data, ...accountData };
-    }
     return data;
   } catch (error) {
     console.error("Error making API call:", error);

@@ -7,7 +7,7 @@ import { isValidEmail } from "@/helpers/isValidEmail";
 import { setupSyncByEmail } from "@/helpers/sync/setupSyncByEmail";
 import { setupSyncByKey } from "@/helpers/sync/setupSyncByKey";
 import { pushData } from "@/helpers/sync/pushData";
-import { verify } from "@/helpers/sync/verify";
+import { pullData } from "@/helpers/sync/pullData";
 // --- DB ---
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
 import saveSettings from "@/helpers/database/settings/saveSettings";
@@ -32,6 +32,8 @@ export default function Sync({ verifyKey }: SyncProps) {
   const [syncEmail, setSyncEmail] = useState("");
   const [syncKey, setSyncKey] = useState("");
   const [dbExport, setDbExport] = useState({});
+  const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
+  const [syncCooldown, setSyncCooldown] = useState<number>(0);
 
   const handleInputChange = (setter) => (event) => {
     setter(event.target.value);
@@ -55,7 +57,7 @@ export default function Sync({ verifyKey }: SyncProps) {
             const syncData = JSON.parse(sclSync.value);
             setData(syncData);
 
-            if (syncData.needsVerification) {
+            if (syncData.syncKey === "") {
               //Setup sync via key verification
               if (verifyKey) {
                 verifySync(syncData.email, verifyKey);
@@ -92,6 +94,24 @@ export default function Sync({ verifyKey }: SyncProps) {
     }
   }, [dbs, isReady]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (syncCooldown > 0) {
+      timer = setInterval(() => {
+        setSyncCooldown((prev) => Math.max(0, prev - 1));
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [syncCooldown]);
+
+  const canSync = () => {
+    if (!lastSyncTime) return true;
+    const now = Date.now();
+    return now - lastSyncTime >= 60000; // 60 seconds
+  };
+
   const save = async (saveData: sclSettings) => {
     if (!dbs?.settings) {
       console.error("Settings database is not initialized.");
@@ -120,25 +140,29 @@ export default function Sync({ verifyKey }: SyncProps) {
   };
 
   const verifySync = async (email: string, key: string) => {
-    if (!email && !key) {
+    if (!key) {
       setShowAlert(true);
       setAlertVariant("danger");
-      setAlertMessage("Key & Email are required!");
+      setAlertMessage("Key is required!");
       return;
     }
 
     try {
       setIsSpinning(true);
-      const response = await verify(email, key);
+      const response = await setupSyncByKey(key);
       if (response.status === "success") {
-        data.email = email;
-        data.needsVerification = false;
-        data.syncKey = response.key;
-        setData(data);
-        save({ "scl-sync": data });
+        const keyData = {
+          syncKey: response.data.token,
+          email: response.data.userData.email,
+          accountType: response.data.keyType,
+          lastSynced: new Date().toISOString()
+        };
+
+        setData(keyData);
+        await save({ "scl-sync": keyData });
         setInitialType("engaged");
         setAlertVariant("success");
-        setAlertMessage(response.message);
+        setAlertMessage("Sync setup with key!");
       } else if (response.status === "error") {
         setAlertVariant("danger");
         setAlertMessage(response.error);
@@ -203,14 +227,53 @@ export default function Sync({ verifyKey }: SyncProps) {
       const response = await setupSyncByKey(syncKey);
       if (response.status === "success") {
         const keyData = {
-          syncKey: response.token,
-          ...response.userData,
+          syncKey: response.data.token,
+          email: response.data.userData.email,
+          accountType: response.data.keyType,
+          lastSynced: new Date().toISOString()
         };
+
+        console.log("1---");
+        console.log(keyData);
+        console.log("1---");
+        console.log(response);
+
         setData(keyData);
-        save({ "scl-sync": keyData });
+        await save({ "scl-sync": keyData });
         setInitialType("engaged");
         setAlertVariant("success");
         setAlertMessage("Sync setup with key!");
+      } else if (response.status === "error") {
+        setShowAlert(true);
+        setAlertVariant("danger");
+        setAlertMessage(response.error);
+      }
+      setShowAlert(true);
+    } catch (error) {
+      console.error("Failed to setup sync with key:", error);
+      setShowAlert(true);
+      setAlertVariant("danger");
+      setAlertMessage("Sync Failed!");
+    }
+    setIsSpinning(false);
+  };
+
+  const syncData = async (force = false) => {
+    if (!force && !canSync()) {
+      setAlertVariant("warning");
+      setAlertMessage("Please wait 60 seconds between syncs");
+      setShowAlert(true);
+      return;
+    }
+
+    try {
+      setIsSpinning(true);
+      const response = await pushData(data?.syncKey, dbExport);
+      if (response.status === "success") {
+        setLastSyncTime(Date.now());
+        setSyncCooldown(60);
+        setAlertVariant("success");
+        setAlertMessage("Data has been synced to the cloud!");
       } else if (response.status === "error") {
         setShowAlert(true);
         setAlertVariant("danger");
@@ -226,14 +289,14 @@ export default function Sync({ verifyKey }: SyncProps) {
     setIsSpinning(false);
   };
 
-  const syncData = async () => {
+  const forcePull = async () => {
     try {
       setIsSpinning(true);
-      const response = await pushData(data?.syncKey, dbExport);
+      const response = await pullData(data?.syncKey);
       if (response.status === "success") {
-        //TODO: Do stuff
+        // TODO: Import the pulled data
         setAlertVariant("success");
-        setAlertMessage("Data has been synced to the cloud!");
+        setAlertMessage("Data has been pulled from the cloud!");
       } else if (response.status === "error") {
         setShowAlert(true);
         setAlertVariant("danger");
@@ -241,10 +304,10 @@ export default function Sync({ verifyKey }: SyncProps) {
       }
       setShowAlert(true);
     } catch (error) {
-      console.error("Failed to export", error);
+      console.error("Failed to pull", error);
       setShowAlert(true);
       setAlertVariant("danger");
-      setAlertMessage("Sync Failed!");
+      setAlertMessage("Pull Failed!");
     }
     setIsSpinning(false);
   };
@@ -390,7 +453,7 @@ export default function Sync({ verifyKey }: SyncProps) {
             <Row className="justify-content-center align-items-center">
               <Col xs="auto">Email: {data?.email}</Col>
               <Col xs="auto">Key: {data?.syncKey}</Col>
-              <Col xs="auto">Last Synced?: {data?.lastSynced ?? "N/A"}</Col>
+              <Col xs="auto">Last Synced: {data?.lastSynced ?? "N/A"}</Col>
               <Col xs="auto">Account Type: {data?.accountType || "Free"}</Col>
             </Row>
             <Row className="mt-4 justify-content-center align-items-center">
@@ -410,12 +473,34 @@ export default function Sync({ verifyKey }: SyncProps) {
                 <Button
                   variant="primary"
                   className="w-100"
-                  disabled={isSpinning}
-                  onClick={async () => {
-                    await syncData();
+                  disabled={isSpinning || syncCooldown > 0}
+                  onClick={() => {
+                    syncData();
                   }}
                 >
-                  Sync Now
+                  {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : "Sync Now"}
+                </Button>
+              </Col>
+              <Col xs="auto">
+                <Button
+                  variant="warning"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={() => {
+                    syncData(true);
+                  }}
+                >
+                  Force Push
+                </Button>
+              </Col>
+              <Col xs="auto">
+                <Button
+                  variant="info"
+                  className="w-100"
+                  disabled={isSpinning}
+                  onClick={forcePull}
+                >
+                  Force Pull
                 </Button>
               </Col>
             </Row>
@@ -426,7 +511,7 @@ export default function Sync({ verifyKey }: SyncProps) {
             <Row className="justify-content-center align-items-center">
               <Col xs="auto">Email: {data?.email}</Col>
               <Col xs="auto">Key: {data?.syncKey ?? "N/A"}</Col>
-              <Col xs="auto">Last Synced?: {data?.lastSynced ?? "N/A"}</Col>
+              <Col xs="auto">Last Synced: {data?.lastSynced ?? "N/A"}</Col>
               <Col xs="auto">Account Type: Unverified</Col>
             </Row>
             <Row className="mt-4 justify-content-center align-items-center">

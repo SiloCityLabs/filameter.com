@@ -70,6 +70,8 @@ export default function Sync({ verifyKey }: SyncProps) {
             } else {
               setInitialType("engaged");
             }
+          } else if (verifyKey) {
+            verifySync("", verifyKey);
           }
 
           //Get Filament Export Data
@@ -150,6 +152,7 @@ export default function Sync({ verifyKey }: SyncProps) {
     try {
       setIsSpinning(true);
       const response = await setupSyncByKey(key);
+      console.log(response);
       if (response.status === "success") {
         const keyData = {
           syncKey: response.data.token,
@@ -232,12 +235,6 @@ export default function Sync({ verifyKey }: SyncProps) {
           accountType: response.data.keyType,
           lastSynced: new Date().toISOString()
         };
-
-        console.log("1---");
-        console.log(keyData);
-        console.log("1---");
-        console.log(response);
-
         setData(keyData);
         await save({ "scl-sync": keyData });
         setInitialType("engaged");

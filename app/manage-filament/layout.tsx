@@ -1,4 +1,7 @@
+// --- Next ---
 import type { Metadata } from "next";
+// --- Layout ---
+import PageLayout from "@/components/PageLayout";
 
 export const metadata: Metadata = {
   title: "Manage Filament",
@@ -10,5 +13,9 @@ export default function ManageFilamentLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <PageLayout headerShowBadge={true}>{children}</PageLayout>
+    </>
+  );
 }

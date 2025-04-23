@@ -1,8 +1,7 @@
 "use client";
 
+// --- React ---
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Container,
   Row,
@@ -15,6 +14,9 @@ import {
   Pagination,
   Spinner,
 } from "react-bootstrap";
+// --- Next ---
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 // --- Components ---
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 // --- DB ---
@@ -261,7 +263,7 @@ export default function SpoolsPage() {
   }
 
   return (
-    <Container fluid className="py-3">
+    <Container className="py-3">
       <Row className="shadow-lg p-3 bg-body rounded">
         <Col xs={12} className="mb-3">
           <CustomAlert

@@ -1,8 +1,11 @@
 "use client";
 
+// --- React ---
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
+// --- Next ---
+import { useSearchParams } from "next/navigation";
+// --- Components ---
 import ManageFilament from "@/components/ManageFilament";
 // --- DB ---
 import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";

@@ -1,7 +1,14 @@
+// --- React ---
 import React from "react";
 import ContentLoader from "react-content-loader";
 
-const SclPlaceholder = ({ isLoading, value }) => {
+const SclPlaceholder = ({
+  isLoading,
+  value,
+}: {
+  isLoading: boolean;
+  value: string;
+}) => {
   const containsHTML =
     /<(?!(?:area|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b)[a-z][^>]*>/i.test(
       value

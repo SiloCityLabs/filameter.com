@@ -1,12 +1,13 @@
+// --- React ---
 import React from "react";
 import Badge from "react-bootstrap/Badge";
 // --- Next ---
 import Image from "next/image";
+// --- Helpers ---
+import { capitalizeFirstLetter } from "@/helpers/_silabs/capitalizeFirstLetter";
 // --- Font Awesome ---
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-// --- Helpers ---
-import { capitalizeFirstLetter } from "@/helpers/_silabs/capitalizeFirstLetter";
 // --- Styles ---
 import styles from "@/public/styles/components/SclBadges.module.css";
 

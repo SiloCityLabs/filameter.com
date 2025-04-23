@@ -1,13 +1,15 @@
 "use client";
 
+// --- React ---
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Container, Form, Button, Spinner } from "react-bootstrap";
 import Select, { MultiValue } from "react-select";
+// --- Next ---
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-// Helpers
+// --- Helpers ---
 import { generateGithubLink } from "@/helpers/_silabs/generateGithubLink";
-// JSON imports
+// --- Data ---
 import githubLabels from "@/json/github/labels.json";
 import githubAssignees from "@/json/github/assignees.json";
 import githubTemplates from "@/json/github/templates.json";

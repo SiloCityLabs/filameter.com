@@ -1,6 +1,8 @@
 "use client";
 
+// --- React ---
 import { useEffect } from "react";
+// --- Next ---
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 

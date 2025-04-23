@@ -297,10 +297,12 @@ export default function SpoolsPage() {
           setAlertMessage("No new data to sync");
           setAlertVariant("info");
         }
+      } else {
+        throw new Error(timestampResponse.error || "Failed to check sync status");
       }
     } catch (error) {
       console.error("Sync failed:", error);
-      setAlertMessage("Sync failed. Please try again.");
+      setAlertMessage(error instanceof Error ? error.message : "Sync failed. Please try again.");
       setAlertVariant("danger");
     } finally {
       setIsSpinning(false);

@@ -5,8 +5,6 @@ import { useCallback, useEffect, useState, Suspense } from "react";
 import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
 // --- Next ---
 import { useRouter, useSearchParams } from "next/navigation";
-// --- Layout ---
-import PageLayout from "@/components/PageLayout";
 // --- Components ---
 import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
 // --- DB ---

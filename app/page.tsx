@@ -4,7 +4,7 @@ import PageLayout from "@/components/PageLayout";
 
 export default function HomePage() {
   return (
-    <PageLayout>
+    <PageLayout headerShowBadge={true}>
       <Container className="mt-3 mb-3">
         <Row className="shadow-lg p-3 bg-body rounded">
           <Col className="text-center">

@@ -184,7 +184,7 @@ export default function FeedbackForm() {
         )}
 
         <div className="text-center mt-4 d-flex justify-content-center">
-          <Link href="/" passHref legacyBehavior>
+          <Link href="/" passHref>
             <Button variant="outline-secondary" className="me-3">
               Cancel
             </Button>

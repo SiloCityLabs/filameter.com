@@ -29,7 +29,7 @@ export default function NotFound() {
                 been moved. If it has moved recently, you might be redirected
                 shortly.
               </p>
-              <Link href="/" passHref legacyBehavior>
+              <Link href="/" passHref>
                 <Button variant="primary">Go back to Homepage</Button>
               </Link>
             </div>

@@ -57,9 +57,15 @@ export default function Sync({ verifyKey }: SyncProps) {
             const syncData = JSON.parse(sclSync.value);
             setData(syncData);
 
-            if (syncData.syncKey === "") {
+            console.log("Sync data:", syncData);
+            console.log("Verify key:", verifyKey);
+
+
+            if (syncData.syncKey === "" || syncData.needsVerification) {
+              console.log("Sync key is empty");
               //Setup sync via key verification
               if (verifyKey) {
+                console.log("Verifying key:", verifyKey);
                 verifySync(syncData.email, verifyKey);
               } else {
                 setInitialType("needs-verification");
@@ -68,9 +74,11 @@ export default function Sync({ verifyKey }: SyncProps) {
                 setShowAlert(true);
               }
             } else {
+              console.log("Sync key is not empty");
               setInitialType("engaged");
             }
           } else if (verifyKey) {
+            console.log("Verifying key:", verifyKey);
             verifySync("", verifyKey);
           }
 

@@ -3,8 +3,6 @@ import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 // --- Components ---
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import GoogleAnalytics from "@/components/_silabs/GoogleAnalytics";
 import ClientDatabaseProviderWrapper from "@/components/ClientDatabaseProviderWrapper";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
@@ -38,10 +36,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  // themeColor: "#ffffff", // Optional: Add theme color
 };
 
-// Setup a font (example using Inter)
+// Setup a font
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
@@ -53,13 +50,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ClientDatabaseProviderWrapper>
-          <div className="main-container">
-            <Header showBadge={true} />
-            <main className="main-content">
-              {children} {/* Page content */}
-            </main>
-            <Footer />
-          </div>
+          {children}
         </ClientDatabaseProviderWrapper>
 
         {GA_TRACKING_ID && (

@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, Button } from "react-bootstrap";
 import Link from "next/link";
 
@@ -12,7 +14,7 @@ type CardProps = {
   }[];
 };
 
-function SclCard(props: CardProps) {
+export default function SclCard(props: CardProps) {
   return (
     <Card
       style={{ width: "18rem" }}
@@ -40,5 +42,3 @@ function SclCard(props: CardProps) {
     </Card>
   );
 }
-
-export default SclCard;

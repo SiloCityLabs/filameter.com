@@ -1,0 +1,44 @@
+name: Weekly Reset Test Branch
+
+on:
+  #schedule:
+    # Runs every Sunday at 08:00 UTC (adjust as needed)
+    # Cron syntax: minute hour day(month) month day(week)
+  #  - cron: "0 8 * * 0"
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+
+jobs:
+  reset_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch all history so we can reset to main correctly
+          fetch-depth: 0
+          # Make sure the token has write permissions
+          persist-credentials: true
+
+      - name: Configure Git User
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+
+      - name: Reset Test Branch to Main
+        run: |
+          # Ensure main is up-to-date locally
+          git checkout main
+          git pull origin main
+
+          # Check out the test branch, or create it if it doesn't exist
+          git checkout test || git checkout -b test
+
+          # Reset test branch to the state of origin/main
+          echo "Resetting test branch to origin/main..."
+          git reset --hard origin/main
+
+          # Force push the reset state to the remote test branch
+          echo "Force pushing changes to test branch..."
+          git push origin test --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

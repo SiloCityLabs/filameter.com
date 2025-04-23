@@ -4,7 +4,7 @@ import React from "react";
 import { Nav } from "react-bootstrap";
 import Image from "next/image";
 
-function Footer() {
+export default function Footer() {
   const showLicense =
     process.env.NEXT_PUBLIC_FOOTER_SITE !== "" &&
     process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT_URL !== "";
@@ -96,5 +96,3 @@ function Footer() {
     </>
   );
 }
-
-export default Footer;

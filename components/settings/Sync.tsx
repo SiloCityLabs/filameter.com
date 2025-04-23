@@ -153,14 +153,14 @@ export default function Sync({ verifyKey }: SyncProps) {
       setIsSpinning(true);
       const response = await setupSyncByKey(key);
       console.log(response);
-      if (response.status === "success") {
+      if (response.status === "success" && response.data) {
         const keyData = {
           syncKey: response.data.token,
           email: response.data.userData.email,
           accountType: response.data.keyType,
           lastSynced: new Date().toISOString()
         };
-
+        console.log("Saving key data:", keyData);
         setData(keyData);
         await save({ "scl-sync": keyData });
         setInitialType("engaged");
@@ -169,6 +169,9 @@ export default function Sync({ verifyKey }: SyncProps) {
       } else if (response.status === "error") {
         setAlertVariant("danger");
         setAlertMessage(response.error);
+      } else {
+        setAlertVariant("danger");
+        setAlertMessage("Invalid response from server");
       }
       setShowAlert(true);
     } catch (error: unknown) {
@@ -267,6 +270,13 @@ export default function Sync({ verifyKey }: SyncProps) {
       setIsSpinning(true);
       const response = await pushData(data?.syncKey, dbExport);
       if (response.status === "success") {
+        // Update lastSynced but preserve other data
+        const updatedData = {
+          ...data,
+          lastSynced: new Date().toISOString()
+        };
+        setData(updatedData);
+        await save({ "scl-sync": updatedData });
         setLastSyncTime(Date.now());
         setSyncCooldown(60);
         setAlertVariant("success");
@@ -291,7 +301,13 @@ export default function Sync({ verifyKey }: SyncProps) {
       setIsSpinning(true);
       const response = await pullData(data?.syncKey);
       if (response.status === "success") {
-        // TODO: Import the pulled data
+        // Update lastSynced but preserve other data
+        const updatedData = {
+          ...data,
+          lastSynced: new Date().toISOString()
+        };
+        setData(updatedData);
+        await save({ "scl-sync": updatedData });
         setAlertVariant("success");
         setAlertMessage("Data has been pulled from the cloud!");
       } else if (response.status === "error") {

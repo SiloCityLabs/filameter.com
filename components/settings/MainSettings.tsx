@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
-import { Row, Col, Form, Button } from "react-bootstrap";
+import { useState, useEffect } from 'react';
+import { Row, Col, Form, Button } from 'react-bootstrap';
 //Components
-import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
+import CustomAlert from '@/components/_silabs/bootstrap/CustomAlert';
 //DB
-import getAllSettings from "@/helpers/database/settings/getAllSettings";
-import saveSettings from "@/helpers/database/settings/saveSettings";
-import { useDatabase } from "@/contexts/DatabaseContext";
+import getAllSettings from '@/helpers/database/settings/getAllSettings';
+import saveSettings from '@/helpers/database/settings/saveSettings';
+import { useDatabase } from '@/contexts/DatabaseContext';
 //Types
-import { sclSettings } from "@/types/_fw";
+import { sclSettings } from '@/types/_fw';
 
 const tableHeaders = [
-  "ID",
-  "Filament",
-  "Material",
-  "Used Weight",
-  "Total Weight",
-  "Weight Left",
-  "Location",
-  "Comments",
+  'ID',
+  'Filament',
+  'Material',
+  'Used Weight',
+  'Total Weight',
+  'Weight Left',
+  'Location',
+  'Comments',
 ];
 
 export default function MainSettings() {
@@ -26,8 +26,8 @@ export default function MainSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<sclSettings>({});
   const [showAlert, setShowAlert] = useState(false);
-  const [alertVariant, setAlertVariant] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVariant, setAlertVariant] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
     async function fetchData() {
@@ -42,11 +42,10 @@ export default function MainSettings() {
           }
           setData(allData);
         } catch (err: unknown) {
-          const errorMessage =
-            err instanceof Error ? err.message : "Failed to fetch settings.";
+          const errorMessage = err instanceof Error ? err.message : 'Failed to fetch settings.';
           setAlertMessage(errorMessage);
           setShowAlert(true);
-          setAlertVariant("danger");
+          setAlertVariant('danger');
         } finally {
           setIsLoading(false);
         }
@@ -70,7 +69,7 @@ export default function MainSettings() {
 
   const save = async () => {
     if (!dbs.settings) {
-      console.error("Database is not initialized.");
+      console.error('Database is not initialized.');
       return;
     }
 
@@ -79,67 +78,56 @@ export default function MainSettings() {
     try {
       await saveSettings(dbs.settings, data);
     } catch (error: unknown) {
-      console.error("Error saving settings:", error);
+      console.error('Error saving settings:', error);
       if (error instanceof Error) {
         setAlertMessage(error.message);
       } else {
-        setAlertMessage("An unknown error occurred while saving settings.");
+        setAlertMessage('An unknown error occurred while saving settings.');
       }
       setShowAlert(true);
-      setAlertVariant("danger");
+      setAlertVariant('danger');
     } finally {
       setIsSpinning(false);
       setShowAlert(true);
-      setAlertMessage("Settings Saved!");
+      setAlertMessage('Settings Saved!');
     }
   };
 
   if (!isReady || isLoading) {
-    return <div className="text-center">Loading database...</div>;
+    return <div className='text-center'>Loading database...</div>;
   }
 
   return (
     <Row>
       <Col>
         <CustomAlert
-          variant={alertVariant ? alertVariant : "success"}
+          variant={alertVariant ? alertVariant : 'success'}
           message={alertMessage}
           show={showAlert}
           onClose={() => setShowAlert(false)}
         />
-        <h4 className="text-center">Spools: Show/Hide Columns</h4>
+        <h4 className='text-center'>Spools: Show/Hide Columns</h4>
         <hr />
-        <Row className="justify-content-center">
-          <Col className="d-flex flex-wrap justify-content-center">
+        <Row className='justify-content-center'>
+          <Col className='d-flex flex-wrap justify-content-center'>
             {tableHeaders.map((header) => (
-              <div
-                key={header}
-                className="d-flex"
-                style={{ width: "50%", maxWidth: "150px" }}
-              >
+              <div key={header} className='d-flex' style={{ width: '50%', maxWidth: '150px' }}>
                 <Form.Check
-                  type="checkbox"
-                  id={`checkbox-${header.replace(/\s/g, "")}`}
+                  type='checkbox'
+                  id={`checkbox-${header.replace(/\s/g, '')}`}
                   label={header}
-                  className="me-2 custom-checkbox"
+                  className='me-2 custom-checkbox'
                   checked={data?.spoolHeaders?.[header] || false}
-                  onChange={(e) =>
-                    handleCheckboxChange(header, e.target.checked)
-                  }
+                  onChange={(e) => handleCheckboxChange(header, e.target.checked)}
                 />
               </div>
             ))}
           </Col>
         </Row>
-        <Row className="mt-5 justify-content-center">
+        <Row className='mt-5 justify-content-center'>
           <Col xs={12} sm={6} md={3}>
-            <div className="d-flex justify-content-center">
-              <Button
-                variant="primary"
-                className="w-100"
-                disabled={isSpinning}
-                onClick={save}
-              >
+            <div className='d-flex justify-content-center'>
+              <Button variant='primary' className='w-100' disabled={isSpinning} onClick={save}>
                 Save Settings
               </Button>
             </div>

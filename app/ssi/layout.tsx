@@ -1,11 +1,11 @@
 // --- Next ---
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 // --- Layout ---
-import PageLayout from "@/components/PageLayout";
+import PageLayout from '@/components/PageLayout';
 
 export const metadata: Metadata = {
-  title: "Spool Sense Import",
-  description: "Importing Spool Sense filament data.",
+  title: 'Spool Sense Import',
+  description: 'Importing Spool Sense filament data.',
 };
 
 export default function SsiLayout({ children }: { children: React.ReactNode }) {

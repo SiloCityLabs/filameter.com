@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
 // --- React ---
-import { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner } from "react-bootstrap";
+import { useEffect, useState } from 'react';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
 // --- Next ---
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from 'next/navigation';
 // --- Components ---
-import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
+import CustomAlert from '@/components/_silabs/bootstrap/CustomAlert';
 // --- Context Hook ---
-import { useDatabase } from "@/contexts/DatabaseContext";
+import { useDatabase } from '@/contexts/DatabaseContext';
 // ---DB Helpers ---
-import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
+import getDocumentByColumn from '@/helpers/_silabs/pouchDb/getDocumentByColumn';
 
 export default function QrScanPage() {
   const router = useRouter();
@@ -20,8 +20,8 @@ export default function QrScanPage() {
   const filamentDb = dbs?.filament;
 
   const [showAlert, setShowAlert] = useState(false);
-  const [alertVariant, setAlertVariant] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVariant, setAlertVariant] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
   const [filamentId, setFilamentId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -31,13 +31,13 @@ export default function QrScanPage() {
     setLocalError(null);
     setShowAlert(false);
 
-    const currentId = searchParams?.get("id") ?? "";
+    const currentId = searchParams?.get('id') ?? '';
 
     if (!currentId) {
-      setLocalError("Missing filament ID in URL.");
+      setLocalError('Missing filament ID in URL.');
       setShowAlert(true);
-      setAlertMessage("Missing filament ID in URL.");
-      setAlertVariant("danger");
+      setAlertMessage('Missing filament ID in URL.');
+      setAlertVariant('danger');
       setIsProcessing(false);
       return;
     }
@@ -51,24 +51,22 @@ export default function QrScanPage() {
     }
 
     if (dbError) {
-      console.error("Database context error:", dbError);
-      setLocalError("Database unavailable.");
+      console.error('Database context error:', dbError);
+      setLocalError('Database unavailable.');
       setShowAlert(true);
       // Use the error string directly from context
       setAlertMessage(`Database error: ${dbError}`);
-      setAlertVariant("danger");
+      setAlertVariant('danger');
       setIsProcessing(false);
       return;
     }
 
     if (!filamentDb) {
-      console.error("Filament database instance not found in context.");
-      setLocalError("Required database (filament) is missing.");
+      console.error('Filament database instance not found in context.');
+      setLocalError('Required database (filament) is missing.');
       setShowAlert(true);
-      setAlertMessage(
-        "Required database (filament) is missing after initialization."
-      );
-      setAlertVariant("danger");
+      setAlertMessage('Required database (filament) is missing after initialization.');
+      setAlertVariant('danger');
       setIsProcessing(false);
       return;
     }
@@ -77,16 +75,9 @@ export default function QrScanPage() {
       setLocalError(null);
 
       try {
-        const fetchedFilament = await getDocumentByColumn(
-          filamentDb,
-          "_id",
-          id,
-          "filament"
-        );
+        const fetchedFilament = await getDocumentByColumn(filamentDb, '_id', id, 'filament');
 
-        const filamentDoc = Array.isArray(fetchedFilament)
-          ? fetchedFilament
-          : null;
+        const filamentDoc = Array.isArray(fetchedFilament) ? fetchedFilament : null;
 
         if (!filamentDoc) {
           router.push(`/manage-filament?id=${id}&type=create`);
@@ -94,13 +85,12 @@ export default function QrScanPage() {
           router.push(`/manage-filament?id=${id}`);
         }
       } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch filament data.";
-        console.error("Fetch filament error:", err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch filament data.';
+        console.error('Fetch filament error:', err);
         setLocalError(errorMessage);
         setShowAlert(true);
         setAlertMessage(errorMessage);
-        setAlertVariant("danger");
+        setAlertVariant('danger');
         setIsProcessing(false);
       }
     };
@@ -115,13 +105,11 @@ export default function QrScanPage() {
 
   if (isLoading && !hasError) {
     return (
-      <Container className="text-center my-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <Container className='text-center my-5'>
+        <Spinner animation='border' role='status'>
+          <span className='visually-hidden'>Loading...</span>
         </Spinner>
-        <p className="mt-2">
-          {!isDbReady ? "Initializing database..." : "Processing QR Code..."}
-        </p>
+        <p className='mt-2'>{!isDbReady ? 'Initializing database...' : 'Processing QR Code...'}</p>
       </Container>
     );
   }
@@ -130,12 +118,11 @@ export default function QrScanPage() {
     <Container fluid>
       <Row>
         <Col>
-          <h2 className="text-center my-4">Spool Sense QR Scan</h2>
+          <h2 className='text-center my-4'>Spool Sense QR Scan</h2>
           <Container
-            className="shadow-lg p-3 mb-5 bg-body rounded text-center"
-            style={{ maxWidth: "600px", margin: "auto" }}
-          >
-            <Row className="justify-content-md-center">
+            className='shadow-lg p-3 mb-5 bg-body rounded text-center'
+            style={{ maxWidth: '600px', margin: 'auto' }}>
+            <Row className='justify-content-md-center'>
               <CustomAlert
                 variant={alertVariant}
                 message={alertMessage}
@@ -145,34 +132,28 @@ export default function QrScanPage() {
 
               {isLoading && !hasError && (
                 <Col lg={8}>
-                  <div className="text-center">
-                    <Spinner animation="border" size="sm" className="me-2" />
-                    {!isDbReady ? "Initializing database..." : "Processing..."}
+                  <div className='text-center'>
+                    <Spinner animation='border' size='sm' className='me-2' />
+                    {!isDbReady ? 'Initializing database...' : 'Processing...'}
                   </div>
                 </Col>
               )}
 
               {hasError && !isLoading && (
                 <Col lg={8}>
-                  <p className="text-danger">
-                    Could not process the QR code.{" "}
-                    {localError || `Database error: ${dbError}`}
+                  <p className='text-danger'>
+                    Could not process the QR code. {localError || `Database error: ${dbError}`}
                   </p>
                 </Col>
               )}
 
               {!isLoading && !hasError && (
                 <Col lg={8}>
-                  <div className="text-center">
+                  <div className='text-center'>
                     Redirecting...
                     <br />
                     {[...Array(5)].map((_, i) => (
-                      <Spinner
-                        key={i}
-                        animation="grow"
-                        size="sm"
-                        className="mx-1"
-                      />
+                      <Spinner key={i} animation='grow' size='sm' className='mx-1' />
                     ))}
                   </div>
                 </Col>

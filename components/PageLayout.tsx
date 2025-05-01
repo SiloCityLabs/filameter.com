@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 // --- React ---
-import React from "react";
+import React from 'react';
 // --- Components ---
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 interface NavLink {
   label: string;
@@ -24,7 +24,7 @@ interface PageLayoutProps {
 
 export default function PageLayout({
   children,
-  headerClassName = "",
+  headerClassName = '',
   navLinks = [],
   showHeader = true,
   showFooter = true,
@@ -32,7 +32,7 @@ export default function PageLayout({
   headerShowBadge = false,
 }: PageLayoutProps) {
   return (
-    <div className="main-container">
+    <div className='main-container'>
       {showHeader && (
         <Header
           className={headerClassName}
@@ -41,7 +41,7 @@ export default function PageLayout({
           showBadge={headerShowBadge}
         />
       )}
-      <main className="main-content">{children}</main>
+      <main className='main-content'>{children}</main>
       {showFooter && <Footer />}
     </div>
   );

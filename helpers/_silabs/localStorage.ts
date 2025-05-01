@@ -5,9 +5,9 @@
  * @param {object | string} value - The value to be stored. It can be any type, but objects will be JSON stringified.
  */
 export function setLocalStorage(key: string, value: object | string): void {
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     // Check if running in the browser
-    if (typeof value === "object") {
+    if (typeof value === 'object') {
       localStorage.setItem(key, JSON.stringify(value));
     } else {
       localStorage.setItem(key, value);
@@ -25,7 +25,7 @@ export function setLocalStorage(key: string, value: object | string): void {
  *          Returns null if not running in a browser environment.
  */
 export function getLocalStorage(key: string): string | object | null {
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     // Check if running in the browser
     const item = localStorage.getItem(key);
     if (item) {

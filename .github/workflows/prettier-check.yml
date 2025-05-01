@@ -1,0 +1,64 @@
+name: Prettier Format
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+      pull-requests: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for git operations
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Prettier format
+        run: npx prettier . --write --ignore-path .prettierignore-ci
+
+      # Step to commit and push changes directly on non-main branches
+      - name: Commit and push changes (non-main branches)
+        # Only run this step if the current branch is NOT 'main' and NOT a pull request
+        if: github.ref != 'refs/heads/main' && github.event_name == 'push'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: |
+            Apply Prettier formatting
+
+            Co-authored-by: Bana0615 <aelbaneh0615@gmail.com>
+
+      # Step to create a pull request if pushing directly to main
+      - name: Create Pull Request (push to main)
+        # Only run this step if the current branch IS 'main' and it's a push event
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: Prettier Snap! Formatting applied. ✨
+          title: 'The Formatting Snap Has Occurred 💥'
+          body: |
+            This PR applies automated Prettier formatting across the codebase.
+
+            Like a certain Mad Titan, Prettier is here to bring balance (of formatting) to the codebase. Inconsistent styles were temporary... this clean, consistent code? It is inevitable.
+
+            ✨ Code aesthetic upgraded. 💯
+
+            Co-authored-by: Bana0615 <aelbaneh0615@gmail.com>
+          branch: prettier-formatting
+          branch-suffix: timestamp
+          delete-branch: true
+          add-paths: . # Add all changes

@@ -1,5 +1,5 @@
 // --- React ---
-import React from "react";
+import React from 'react';
 
 interface LoadingLettersProps {
   text: string;
@@ -14,40 +14,33 @@ export function LoadingLetters({
   loadingDuration,
   interval,
   className,
-  placeholderChar = "_",
+  placeholderChar = '_',
 }: LoadingLettersProps) {
-  const [displayText, setDisplayText] = React.useState<string>(
-    placeholderChar.repeat(text.length)
-  );
-  const validLetters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const [displayText, setDisplayText] = React.useState<string>(placeholderChar.repeat(text.length));
+  const validLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   React.useEffect(() => {
     let currentText = placeholderChar.repeat(text.length);
     let currentIndex = 0;
 
     const randomizeLetters = () => {
-      let newText = "";
+      let newText = '';
       for (let i = 0; i < text.length; i++) {
         if (i < currentIndex) {
           newText += text[i];
         } else {
-          newText +=
-            validLetters[Math.floor(Math.random() * validLetters.length)];
+          newText += validLetters[Math.floor(Math.random() * validLetters.length)];
         }
       }
       setDisplayText(newText);
 
-      if (
-        currentIndex < text.length &&
-        currentText[currentIndex] === text[currentIndex]
-      ) {
+      if (currentIndex < text.length && currentText[currentIndex] === text[currentIndex]) {
         currentIndex++;
       }
 
       currentText =
         currentText.substring(0, currentIndex) +
-        (currentIndex < text.length ? text[currentIndex] : "") +
+        (currentIndex < text.length ? text[currentIndex] : '') +
         currentText.substring(currentIndex + 1);
     };
 

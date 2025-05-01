@@ -1,14 +1,12 @@
-"use client";
+'use client';
 
 // --- React ---
-import { useEffect } from "react";
+import { useEffect } from 'react';
 // --- Next ---
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
 
 // Define or import your redirects map
-const redirects: Record<string, string> = {
-  "/inventory-list": "/spools",
-};
+const redirects: Record<string, string> = { '/inventory-list': '/spools' };
 
 export default function NotFoundRedirector() {
   const router = useRouter();

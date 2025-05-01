@@ -1,6 +1,6 @@
 // --- React ---
-import React from "react";
-import { Alert } from "react-bootstrap";
+import React from 'react';
+import { Alert } from 'react-bootstrap';
 
 interface AlertProps {
   variant: string;
@@ -9,12 +9,7 @@ interface AlertProps {
   onClose: () => void;
 }
 
-const CustomAlert: React.FC<AlertProps> = ({
-  variant,
-  message,
-  show,
-  onClose,
-}) => {
+const CustomAlert: React.FC<AlertProps> = ({ variant, message, show, onClose }) => {
   if (!show) {
     return null; // Don't render if not shown
   }

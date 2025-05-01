@@ -1,6 +1,6 @@
 // --- Helpers ---
-import { v4 as uuidv4 } from "uuid";
-import Joi from "joi";
+import { v4 as uuidv4 } from 'uuid';
+import Joi from 'joi';
 
 /**
  * Saves or updates a document in the PouchDB database.
@@ -48,17 +48,11 @@ export const save = async (
           // If the document is not found, assign a new UUID for the creation
           // If other errors occured, report them.
 
-          if (getErr instanceof Error && getErr.name === "NotFoundError") {
+          if (getErr instanceof Error && getErr.name === 'NotFoundError') {
             doc._id = uuidv4();
           } else {
-            console.error(
-              `Error getting existing ${type} document for update:`,
-              getErr
-            );
-            return {
-              success: false,
-              error: `Error getting ${type} document for update.`,
-            };
+            console.error(`Error getting existing ${type} document for update:`, getErr);
+            return { success: false, error: `Error getting ${type} document for update.` };
           }
         }
       } else {
@@ -75,13 +69,13 @@ export const save = async (
       // Return different error responses based on the error type
       if (error instanceof Error) {
         return { success: false, error: error.message };
-      } else if (typeof error === "string") {
+      } else if (typeof error === 'string') {
         return { success: false, error: error };
       } else {
-        return { success: false, error: "An unknown error occurred." };
+        return { success: false, error: 'An unknown error occurred.' };
       }
     }
   } else {
-    return { success: false, error: "Database not initialized" };
+    return { success: false, error: 'Database not initialized' };
   }
 };

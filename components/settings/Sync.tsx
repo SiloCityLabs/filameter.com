@@ -53,13 +53,10 @@ export default function Sync({ verifyKey }: SyncProps) {
             setData(syncData);
 
             console.log('Sync data:', syncData);
-            console.log('Verify key:', verifyKey);
 
             if (syncData.syncKey === '' || syncData.needsVerification) {
-              console.log('Sync key is empty');
               //Setup sync via key verification
               if (verifyKey) {
-                console.log('Verifying key:', verifyKey);
                 verifySync(syncData.email, verifyKey);
               } else {
                 setInitialType('needs-verification');
@@ -68,7 +65,6 @@ export default function Sync({ verifyKey }: SyncProps) {
                 setShowAlert(true);
               }
             } else {
-              console.log('Sync key is not empty');
               setInitialType('engaged');
             }
           } else if (verifyKey) {
@@ -153,7 +149,6 @@ export default function Sync({ verifyKey }: SyncProps) {
     try {
       setIsSpinning(true);
       const response = await setupSyncByKey(key);
-      console.log(response);
       if (response.status === 'success' && response.data) {
         const keyData = {
           syncKey: response.data.token,
@@ -161,7 +156,6 @@ export default function Sync({ verifyKey }: SyncProps) {
           accountType: response.data.keyType,
           lastSynced: new Date().toISOString(),
         };
-        console.log('Saving key data:', keyData);
         setData(keyData);
         await save({ 'scl-sync': keyData });
         setInitialType('engaged');
@@ -450,11 +444,11 @@ export default function Sync({ verifyKey }: SyncProps) {
             </Row>
           </Row>
         )}
-        {initialType === 'engaged' && (
+        {(initialType === 'engaged' || initialType === 'needs-verification') && (
           <>
             <Row className='justify-content-center align-items-center'>
-              <Col xs='auto'>Email: {data?.email}</Col>
-              <Col xs='auto'>Key: {data?.syncKey}</Col>
+              <Col xs='auto'>Email: {data?.email ?? 'N/A'}</Col>
+              <Col xs='auto'>Key: {data?.syncKey ?? 'N/A'}</Col>
               <Col xs='auto'>Last Synced: {data?.lastSynced ?? 'N/A'}</Col>
               <Col xs='auto'>Account Type: {data?.accountType || 'Free'}</Col>
             </Row>
@@ -474,7 +468,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                 <Button
                   variant='primary'
                   className='w-100'
-                  disabled={isSpinning || syncCooldown > 0}
+                  disabled={isSpinning || syncCooldown > 0 || initialType === 'needs-verification'}
                   onClick={() => {
                     syncData();
                   }}>
@@ -485,7 +479,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                 <Button
                   variant='warning'
                   className='w-100'
-                  disabled={isSpinning}
+                  disabled={isSpinning || initialType === 'needs-verification'}
                   onClick={() => {
                     syncData(true);
                   }}>
@@ -493,31 +487,12 @@ export default function Sync({ verifyKey }: SyncProps) {
                 </Button>
               </Col>
               <Col xs='auto'>
-                <Button variant='info' className='w-100' disabled={isSpinning} onClick={forcePull}>
-                  Force Pull
-                </Button>
-              </Col>
-            </Row>
-          </>
-        )}
-        {initialType === 'needs-verification' && (
-          <>
-            <Row className='justify-content-center align-items-center'>
-              <Col xs='auto'>Email: {data?.email}</Col>
-              <Col xs='auto'>Key: {data?.syncKey ?? 'N/A'}</Col>
-              <Col xs='auto'>Last Synced: {data?.lastSynced ?? 'N/A'}</Col>
-              <Col xs='auto'>Account Type: Unverified</Col>
-            </Row>
-            <Row className='mt-4 justify-content-center align-items-center'>
-              <Col xs='auto'>
                 <Button
-                  variant='primary'
+                  variant='info'
                   className='w-100'
-                  disabled={isSpinning}
-                  onClick={() => {
-                    removeSync();
-                  }}>
-                  Remove Sync
+                  disabled={isSpinning || initialType === 'needs-verification'}
+                  onClick={forcePull}>
+                  Force Pull
                 </Button>
               </Col>
             </Row>

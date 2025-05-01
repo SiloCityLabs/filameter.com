@@ -1,8 +1,8 @@
-import PouchDB from "pouchdb";
-import PouchDBFind from "pouchdb-find";
-import idbAdapter from "pouchdb-adapter-idb";
-import { migrateFilamentDB } from "@/helpers/database/filament/migrateFilamentDB";
-import { initializeSettingsDB } from "@/helpers/database/settings/initializeSettingsDB";
+import PouchDB from 'pouchdb';
+import PouchDBFind from 'pouchdb-find';
+import idbAdapter from 'pouchdb-adapter-idb';
+import { migrateFilamentDB } from '@/helpers/database/filament/migrateFilamentDB';
+import { initializeSettingsDB } from '@/helpers/database/settings/initializeSettingsDB';
 
 // --- Initialize Plugins  ---
 PouchDB.plugin(PouchDBFind);
@@ -20,24 +20,19 @@ async function performInitialization(): Promise<{
   filament: PouchDB.Database;
   settings: PouchDB.Database;
 }> {
-  const filamentDbName = "filament";
-  const adapter = "idb";
+  const filamentDbName = 'filament';
+  const adapter = 'idb';
 
   // --- Handle Filament DB Destruction ---
-  if (localStorage.getItem("clearDatabase") === "true") {
-    console.warn(
-      "Singleton Initializer: clearDatabase flag found. Destroying filament DB."
-    );
-    localStorage.removeItem("clearDatabase");
+  if (localStorage.getItem('clearDatabase') === 'true') {
+    console.warn('Singleton Initializer: clearDatabase flag found. Destroying filament DB.');
+    localStorage.removeItem('clearDatabase');
     const tempFilamentDB = new PouchDB(filamentDbName, { adapter });
     try {
       await tempFilamentDB.destroy();
-      console.log("Singleton Initializer: Filament DB destroyed successfully.");
+      console.log('Singleton Initializer: Filament DB destroyed successfully.');
     } catch (destroyError) {
-      console.error(
-        "Singleton Initializer: Failed to destroy filament database:",
-        destroyError
-      );
+      console.error('Singleton Initializer: Failed to destroy filament database:', destroyError);
     }
   }
 
@@ -49,9 +44,7 @@ async function performInitialization(): Promise<{
   // --- Initialize Settings DB ---
   const settingsDb = await initializeSettingsDB();
   if (!settingsDb) {
-    throw new Error(
-      "Singleton Initializer: Settings DB Initialization Failed (returned null)"
-    );
+    throw new Error('Singleton Initializer: Settings DB Initialization Failed (returned null)');
   }
 
   // --- Store instances and return ---
@@ -66,10 +59,8 @@ export function getDatabases(): Promise<{
   settings: PouchDB.Database;
 }> {
   // Ensure this only runs client-side
-  if (typeof window === "undefined") {
-    return Promise.reject(
-      new Error("Database cannot be accessed on the server.")
-    );
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('Database cannot be accessed on the server.'));
   }
 
   // If initialization promise doesn't exist, create it by calling performInitialization

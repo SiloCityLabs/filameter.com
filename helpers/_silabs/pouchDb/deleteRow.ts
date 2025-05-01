@@ -7,13 +7,9 @@
  *
  * @returns {Promise<boolean>} - A promise that resolves to true if the document was deleted, false otherwise.
  */
-async function deleteRow(
-  db: PouchDB.Database,
-  id: string,
-  type: string
-): Promise<boolean> {
+async function deleteRow(db: PouchDB.Database, id: string, type: string): Promise<boolean> {
   if (!db) {
-    console.error("Database is not initialized.");
+    console.error('Database is not initialized.');
     return false;
   }
 
@@ -29,13 +25,13 @@ async function deleteRow(
     console.error(`Error deleting ${type} with ID ${id}:`, error);
 
     if (error instanceof Error) {
-      if (error.name === "NotFoundError") {
+      if (error.name === 'NotFoundError') {
         console.error(`Filament with ID ${id} not found for deletion.`);
         return false;
       } else {
         throw new Error(error.message);
       }
-    } else if (typeof error === "string") {
+    } else if (typeof error === 'string') {
       throw new Error(error);
     } else {
       throw new Error(`An unknown error occurred while deleting the ${type}.`);

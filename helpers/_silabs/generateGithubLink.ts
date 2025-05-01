@@ -23,8 +23,8 @@ type LinkParams = {
  * @returns {string} The string with the first letter of each word capitalized.
  */
 export function generateGithubLink(
-  owner: string = "SiloCityLabs",
-  repo: string = "",
+  owner: string = 'SiloCityLabs',
+  repo: string = '',
   params: LinkParams
 ): string {
   const url = new URL(`https://github.com/${owner}/${repo}/issues/new`);
@@ -36,29 +36,29 @@ export function generateGithubLink(
     key: string,
     value: string | number | undefined | null
   ) => {
-    if (value !== undefined && value !== null && value !== "") {
+    if (value !== undefined && value !== null && value !== '') {
       searchParams.append(key, String(value));
     }
   };
 
   // Add title to the search parameters.
-  appendParam("title", params.title);
+  appendParam('title', params.title);
 
   // Add body to the search parameters if no template is specified.
   if (!params.template) {
-    appendParam("body", params.body);
+    appendParam('body', params.body);
   }
   // Add labels to the search parameters, handling both single string and array formats.
   if (params.labels) {
     if (Array.isArray(params.labels)) {
       // If labels is an array, join them with a comma
       if (params.labels.length > 0) {
-        appendParam("labels", params.labels.join(","));
+        appendParam('labels', params.labels.join(','));
       }
     } else {
       // If labels is not an array, add it directly
 
-      appendParam("labels", params.labels);
+      appendParam('labels', params.labels);
     }
   }
 
@@ -67,19 +67,19 @@ export function generateGithubLink(
     if (Array.isArray(params.assignees)) {
       // If assignees is an array, join them with a comma
       if (params.assignees.length > 0) {
-        appendParam("assignees", params.assignees.join(","));
+        appendParam('assignees', params.assignees.join(','));
       }
     } else {
       // If assignees is not an array, add it directly
-      appendParam("assignees", params.assignees);
+      appendParam('assignees', params.assignees);
     }
   }
 
   // Add milestone to the search parameters.
-  appendParam("milestone", params.milestone);
+  appendParam('milestone', params.milestone);
 
   // Add template to the search parameters.
-  appendParam("template", params.template);
+  appendParam('template', params.template);
 
   return url.toString();
 }

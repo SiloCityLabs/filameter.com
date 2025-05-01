@@ -1,5 +1,5 @@
-import PouchDB from "pouchdb";
-import { isPouchDBError } from "@/helpers/isPouchDBError";
+import PouchDB from 'pouchdb';
+import { isPouchDBError } from '@/helpers/isPouchDBError';
 
 export async function exportDB(
   db: PouchDB.Database,
@@ -9,7 +9,7 @@ export async function exportDB(
     // Fetch regular documents
     const result = await db.allDocs({ include_docs: true });
     const docs = result.rows
-      .filter((row) => row.doc && !row.id.startsWith("_design/"))
+      .filter((row) => row.doc && !row.id.startsWith('_design/'))
       .map((row) => {
         const doc = { ...row.doc };
         delete doc._rev;
@@ -20,7 +20,7 @@ export async function exportDB(
     let localDocs: PouchDB.Core.Document<any>[] = [];
 
     // Add all local document IDs
-    const knownLocalIds = ["_local/info"];
+    const knownLocalIds = ['_local/info'];
     for (const docId of knownLocalIds) {
       try {
         const doc = await db.get(docId);
@@ -29,16 +29,13 @@ export async function exportDB(
         const { _rev, ...docWithoutRev } = updatedInfoDoc;
         localDocs.push(docWithoutRev);
       } catch (err) {
-        if (isPouchDBError(err) && err.name !== "not_found") {
+        if (isPouchDBError(err) && err.name !== 'not_found') {
           throw err;
         }
       }
     }
 
-    const exportData = {
-      regular: docs,
-      local: localDocs,
-    };
+    const exportData = { regular: docs, local: localDocs };
 
     if (!returnFile) {
       return exportData;
@@ -46,9 +43,9 @@ export async function exportDB(
 
     // Create a Blob and trigger download (no change here)
     const dataStr = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
+    const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `filameter-db-export-${Date.now()}.json`;
     document.body.appendChild(a);
@@ -56,7 +53,7 @@ export async function exportDB(
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch (error) {
-    console.error("Failed to export database:", error);
+    console.error('Failed to export database:', error);
     throw error;
   }
 }

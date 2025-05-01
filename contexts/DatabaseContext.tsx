@@ -1,13 +1,7 @@
-"use client";
+'use client';
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { getDatabases } from "@/utils/db";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getDatabases } from '@/utils/db';
 
 // --- Context Definition ---
 interface DatabaseContextProps {
@@ -25,12 +19,8 @@ export const useDatabase = () => useContext(DatabaseContext);
 interface DatabaseProviderProps {
   children: ReactNode;
 }
-export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
-  children,
-}) => {
-  const [dbs, setDbs] = useState<{ [key: string]: PouchDB.Database | null }>(
-    {}
-  );
+export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({ children }) => {
+  const [dbs, setDbs] = useState<{ [key: string]: PouchDB.Database | null }>({});
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,20 +38,12 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
       })
       .catch((initError) => {
         if (isMounted) {
-          console.error(
-            "DatabaseProvider: Error getting singleton DBs:",
-            initError
-          );
-          setError(
-            initError instanceof Error ? initError.message : String(initError)
-          );
+          console.error('DatabaseProvider: Error getting singleton DBs:', initError);
+          setError(initError instanceof Error ? initError.message : String(initError));
           setDbs({});
           setIsReady(true);
         } else {
-          console.error(
-            "DatabaseProvider: Component unmounted after DB init error:",
-            initError
-          );
+          console.error('DatabaseProvider: Component unmounted after DB init error:', initError);
         }
       });
 
@@ -72,8 +54,6 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({
   }, []);
 
   return (
-    <DatabaseContext.Provider value={{ dbs, isReady, error }}>
-      {children}
-    </DatabaseContext.Provider>
+    <DatabaseContext.Provider value={{ dbs, isReady, error }}>{children}</DatabaseContext.Provider>
   );
 };

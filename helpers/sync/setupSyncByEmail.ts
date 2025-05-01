@@ -4,15 +4,9 @@ export async function setupSyncByEmail(email: string): Promise<any> {
 
   try {
     const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        function: "create",
-        email: email,
-        app: app,
-      }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ function: 'create', email: email, app: app }),
     });
 
     if (!response.ok) {
@@ -22,7 +16,7 @@ export async function setupSyncByEmail(email: string): Promise<any> {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error making API call:", error);
+    console.error('Error making API call:', error);
     throw error;
   }
 }

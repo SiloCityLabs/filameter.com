@@ -2,7 +2,7 @@
  * Merges multiple objects into a single object, rekeying the properties with incrementing numeric keys.
  *
  * @param {...any[]} objects - The objects to merge. Each object's properties will be added to the result.
- * 
+ *
  * @returns {object} - A new object containing all the properties from the input objects, rekeyed numerically.
  *
  * @example

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 // --- React ---
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Container,
   Row,
@@ -13,33 +13,28 @@ import {
   Tooltip,
   Pagination,
   Spinner,
-} from "react-bootstrap";
+} from 'react-bootstrap';
 // --- Next ---
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 // --- Components ---
-import CustomAlert from "@/components/_silabs/bootstrap/CustomAlert";
+import CustomAlert from '@/components/_silabs/bootstrap/CustomAlert';
 // --- DB ---
-import deleteRow from "@/helpers/_silabs/pouchDb/deleteRow";
-import getAllFilaments from "@/helpers/database/filament/getAllFilaments";
-import getAllSettings from "@/helpers/database/settings/getAllSettings";
-import { useDatabase } from "@/contexts/DatabaseContext";
-import { exportDB } from "@/helpers/exportDB";
-import { pushData } from "@/helpers/sync/pushData";
-import { pullData, checkTimestamp } from "@/helpers/sync/pullData";
-import getDocumentByColumn from "@/helpers/_silabs/pouchDb/getDocumentByColumn";
-import { importPulledData } from "@/helpers/sync/importPulledData";
+import deleteRow from '@/helpers/_silabs/pouchDb/deleteRow';
+import getAllFilaments from '@/helpers/database/filament/getAllFilaments';
+import getAllSettings from '@/helpers/database/settings/getAllSettings';
+import { useDatabase } from '@/contexts/DatabaseContext';
+import { exportDB } from '@/helpers/exportDB';
+import { pushData } from '@/helpers/sync/pushData';
+import { pullData, checkTimestamp } from '@/helpers/sync/pullData';
+import getDocumentByColumn from '@/helpers/_silabs/pouchDb/getDocumentByColumn';
+import { importPulledData } from '@/helpers/sync/importPulledData';
 // --- Icons ---
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faPenToSquare,
-  faTrash,
-  faCopy,
-  faCloudArrowUp,
-} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPenToSquare, faTrash, faCopy, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 // --- Types ---
-import type { sclSettings } from "@/types/_fw";
-import type { Filament } from "@/types/Filament";
+import type { sclSettings } from '@/types/_fw';
+import type { Filament } from '@/types/Filament';
 
 export default function SpoolsPage() {
   const { dbs, isReady } = useDatabase();
@@ -49,13 +44,13 @@ export default function SpoolsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const [alertVariant, setAlertVariant] = useState("success");
-  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVariant, setAlertVariant] = useState('success');
+  const [alertMessage, setAlertMessage] = useState('');
   const [data, setData] = useState<Filament[]>([]);
-  const [sortKey, setSortKey] = useState<keyof Filament | null>("_id");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [sortKey, setSortKey] = useState<keyof Filament | null>('_id');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [settings, setSettings] = useState<sclSettings>({});
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [syncData, setSyncData] = useState<sclSettings>({});
@@ -65,18 +60,15 @@ export default function SpoolsPage() {
 
   // Effect to check for alert message from URL parameters on initial load
   useEffect(() => {
-    const alert_msg = searchParams?.get("alert_msg") ?? "";
+    const alert_msg = searchParams?.get('alert_msg') ?? '';
 
     if (alert_msg) {
       setShowAlert(true);
       setAlertMessage(decodeURIComponent(alert_msg));
-      if (
-        alert_msg.toLowerCase().includes("error") ||
-        alert_msg.toLowerCase().includes("failed")
-      ) {
-        setAlertVariant("danger");
+      if (alert_msg.toLowerCase().includes('error') || alert_msg.toLowerCase().includes('failed')) {
+        setAlertVariant('danger');
       } else {
-        setAlertVariant("success");
+        setAlertVariant('success');
       }
     }
   }, [searchParams, router]);
@@ -84,7 +76,7 @@ export default function SpoolsPage() {
   useEffect(() => {
     async function fetchData() {
       if (!dbs.filament || !dbs.settings) {
-        console.warn("Database instances not yet available.");
+        console.warn('Database instances not yet available.');
         return;
       }
 
@@ -101,12 +93,11 @@ export default function SpoolsPage() {
         setData(fetchedData);
         setSettings(fetchedSettings);
       } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch initial data.";
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch initial data.';
         setAlertMessage(errorMessage);
         setShowAlert(true);
-        setAlertVariant("danger");
-        console.error("Data fetch error:", err);
+        setAlertVariant('danger');
+        console.error('Data fetch error:', err);
       } finally {
         setIsLoading(false);
       }
@@ -135,17 +126,12 @@ export default function SpoolsPage() {
     async function fetchSyncData() {
       if (dbs.settings) {
         try {
-          const sclSync = await getDocumentByColumn(
-            dbs.settings,
-            "name",
-            "scl-sync",
-            "settings"
-          );
-          if (sclSync && sclSync.value !== "") {
+          const sclSync = await getDocumentByColumn(dbs.settings, 'name', 'scl-sync', 'settings');
+          if (sclSync && sclSync.value !== '') {
             setSyncData(JSON.parse(sclSync.value));
           }
         } catch (error) {
-          console.error("Error fetching sync data:", error);
+          console.error('Error fetching sync data:', error);
         }
       }
     }
@@ -158,32 +144,30 @@ export default function SpoolsPage() {
   // --- Event Handlers ---
   const handleDelete = async (id: string | undefined) => {
     if (!id) {
-      setAlertMessage("Cannot delete: Invalid filament ID.");
-      setAlertVariant("danger");
+      setAlertMessage('Cannot delete: Invalid filament ID.');
+      setAlertVariant('danger');
       setShowAlert(true);
       return;
     }
 
-    if (
-      !window.confirm(`Are you sure you want to delete filament ID: ${id}?`)
-    ) {
+    if (!window.confirm(`Are you sure you want to delete filament ID: ${id}?`)) {
       return;
     }
 
     if (!dbs.filament) {
-      setAlertMessage("Database not available for deletion.");
-      setAlertVariant("warning");
+      setAlertMessage('Database not available for deletion.');
+      setAlertVariant('warning');
       setShowAlert(true);
       return;
     }
 
     setIsDeleting(true);
     try {
-      const success = await deleteRow(dbs.filament, id, "filament");
+      const success = await deleteRow(dbs.filament, id, 'filament');
       setShowAlert(true);
       if (success) {
-        setAlertMessage("Filament deleted successfully.");
-        setAlertVariant("success");
+        setAlertMessage('Filament deleted successfully.');
+        setAlertVariant('success');
         setData((currentData) => currentData.filter((f) => f._id !== id));
         const newTotalItems = filteredFilaments.length - 1;
         const maxPage = Math.max(1, Math.ceil(newTotalItems / itemsPerPage));
@@ -191,16 +175,15 @@ export default function SpoolsPage() {
           setCurrentPage(maxPage);
         }
       } else {
-        setAlertMessage("Filament not found or deletion failed.");
-        setAlertVariant("warning");
+        setAlertMessage('Filament not found or deletion failed.');
+        setAlertVariant('warning');
       }
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to delete filament.";
-      setAlertVariant("danger");
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete filament.';
+      setAlertVariant('danger');
       setAlertMessage(errorMessage);
       setShowAlert(true);
-      console.error("Delete error:", err);
+      console.error('Delete error:', err);
     } finally {
       setIsDeleting(false);
     }
@@ -208,10 +191,10 @@ export default function SpoolsPage() {
 
   const handleSortClick = (key: keyof Filament) => {
     if (sortKey === key) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortKey(key);
-      setSortDirection("asc");
+      setSortDirection('asc');
     }
     setCurrentPage(1);
   };
@@ -221,9 +204,7 @@ export default function SpoolsPage() {
     setCurrentPage(1);
   };
 
-  const handleItemsPerPageChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleItemsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setItemsPerPage(Number(event.target.value));
     setCurrentPage(1);
   };
@@ -236,8 +217,8 @@ export default function SpoolsPage() {
 
   const handleSync = async () => {
     if (!canSync()) {
-      setAlertMessage("Please wait 60 seconds between syncs");
-      setAlertVariant("warning");
+      setAlertMessage('Please wait 60 seconds between syncs');
+      setAlertVariant('warning');
       setShowAlert(true);
       return;
     }
@@ -246,24 +227,24 @@ export default function SpoolsPage() {
       setIsSpinning(true);
       // Check timestamp first
       const timestampResponse = await checkTimestamp(syncData.syncKey);
-      if (timestampResponse.status === "success") {
+      if (timestampResponse.status === 'success') {
         const cloudTimestamp = new Date(timestampResponse.timestamp).getTime();
         const localTimestamp = syncData.lastSynced ? new Date(syncData.lastSynced).getTime() : 0;
 
         if (cloudTimestamp > localTimestamp) {
           // Pull new data
           const pullResponse = await pullData(syncData.syncKey);
-          if (pullResponse.status === "success") {
+          if (pullResponse.status === 'success') {
             if (!dbs.filament || !dbs.settings) {
-              throw new Error("Database instances not initialized");
+              throw new Error('Database instances not initialized');
             }
             const importResult = await importPulledData(
               { filament: dbs.filament, settings: dbs.settings },
               pullResponse
             );
             if (importResult.success) {
-              setAlertMessage("Data synced successfully");
-              setAlertVariant("success");
+              setAlertMessage('Data synced successfully');
+              setAlertVariant('success');
               setLastSyncTime(Date.now());
               setSyncCooldown(60);
               // Refresh data
@@ -277,33 +258,33 @@ export default function SpoolsPage() {
               throw new Error(importResult.message);
             }
           } else {
-            throw new Error(pullResponse.message || "Failed to pull data");
+            throw new Error(pullResponse.message || 'Failed to pull data');
           }
         } else if (dbs.filament) {
           // Push data if local is newer
           const exportData = await exportDB(dbs.filament, false);
           if (exportData) {
             const pushResponse = await pushData(syncData.syncKey, exportData);
-            if (pushResponse.status === "success") {
-              setAlertMessage("Data pushed to cloud successfully");
-              setAlertVariant("success");
+            if (pushResponse.status === 'success') {
+              setAlertMessage('Data pushed to cloud successfully');
+              setAlertVariant('success');
               setLastSyncTime(Date.now());
               setSyncCooldown(60);
             } else {
-              throw new Error(pushResponse.message || "Failed to push data");
+              throw new Error(pushResponse.message || 'Failed to push data');
             }
           }
         } else {
-          setAlertMessage("No new data to sync");
-          setAlertVariant("info");
+          setAlertMessage('No new data to sync');
+          setAlertVariant('info');
         }
       } else {
-        throw new Error(timestampResponse.error || "Failed to check sync status");
+        throw new Error(timestampResponse.error || 'Failed to check sync status');
       }
     } catch (error) {
-      console.error("Sync failed:", error);
-      setAlertMessage(error instanceof Error ? error.message : "Sync failed. Please try again.");
-      setAlertVariant("danger");
+      console.error('Sync failed:', error);
+      setAlertMessage(error instanceof Error ? error.message : 'Sync failed. Please try again.');
+      setAlertVariant('danger');
     } finally {
       setIsSpinning(false);
       setShowAlert(true);
@@ -327,29 +308,26 @@ export default function SpoolsPage() {
     if (!sortKey) return 0;
 
     // Handle potential undefined values during sort
-    const aValue = a[sortKey] ?? "";
-    const bValue = b[sortKey] ?? "";
+    const aValue = a[sortKey] ?? '';
+    const bValue = b[sortKey] ?? '';
 
     let comparison = 0;
-    if (typeof aValue === "string" && typeof bValue === "string") {
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
       comparison = aValue.localeCompare(bValue);
-    } else if (typeof aValue === "number" && typeof bValue === "number") {
+    } else if (typeof aValue === 'number' && typeof bValue === 'number') {
       comparison = aValue - bValue;
     } else {
       // Basic comparison for mixed or other types
       comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
     }
 
-    return sortDirection === "asc" ? comparison : -comparison;
+    return sortDirection === 'asc' ? comparison : -comparison;
   });
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = sortedFilaments.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.max(
-    1,
-    Math.ceil(sortedFilaments.length / itemsPerPage)
-  ); // Ensure at least 1 page
+  const totalPages = Math.max(1, Math.ceil(sortedFilaments.length / itemsPerPage)); // Ensure at least 1 page
 
   // --- Render Helpers ---
   const renderHeader = (key: keyof Filament, title: string) => {
@@ -360,19 +338,18 @@ export default function SpoolsPage() {
 
     return (
       <th
-        className="text-center align-middle"
-        style={{ cursor: "pointer" }}
-        onClick={() => handleSortClick(key)}
-      >
-        {title}{" "}
+        className='text-center align-middle'
+        style={{ cursor: 'pointer' }}
+        onClick={() => handleSortClick(key)}>
+        {title}{' '}
         {sortKey === key ? (
-          sortDirection === "asc" ? (
-            "▲"
+          sortDirection === 'asc' ? (
+            '▲'
           ) : (
-            "▼"
+            '▼'
           )
         ) : (
-          <span style={{ color: "lightgrey" }}>▲▼</span>
+          <span style={{ color: 'lightgrey' }}>▲▼</span>
         )}
       </th>
     );
@@ -381,36 +358,35 @@ export default function SpoolsPage() {
   // Show loading spinner if fetching initial data or context isn't ready
   if (isLoading) {
     return (
-      <Container className="text-center my-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading spools...</span>
+      <Container className='text-center my-5'>
+        <Spinner animation='border' role='status'>
+          <span className='visually-hidden'>Loading spools...</span>
         </Spinner>
-        <p className="mt-2">Loading spools...</p>
+        <p className='mt-2'>Loading spools...</p>
       </Container>
     );
   }
 
   return (
-    <Container className="mt-3 mb-3">
-      <Row className="shadow-lg p-3 bg-body rounded">
+    <Container className='mt-3 mb-3'>
+      <Row className='shadow-lg p-3 bg-body rounded'>
         <Col>
-          <Row className="mb-3">
+          <Row className='mb-3'>
             <Col>
               <h1>Spools</h1>
             </Col>
-            <Col xs="auto">
+            <Col xs='auto'>
               <Button
-                variant="primary"
+                variant='primary'
                 disabled={isSpinning || syncCooldown > 0 || !syncData.syncKey}
-                onClick={handleSync}
-              >
-                <FontAwesomeIcon icon={faCloudArrowUp} className="me-2" />
-                {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : "Sync"}
+                onClick={handleSync}>
+                <FontAwesomeIcon icon={faCloudArrowUp} className='me-2' />
+                {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync'}
               </Button>
             </Col>
           </Row>
           <Row>
-            <Col xs={12} className="mb-3">
+            <Col xs={12} className='mb-3'>
               <CustomAlert
                 variant={alertVariant}
                 message={alertMessage}
@@ -420,18 +396,18 @@ export default function SpoolsPage() {
             </Col>
           </Row>
           <Row>
-            <Col xs={12} md={8} className="mb-2">
+            <Col xs={12} md={8} className='mb-2'>
               <Form.Control
-                type="text"
-                placeholder="Search by ID, Name, Material, Location..."
+                type='text'
+                placeholder='Search by ID, Name, Material, Location...'
                 value={searchTerm}
                 onChange={handleSearchChange}
-                size="sm"
+                size='sm'
               />
             </Col>
-            <Col xs={12} md={4} className="text-md-end mb-2">
-              <Link href="/manage-filament" passHref>
-                <Button variant="primary" size="sm" className="w-50 w-md-auto">
+            <Col xs={12} md={4} className='text-md-end mb-2'>
+              <Link href='/manage-filament' passHref>
+                <Button variant='primary' size='sm' className='w-50 w-md-auto'>
                   Add Filament
                 </Button>
               </Link>
@@ -439,100 +415,86 @@ export default function SpoolsPage() {
           </Row>
           <Row>
             <Col xs={12}>
-              <div className="table-responsive">
-                <Table striped bordered hover size="sm" className="align-middle">
+              <div className='table-responsive'>
+                <Table striped bordered hover size='sm' className='align-middle'>
                   <thead>
                     <tr>
-                      {renderHeader("_id", "ID")}
-                      {renderHeader("filament", "Filament")}
-                      {renderHeader("material", "Material")}
-                      {renderHeader("used_weight", "Used (g)")}
-                      {renderHeader("total_weight", "Total (g)")}
-                      {renderHeader("calc_weight", "Remaining (g)")}
-                      {renderHeader("location", "Location")}
-                      {renderHeader("comments", "Comments")}
-                      <th className="text-center align-middle">Actions</th>
+                      {renderHeader('_id', 'ID')}
+                      {renderHeader('filament', 'Filament')}
+                      {renderHeader('material', 'Material')}
+                      {renderHeader('used_weight', 'Used (g)')}
+                      {renderHeader('total_weight', 'Total (g)')}
+                      {renderHeader('calc_weight', 'Remaining (g)')}
+                      {renderHeader('location', 'Location')}
+                      {renderHeader('comments', 'Comments')}
+                      <th className='text-center align-middle'>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {isDeleting && (
                       <tr>
-                        <td colSpan={9} className="text-center text-muted">
-                          <Spinner animation="border" size="sm" className="me-2" />{" "}
-                          Deleting...
+                        <td colSpan={9} className='text-center text-muted'>
+                          <Spinner animation='border' size='sm' className='me-2' /> Deleting...
                         </td>
                       </tr>
                     )}
                     {!isDeleting && currentItems.length > 0
                       ? currentItems.map((filament) => (
                           <tr key={`filament-${filament._id}`}>
-                            {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders["ID"] !== false) && (
-                              <td className="text-center">
+                            {(!settings?.spoolHeaders || settings.spoolHeaders['ID'] !== false) && (
+                              <td className='text-center'>
                                 <OverlayTrigger
-                                  placement="top"
+                                  placement='top'
                                   delay={{ show: 400, hide: 250 }}
                                   overlay={
-                                    <Tooltip style={{ position: "fixed" }}>
-                                      {filament._id || "N/A"}
+                                    <Tooltip style={{ position: 'fixed' }}>
+                                      {filament._id || 'N/A'}
                                     </Tooltip>
-                                  }
-                                >
-                                  <span style={{ cursor: "help" }}>
-                                    {filament._id
-                                      ? `${filament._id.substring(0, 5)}...`
-                                      : "N/A"}
+                                  }>
+                                  <span style={{ cursor: 'help' }}>
+                                    {filament._id ? `${filament._id.substring(0, 5)}...` : 'N/A'}
                                   </span>
                                 </OverlayTrigger>
                               </td>
                             )}
                             {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders["Filament"] !== false) && (
-                              <td className="text-center">{filament.filament}</td>
+                              settings.spoolHeaders['Filament'] !== false) && (
+                              <td className='text-center'>{filament.filament}</td>
                             )}
                             {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders["Material"] !== false) && (
-                              <td className="text-center">{filament.material}</td>
+                              settings.spoolHeaders['Material'] !== false) && (
+                              <td className='text-center'>{filament.material}</td>
                             )}
                             {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders["Used (g)"] !== false) && (
-                              <td className="text-center">
-                                {filament.used_weight}
-                              </td>
+                              settings.spoolHeaders['Used (g)'] !== false) && (
+                              <td className='text-center'>{filament.used_weight}</td>
                             )}
                             {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders["Total (g)"] !== false) && (
-                              <td className="text-center">
-                                {filament.total_weight}
-                              </td>
+                              settings.spoolHeaders['Total (g)'] !== false) && (
+                              <td className='text-center'>{filament.total_weight}</td>
                             )}
                             {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders["Remaining (g)"] !== false) && (
-                              <td className="text-center">
-                                {filament?.calc_weight ?? ""}
-                              </td>
+                              settings.spoolHeaders['Remaining (g)'] !== false) && (
+                              <td className='text-center'>{filament?.calc_weight ?? ''}</td>
                             )}
                             {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders["Location"] !== false) && (
-                              <td className="text-center">{filament.location}</td>
+                              settings.spoolHeaders['Location'] !== false) && (
+                              <td className='text-center'>{filament.location}</td>
                             )}
                             {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders["Comments"] !== false) && (
-                              <td className="text-center">
-                                {filament.comments &&
-                                filament.comments.length > 20 ? (
+                              settings.spoolHeaders['Comments'] !== false) && (
+                              <td className='text-center'>
+                                {filament.comments && filament.comments.length > 20 ? (
                                   <OverlayTrigger
-                                    placement="top"
+                                    placement='top'
                                     delay={{ show: 400, hide: 250 }}
                                     overlay={
-                                      <Tooltip style={{ position: "fixed" }}>
+                                      <Tooltip style={{ position: 'fixed' }}>
                                         {filament.comments}
                                       </Tooltip>
-                                    }
-                                  >
+                                    }>
                                     <span
-                                      style={{ cursor: "help" }}
-                                    >{`${filament.comments.substring(
+                                      style={{ cursor: 'help' }}>{`${filament.comments.substring(
                                       0,
                                       17
                                     )}...`}</span>
@@ -543,64 +505,44 @@ export default function SpoolsPage() {
                               </td>
                             )}
 
-                            <td className="text-center">
-                              <div className="d-flex justify-content-center align-items-center flex-nowrap">
+                            <td className='text-center'>
+                              <div className='d-flex justify-content-center align-items-center flex-nowrap'>
                                 <OverlayTrigger
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip style={{ position: "fixed" }}>
-                                      Edit
-                                    </Tooltip>
-                                  }
-                                >
-                                  <Link
-                                    href={`/manage-filament?id=${filament._id}`}
-                                    passHref
-                                  >
+                                  placement='top'
+                                  overlay={<Tooltip style={{ position: 'fixed' }}>Edit</Tooltip>}>
+                                  <Link href={`/manage-filament?id=${filament._id}`} passHref>
                                     <Button
-                                      variant="outline-primary"
-                                      size="sm"
-                                      className="me-1 py-0 px-1"
-                                    >
+                                      variant='outline-primary'
+                                      size='sm'
+                                      className='me-1 py-0 px-1'>
                                       <FontAwesomeIcon icon={faPenToSquare} />
                                     </Button>
                                   </Link>
                                 </OverlayTrigger>
                                 <OverlayTrigger
-                                  placement="top"
-                                  overlay={
-                                    <Tooltip style={{ position: "fixed" }}>
-                                      Delete
-                                    </Tooltip>
-                                  }
-                                >
+                                  placement='top'
+                                  overlay={<Tooltip style={{ position: 'fixed' }}>Delete</Tooltip>}>
                                   <Button
-                                    variant="outline-danger"
-                                    size="sm"
-                                    className="me-1 py-0 px-1"
+                                    variant='outline-danger'
+                                    size='sm'
+                                    className='me-1 py-0 px-1'
                                     onClick={() => handleDelete(filament._id)}
-                                    disabled={isDeleting}
-                                  >
+                                    disabled={isDeleting}>
                                     <FontAwesomeIcon icon={faTrash} />
                                   </Button>
                                 </OverlayTrigger>
                                 <OverlayTrigger
-                                  placement="top"
+                                  placement='top'
                                   overlay={
-                                    <Tooltip style={{ position: "fixed" }}>
-                                      Duplicate
-                                    </Tooltip>
-                                  }
-                                >
+                                    <Tooltip style={{ position: 'fixed' }}>Duplicate</Tooltip>
+                                  }>
                                   <Link
                                     href={`/manage-filament?id=${filament._id}&type=duplicate`}
-                                    passHref
-                                  >
+                                    passHref>
                                     <Button
-                                      variant="outline-secondary"
-                                      size="sm"
-                                      className="py-0 px-1"
-                                    >
+                                      variant='outline-secondary'
+                                      size='sm'
+                                      className='py-0 px-1'>
                                       <FontAwesomeIcon icon={faCopy} />
                                     </Button>
                                   </Link>
@@ -611,10 +553,7 @@ export default function SpoolsPage() {
                         ))
                       : !isDeleting && (
                           <tr>
-                            <td
-                              colSpan={9}
-                              className="text-center fst-italic text-muted"
-                            >
+                            <td colSpan={9} className='text-center fst-italic text-muted'>
                               No spools found matching your criteria.
                             </td>
                           </tr>
@@ -627,11 +566,8 @@ export default function SpoolsPage() {
           {/* Pagination and Items Per Page Selector */}
           {!isLoading && sortedFilaments.length > itemsPerPage && (
             <Row>
-              <Col
-                xs={12}
-                className="d-flex justify-content-between align-items-center mt-3"
-              >
-                <Pagination size="sm" className="mb-0">
+              <Col xs={12} className='d-flex justify-content-between align-items-center mt-3'>
+                <Pagination size='sm' className='mb-0'>
                   <Pagination.Prev
                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
@@ -644,23 +580,20 @@ export default function SpoolsPage() {
                     </Pagination.Item>
                   )}
                   <Pagination.Next
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                    }
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
                   />
                 </Pagination>
-                <div className="d-flex align-items-center">
-                  <span className="me-2 text-muted" style={{ fontSize: "0.8rem" }}>
+                <div className='d-flex align-items-center'>
+                  <span className='me-2 text-muted' style={{ fontSize: '0.8rem' }}>
                     Items/page:
                   </span>
                   <Form.Select
                     value={itemsPerPage}
                     onChange={handleItemsPerPageChange}
-                    size="sm"
-                    style={{ width: "auto" }}
-                    aria-label="Items per page"
-                  >
+                    size='sm'
+                    style={{ width: 'auto' }}
+                    aria-label='Items per page'>
                     <option value={10}>10</option>
                     <option value={25}>25</option>
                     <option value={50}>50</option>

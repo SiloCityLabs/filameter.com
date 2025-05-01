@@ -4,17 +4,9 @@ export async function pushData(key: string, exportData: {}): Promise<any> {
 
   try {
     const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        function: "push",
-        email: "",
-        key: key,
-        app: app,
-        data: exportData,
-      }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ function: 'push', email: '', key: key, app: app, data: exportData }),
     });
 
     if (!response.ok) {
@@ -24,7 +16,7 @@ export async function pushData(key: string, exportData: {}): Promise<any> {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error making API call:", error);
+    console.error('Error making API call:', error);
     throw error;
   }
 }

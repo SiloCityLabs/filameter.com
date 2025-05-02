@@ -13,6 +13,7 @@ import getDocumentByColumn from '@/helpers/_silabs/pouchDb/getDocumentByColumn';
 import saveSettings from '@/helpers/database/settings/saveSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { exportDB } from '@/helpers/exportDB';
+import { importDB } from '@/helpers/importDB';
 // --- Types ---
 import type { sclSettings } from '@/types/_fw';
 
@@ -289,16 +290,38 @@ export default function Sync({ verifyKey }: SyncProps) {
   };
 
   const forcePull = async () => {
+    if (!dbs?.filament) {
+      console.error('Filament database is not initialized.');
+      setAlertMessage('Database not ready. Cannot save filaments.');
+      setAlertVariant('warning');
+      setShowAlert(true);
+      return;
+    }
+
     try {
       setIsSpinning(true);
       const response = await pullData(data?.syncKey);
       if (response.status === 'success') {
         // Update lastSynced but preserve other data
-        const updatedData = { ...data, lastSynced: new Date().toISOString() };
+        const updatedData = {
+          ...data,
+          syncKey: response.data.token,
+          email: response.data.userData.email,
+          accountType: response.data.keyType,
+          lastSynced: new Date().toISOString(),
+        };
         setData(updatedData);
         await save({ 'scl-sync': updatedData });
-        setAlertVariant('success');
-        setAlertMessage('Data has been pulled from the cloud!');
+
+        // Force overwrite data
+        if (Object.keys(response.data?.data).length > 0 && response.data.data?.regular) {
+          await importDB(dbs.filament, response.data.data);
+          setAlertVariant('success');
+          setAlertMessage('Data has been pulled from the cloud!');
+        } else {
+          setAlertVariant('info');
+          setAlertMessage('There was no cloud data, nothing has been pulled from the cloud!');
+        }
       } else if (response.status === 'error') {
         setShowAlert(true);
         setAlertVariant('danger');

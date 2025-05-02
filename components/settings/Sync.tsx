@@ -284,7 +284,10 @@ export default function Sync({ verifyKey }: SyncProps) {
                 `Update available. Last sync: ${lastSyncedDate.toLocaleString()}, Remote timestamp: ${responseDate.toLocaleString()}`
               );
 
-              pullSyncData();
+              await pullSyncData();
+
+              setLastSyncTime(Date.now());
+              setSyncCooldown(60);
             } else {
               // TODO: Add specific logic if local data is up-to-date or newer
               setAlertVariant('success');

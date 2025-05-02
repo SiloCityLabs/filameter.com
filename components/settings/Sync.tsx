@@ -17,10 +17,17 @@ import { exportDB } from '@/helpers/exportDB';
 import { importDB } from '@/helpers/importDB';
 // --- Types ---
 import type { sclSettings } from '@/types/_fw';
+import type { Filament } from '@/types/Filament';
 
+interface SyncDataStructure {
+  local: Filament[];
+  regular: Filament[];
+}
 interface SyncProps {
   verifyKey: string;
 }
+
+const defaultSyncData: SyncDataStructure = { local: [], regular: [] };
 
 export default function Sync({ verifyKey }: SyncProps) {
   const { dbs, isReady } = useDatabase();
@@ -33,7 +40,7 @@ export default function Sync({ verifyKey }: SyncProps) {
   const [initialType, setInitialType] = useState('');
   const [syncEmail, setSyncEmail] = useState('');
   const [syncKey, setSyncKey] = useState('');
-  const [dbExport, setDbExport] = useState({});
+  const [dbExport, setDbExport] = useState(defaultSyncData);
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
   const [syncCooldown, setSyncCooldown] = useState<number>(0);
 
@@ -54,8 +61,6 @@ export default function Sync({ verifyKey }: SyncProps) {
             const syncData = JSON.parse(sclSync.value);
             setData(syncData);
 
-            console.log('Sync data:', syncData);
-
             if (syncData.syncKey === '' || syncData.needsVerification) {
               //Setup sync via key verification
               if (verifyKey) {
@@ -74,8 +79,8 @@ export default function Sync({ verifyKey }: SyncProps) {
           }
 
           //Get Filament Export Data
-          const exportData = (await exportDB(dbs.filament, false)) ?? {};
-          setDbExport(exportData);
+          const exportData = (await exportDB(dbs.filament, false)) ?? defaultSyncData;
+          setDbExport(exportData as SyncDataStructure);
         } catch (err: unknown) {
           const errorMessage = err instanceof Error ? err.message : 'Failed to fetch settings.';
           setAlertMessage(errorMessage);
@@ -233,7 +238,6 @@ export default function Sync({ verifyKey }: SyncProps) {
         setAlertVariant('success');
         setAlertMessage('Data has been synced to the cloud!');
       } else if (response.status === 'error') {
-        setShowAlert(true);
         setAlertVariant('danger');
         setAlertMessage(response.error);
       }
@@ -258,7 +262,6 @@ export default function Sync({ verifyKey }: SyncProps) {
     try {
       setIsSpinning(true);
       const response = await checkTimestamp(data.syncKey);
-      console.log('checkTimestamp response', response);
       if (response.status === 'success') {
         // Ensure both timestamp values exist before attempting comparison
         if (response.timestamp) {
@@ -277,25 +280,20 @@ export default function Sync({ verifyKey }: SyncProps) {
           } else {
             // Perform the comparison: Is responseDate later than lastSyncedDate?
             if (responseDate > lastSyncedDate) {
-              console.log('Sync Check Result: Remote timestamp is more recent.');
-              // Example: Maybe set a specific alert message indicating an update is available
-              setAlertVariant('info');
-              setAlertMessage(
+              console.debug(
                 `Update available. Last sync: ${lastSyncedDate.toLocaleString()}, Remote timestamp: ${responseDate.toLocaleString()}`
               );
 
               pullSyncData();
             } else {
-              console.log('Sync Check Result: Local timestamp is the same or more recent.');
               // TODO: Add specific logic if local data is up-to-date or newer
               setAlertVariant('success');
               setAlertMessage(
                 `Data is up-to-date. Last sync: ${lastSyncedDate.toLocaleString()}, Remote timestamp: ${responseDate.toLocaleString()}`
               );
+              setShowAlert(true);
             }
           }
-
-          setShowAlert(true);
         } else {
           // Handle cases where one of the timestamps might be missing even on success
           console.warn('Timestamp missing in successful response or local data:', {
@@ -304,13 +302,13 @@ export default function Sync({ verifyKey }: SyncProps) {
           });
           setAlertVariant('warning');
           setAlertMessage('Could not compare sync times: timestamp missing.');
+          setShowAlert(true);
         }
       } else if (response.status === 'error') {
-        setShowAlert(true);
         setAlertVariant('danger');
         setAlertMessage(response.error);
+        setShowAlert(true);
       }
-      setShowAlert(true);
     } catch (error) {
       console.error('Failed to export', error);
       setShowAlert(true);
@@ -329,41 +327,109 @@ export default function Sync({ verifyKey }: SyncProps) {
       return;
     }
 
+    // Refresh dbExport state right before pull/merge operation
+    const currentDbExport: SyncDataStructure = dbExport;
+
     try {
       setIsSpinning(true);
       const response = await pullData(data?.syncKey);
-      if (response.status === 'success') {
-        // Update lastSynced but preserve other data
-        const updatedData = {
-          ...data,
-          syncKey: response.data.token,
-          email: response.data.userData.email,
-          accountType: response.data.keyType,
-          lastSynced: new Date().toISOString(),
-        };
-        setData(updatedData);
-        await save({ 'scl-sync': updatedData });
 
-        if (Object.keys(response.data?.data).length > 0 && response.data.data?.regular) {
-          const serverData = response.data.data;
-          // Force overwrite data
+      if (response.status === 'success') {
+        const nowISO = new Date().toISOString();
+        // Update settings data immediately after successful pull API call
+        const updatedSettingsData = {
+          ...data,
+          syncKey: response.data?.token ?? data?.syncKey,
+          email: response.data?.userData?.email ?? data?.email,
+          accountType: response.data?.keyType ?? data?.accountType,
+          lastSynced: nowISO,
+          needsVerification: false,
+        };
+        setData(updatedSettingsData); // Update component state
+        await save({ 'scl-sync': updatedSettingsData }); // Save updated settings to DB
+        setLastSyncTime(Date.parse(nowISO)); // Update lastSyncTime for cooldown timer
+
+        // Ensure serverData has the expected structure, provide defaults if not
+        const serverData: SyncDataStructure = {
+          local: response.data?.data?.local ?? [],
+          regular: response.data?.data?.regular ?? [],
+        };
+
+        if (serverData.local.length > 0 || serverData.regular.length > 0) {
+          let finalDataToImport: SyncDataStructure;
+          let importMessage = '';
+
           if (force) {
-            await importDB(dbs.filament, serverData);
-            setAlertVariant('success');
-            setAlertMessage('Data has been pulled from the cloud!');
+            finalDataToImport = serverData;
+            importMessage = 'Data has been force-pulled from the cloud, overwriting local data!';
+            setAlertVariant('warning');
           } else {
-            //compare serverData and dbExport
+            // Handle 'local' data: Always replace with server data
+            const mergedLocal = serverData.local;
+
+            // Handle 'regular' data: Merge based on _id
+            const serverRegularMap = new Map(serverData.regular.map((item) => [item._id, item]));
+            const mergedRegular: Filament[] = [];
+            const processedServerIds = new Set<string>();
+
+            // Iterate through local data
+            if (currentDbExport.regular && Array.isArray(currentDbExport.regular)) {
+              for (const localItem of currentDbExport.regular) {
+                if (localItem?._id && serverRegularMap.has(localItem._id)) {
+                  // ID exists in both: take server version
+                  mergedRegular.push(serverRegularMap.get(localItem._id)!);
+                  processedServerIds.add(localItem._id); // Mark server item as processed
+                } else {
+                  // ID only exists locally: keep local version
+                  mergedRegular.push(localItem);
+                }
+              }
+            }
+
+            // Add any server items that were not present locally
+            for (const serverItem of serverData.regular) {
+              if (!processedServerIds.has(serverItem._id ?? '')) {
+                mergedRegular.push(serverItem);
+              }
+            }
+
+            finalDataToImport = { local: mergedLocal, regular: mergedRegular };
+            importMessage = 'Data has been pulled and merged with local data!';
+            setAlertVariant('success');
+          }
+
+          //Push new synced data to cloud
+          const pushResponse = await pushData(data.syncKey, finalDataToImport);
+          if (pushResponse.status === 'error') {
+            setShowAlert(true);
+            setAlertVariant('danger');
+            setAlertMessage(response.error);
+            return;
+          }
+          // Import the final data structure (either forced or merged)
+          await importDB(dbs.filament, finalDataToImport);
+          setAlertMessage(importMessage);
+
+          // Refresh local export state *after* successful import
+          try {
+            const refreshedExportData = (await exportDB(dbs.filament, false)) ?? {
+              local: [],
+              regular: [],
+            };
+            setDbExport(refreshedExportData as SyncDataStructure);
+          } catch (err) {
+            console.error('Error refreshing local DB export after import:', err);
+            // Non-critical error, maybe just log it
           }
         } else {
           setAlertVariant('info');
-          setAlertMessage('There was no cloud data, nothing has been pulled from the cloud!');
+          setAlertMessage('Cloud data was empty. Local data remains unchanged.');
         }
       } else if (response.status === 'error') {
-        setShowAlert(true);
         setAlertVariant('danger');
         setAlertMessage(response.error);
       }
-      setShowAlert(true);
+      setShowAlert(true); // Show alert for success/info/error cases
     } catch (error) {
       console.error('Failed to pull', error);
       setShowAlert(true);

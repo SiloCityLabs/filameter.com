@@ -190,7 +190,7 @@ export default function Sync({ verifyKey }: SyncProps) {
           syncKey: response.data.token,
           email: response.data.userData.email,
           accountType: response.data.keyType,
-          lastSynced: new Date().toISOString(),
+          lastSynced: null,
         };
         setData(keyData);
         await save({ 'scl-sync': keyData });
@@ -212,7 +212,7 @@ export default function Sync({ verifyKey }: SyncProps) {
     setIsSpinning(false);
   };
 
-  const syncData = async (force = false) => {
+  const pushSyncData = async (force = false) => {
     if (!force && !canSync()) {
       setAlertVariant('warning');
       setAlertMessage('Please wait 60 seconds between syncs');
@@ -248,7 +248,7 @@ export default function Sync({ verifyKey }: SyncProps) {
   };
 
   const checkSyncTimestamp = async () => {
-    if (data?.syncKey) {
+    if (!data?.syncKey) {
       setAlertVariant('warning');
       setAlertMessage('Sync key missing');
       setShowAlert(true);
@@ -259,12 +259,57 @@ export default function Sync({ verifyKey }: SyncProps) {
       setIsSpinning(true);
       const response = await checkTimestamp(data.syncKey);
       console.log('checkTimestamp response', response);
-      // if (response.status === 'success') {
-      // } else if (response.status === 'error') {
-      //   setShowAlert(true);
-      //   setAlertVariant('danger');
-      //   setAlertMessage(response.error);
-      // }
+      if (response.status === 'success') {
+        // Ensure both timestamp values exist before attempting comparison
+        if (response.timestamp) {
+          const responseDate = new Date(response.timestamp);
+          const lastSyncedDate = new Date(data?.lastSynced ?? 0);
+
+          // Check if dates are valid after parsing
+          if (isNaN(responseDate.getTime()) || isNaN(lastSyncedDate.getTime())) {
+            console.error('Invalid date format encountered for comparison:', {
+              responseTimestamp: response.timestamp,
+              lastSynced: data.lastSynced,
+            });
+            // Set an appropriate error message if dates are invalid
+            setAlertVariant('danger');
+            setAlertMessage('Error comparing sync times: Invalid date format.');
+          } else {
+            // Perform the comparison: Is responseDate later than lastSyncedDate?
+            if (responseDate > lastSyncedDate) {
+              console.log('Sync Check Result: Remote timestamp is more recent.');
+              // Example: Maybe set a specific alert message indicating an update is available
+              setAlertVariant('info');
+              setAlertMessage(
+                `Update available. Last sync: ${lastSyncedDate.toLocaleString()}, Remote timestamp: ${responseDate.toLocaleString()}`
+              );
+
+              pullSyncData();
+            } else {
+              console.log('Sync Check Result: Local timestamp is the same or more recent.');
+              // TODO: Add specific logic if local data is up-to-date or newer
+              setAlertVariant('success');
+              setAlertMessage(
+                `Data is up-to-date. Last sync: ${lastSyncedDate.toLocaleString()}, Remote timestamp: ${responseDate.toLocaleString()}`
+              );
+            }
+          }
+
+          setShowAlert(true);
+        } else {
+          // Handle cases where one of the timestamps might be missing even on success
+          console.warn('Timestamp missing in successful response or local data:', {
+            responseTimestamp: response.timestamp,
+            lastSynced: data.lastSynced,
+          });
+          setAlertVariant('warning');
+          setAlertMessage('Could not compare sync times: timestamp missing.');
+        }
+      } else if (response.status === 'error') {
+        setShowAlert(true);
+        setAlertVariant('danger');
+        setAlertMessage(response.error);
+      }
       setShowAlert(true);
     } catch (error) {
       console.error('Failed to export', error);
@@ -275,7 +320,7 @@ export default function Sync({ verifyKey }: SyncProps) {
     setIsSpinning(false);
   };
 
-  const forcePull = async () => {
+  const pullSyncData = async (force: boolean = false) => {
     if (!dbs?.filament) {
       console.error('Filament database is not initialized.');
       setAlertMessage('Database not ready. Cannot save filaments.');
@@ -299,11 +344,16 @@ export default function Sync({ verifyKey }: SyncProps) {
         setData(updatedData);
         await save({ 'scl-sync': updatedData });
 
-        // Force overwrite data
         if (Object.keys(response.data?.data).length > 0 && response.data.data?.regular) {
-          await importDB(dbs.filament, response.data.data);
-          setAlertVariant('success');
-          setAlertMessage('Data has been pulled from the cloud!');
+          const serverData = response.data.data;
+          // Force overwrite data
+          if (force) {
+            await importDB(dbs.filament, serverData);
+            setAlertVariant('success');
+            setAlertMessage('Data has been pulled from the cloud!');
+          } else {
+            //compare serverData and dbExport
+          }
         } else {
           setAlertVariant('info');
           setAlertMessage('There was no cloud data, nothing has been pulled from the cloud!');
@@ -458,7 +508,9 @@ export default function Sync({ verifyKey }: SyncProps) {
             <Row className='justify-content-center align-items-center'>
               <Col xs='auto'>Email: {data?.email ?? 'N/A'}</Col>
               <Col xs='auto'>Key: {data?.syncKey ?? 'N/A'}</Col>
-              <Col xs='auto'>Last Synced: {data?.lastSynced ?? 'N/A'}</Col>
+              <Col xs='auto'>
+                Last Synced: {data?.lastSynced ? new Date(data.lastSynced).toLocaleString() : 'N/A'}
+              </Col>
               <Col xs='auto'>Account Type: {data?.accountType || 'Free'}</Col>
             </Row>
             <Row className='mt-4 justify-content-center align-items-center'>
@@ -479,7 +531,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                   className='w-100'
                   disabled={isSpinning || syncCooldown > 0 || initialType === 'needs-verification'}
                   onClick={() => {
-                    syncData();
+                    checkSyncTimestamp();
                   }}>
                   {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync Now'}
                 </Button>
@@ -490,7 +542,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                   className='w-100'
                   disabled={isSpinning || initialType === 'needs-verification'}
                   onClick={() => {
-                    syncData(true);
+                    pushSyncData(true);
                   }}>
                   Force Push
                 </Button>
@@ -500,7 +552,9 @@ export default function Sync({ verifyKey }: SyncProps) {
                   variant='info'
                   className='w-100'
                   disabled={isSpinning || initialType === 'needs-verification'}
-                  onClick={forcePull}>
+                  onClick={() => {
+                    pullSyncData(true);
+                  }}>
                   Force Pull
                 </Button>
               </Col>

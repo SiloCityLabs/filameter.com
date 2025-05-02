@@ -1,4 +1,4 @@
-export async function pullData(key: string): Promise<any> {
+export async function checkTimestamp(key: string): Promise<any> {
   const url = process.env.NEXT_PUBLIC_APP_FILAMETER_SYNC_URL as string;
   const app = process.env.NEXT_PUBLIC_APP_FILAMETER_SYNC_APP as string;
 
@@ -6,7 +6,7 @@ export async function pullData(key: string): Promise<any> {
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ function: 'pull', key: key, app: app }),
+      body: JSON.stringify({ function: 'timestamp', key: key, app: app }),
     });
 
     if (!response.ok) {

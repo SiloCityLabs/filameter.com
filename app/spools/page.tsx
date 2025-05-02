@@ -26,7 +26,8 @@ import getAllSettings from '@/helpers/database/settings/getAllSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { exportDB } from '@/helpers/exportDB';
 import { pushData } from '@/helpers/sync/pushData';
-import { pullData, checkTimestamp } from '@/helpers/sync/pullData';
+import { pullData } from '@/helpers/sync/pullData';
+import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
 import getDocumentByColumn from '@/helpers/_silabs/pouchDb/getDocumentByColumn';
 import { importPulledData } from '@/helpers/sync/importPulledData';
 // --- Icons ---

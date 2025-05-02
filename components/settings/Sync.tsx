@@ -8,6 +8,7 @@ import { setupSyncByEmail } from '@/helpers/sync/setupSyncByEmail';
 import { setupSyncByKey } from '@/helpers/sync/setupSyncByKey';
 import { pushData } from '@/helpers/sync/pushData';
 import { pullData } from '@/helpers/sync/pullData';
+import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
 // --- DB ---
 import getDocumentByColumn from '@/helpers/_silabs/pouchDb/getDocumentByColumn';
 import saveSettings from '@/helpers/database/settings/saveSettings';
@@ -58,7 +59,7 @@ export default function Sync({ verifyKey }: SyncProps) {
             if (syncData.syncKey === '' || syncData.needsVerification) {
               //Setup sync via key verification
               if (verifyKey) {
-                verifySync(syncData.email, verifyKey);
+                existingKey(verifyKey);
               } else {
                 setInitialType('needs-verification');
                 setAlertVariant('info');
@@ -69,8 +70,7 @@ export default function Sync({ verifyKey }: SyncProps) {
               setInitialType('engaged');
             }
           } else if (verifyKey) {
-            console.log('Verifying key:', verifyKey);
-            verifySync('', verifyKey);
+            existingKey(verifyKey);
           }
 
           //Get Filament Export Data
@@ -139,51 +139,6 @@ export default function Sync({ verifyKey }: SyncProps) {
     }
   };
 
-  const verifySync = async (email: string, key: string) => {
-    if (!key) {
-      setShowAlert(true);
-      setAlertVariant('danger');
-      setAlertMessage('Key is required!');
-      return;
-    }
-
-    try {
-      setIsSpinning(true);
-      const response = await setupSyncByKey(key);
-      if (response.status === 'success' && response.data) {
-        const keyData = {
-          syncKey: response.data.token,
-          email: response.data.userData.email,
-          accountType: response.data.keyType,
-          lastSynced: new Date().toISOString(),
-        };
-        setData(keyData);
-        await save({ 'scl-sync': keyData });
-        setInitialType('engaged');
-        setAlertVariant('success');
-        setAlertMessage('Sync setup with key!');
-      } else if (response.status === 'error') {
-        setAlertVariant('danger');
-        setAlertMessage(response.error);
-      } else {
-        setAlertVariant('danger');
-        setAlertMessage('Invalid response from server');
-      }
-      setShowAlert(true);
-    } catch (error: unknown) {
-      console.error('Error verifying sync:', error);
-      if (error instanceof Error) {
-        setAlertMessage(error.message);
-      } else {
-        setAlertMessage('An unknown error occurred while verifying sync.');
-      }
-      setShowAlert(true);
-      setAlertVariant('danger');
-    } finally {
-      setIsSpinning(false);
-    }
-  };
-
   const createSync = async () => {
     if (!isValidEmail(syncEmail)) {
       setShowAlert(true);
@@ -217,17 +172,20 @@ export default function Sync({ verifyKey }: SyncProps) {
     setIsSpinning(false);
   };
 
-  const existingKey = async () => {
-    if (!syncKey) {
+  const existingKey = async (key: string = '') => {
+    if (!syncKey && !key) {
       setShowAlert(true);
       setAlertVariant('danger');
       setAlertMessage('Key is required!');
       return;
     }
+
+    const userKey = key || syncKey;
+
     try {
       setIsSpinning(true);
-      const response = await setupSyncByKey(syncKey);
-      if (response.status === 'success') {
+      const response = await setupSyncByKey(userKey);
+      if (response.status === 'success' && response.data) {
         const keyData = {
           syncKey: response.data.token,
           email: response.data.userData.email,
@@ -279,6 +237,34 @@ export default function Sync({ verifyKey }: SyncProps) {
         setAlertVariant('danger');
         setAlertMessage(response.error);
       }
+      setShowAlert(true);
+    } catch (error) {
+      console.error('Failed to export', error);
+      setShowAlert(true);
+      setAlertVariant('danger');
+      setAlertMessage('Sync Failed!');
+    }
+    setIsSpinning(false);
+  };
+
+  const checkSyncTimestamp = async () => {
+    if (data?.syncKey) {
+      setAlertVariant('warning');
+      setAlertMessage('Sync key missing');
+      setShowAlert(true);
+      return;
+    }
+
+    try {
+      setIsSpinning(true);
+      const response = await checkTimestamp(data.syncKey);
+      console.log('checkTimestamp response', response);
+      // if (response.status === 'success') {
+      // } else if (response.status === 'error') {
+      //   setShowAlert(true);
+      //   setAlertVariant('danger');
+      //   setAlertMessage(response.error);
+      // }
       setShowAlert(true);
     } catch (error) {
       console.error('Failed to export', error);

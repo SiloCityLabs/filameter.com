@@ -192,6 +192,12 @@ export default function Sync({ verifyKey }: SyncProps) {
           accountType: response.data.keyType,
           lastSynced: new Date().toISOString(),
         };
+
+        // Import data into the filament database if available
+        if (dbs?.filament && Object.keys(response.data?.data).length > 0 && response.data.data?.regular) {
+          await importDB(dbs.filament, response.data.data);
+        }
+
         setData(keyData);
         await save({ 'scl-sync': keyData });
         setInitialType('engaged');
@@ -237,34 +243,6 @@ export default function Sync({ verifyKey }: SyncProps) {
         setAlertVariant('danger');
         setAlertMessage(response.error);
       }
-      setShowAlert(true);
-    } catch (error) {
-      console.error('Failed to export', error);
-      setShowAlert(true);
-      setAlertVariant('danger');
-      setAlertMessage('Sync Failed!');
-    }
-    setIsSpinning(false);
-  };
-
-  const checkSyncTimestamp = async () => {
-    if (data?.syncKey) {
-      setAlertVariant('warning');
-      setAlertMessage('Sync key missing');
-      setShowAlert(true);
-      return;
-    }
-
-    try {
-      setIsSpinning(true);
-      const response = await checkTimestamp(data.syncKey);
-      console.log('checkTimestamp response', response);
-      // if (response.status === 'success') {
-      // } else if (response.status === 'error') {
-      //   setShowAlert(true);
-      //   setAlertVariant('danger');
-      //   setAlertMessage(response.error);
-      // }
       setShowAlert(true);
     } catch (error) {
       console.error('Failed to export', error);

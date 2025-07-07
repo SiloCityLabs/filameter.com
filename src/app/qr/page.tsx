@@ -10,7 +10,7 @@ import { CustomAlert } from '@silocitypages/ui-core';
 // --- Context Hook ---
 import { useDatabase } from '@/contexts/DatabaseContext';
 // ---DB Helpers ---
-import getDocumentByColumn from '@silocitypages/data-access';
+import { getDocumentByColumn } from '@silocitypages/data-access';
 
 export default function QrScanPage() {
   const router = useRouter();

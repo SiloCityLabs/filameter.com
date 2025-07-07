@@ -1,25 +1,30 @@
+// --- React ---
 import { useState, useEffect } from 'react';
 import { Row, Col, Form, Button } from 'react-bootstrap';
-//Components
+// --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
-//DB
+// --- DB ---
 import getAllSettings from '@/helpers/database/settings/getAllSettings';
 import saveSettings from '@/helpers/database/settings/saveSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
-//Types
-import { sclSettings } from '@/types/_fw';
+// --- Types ---
+import type { sclSettings } from '@silocitypages/ui-core';
 
 const tableHeaders = [
   'ID',
   'Filament',
   'Material',
-  'Used Weight',
-  'Total Weight',
-  'Weight Left',
+  'Used (g)',
+  'Total (g)',
+  'Remaining (g)',
   'Location',
   'Comments',
 ];
 
+/**
+ * Renders the main settings panel, allowing users to configure
+ * which columns are visible on the spools table.
+ */
 export default function MainSettings() {
   const { dbs, isReady } = useDatabase();
   const [isSpinning, setIsSpinning] = useState(false);
@@ -33,10 +38,14 @@ export default function MainSettings() {
     async function fetchData() {
       if (dbs.settings) {
         try {
-          const allData = await getAllSettings(dbs.settings);
-          if (!allData.spoolHeaders) {
+          // Cast the fetched settings to sclSettings, which allows for indexable properties.
+          const allData = (await getAllSettings(dbs.settings)) as sclSettings;
+
+          // If spoolHeaders setting doesn't exist or is not an object, initialize it.
+          if (!allData.spoolHeaders || typeof allData.spoolHeaders !== 'object') {
             allData.spoolHeaders = {};
             tableHeaders.forEach((header) => {
+              // This is now valid because allData.spoolHeaders is treated as an indexable object.
               allData.spoolHeaders[header] = true;
             });
           }
@@ -59,8 +68,9 @@ export default function MainSettings() {
   const handleCheckboxChange = (header: string, isChecked: boolean) => {
     setData((prevData) => {
       const newData = { ...prevData };
-      if (!newData.spoolHeaders) {
-        newData.spoolHeaders = {}; // Initialize spoolHeaders if it doesn't exist
+      // Ensure spoolHeaders is initialized before modification
+      if (!newData.spoolHeaders || typeof newData.spoolHeaders !== 'object') {
+        newData.spoolHeaders = {};
       }
       newData.spoolHeaders[header] = isChecked;
       return newData;
@@ -77,6 +87,8 @@ export default function MainSettings() {
 
     try {
       await saveSettings(dbs.settings, data);
+      setAlertMessage('Settings Saved!');
+      setAlertVariant('success');
     } catch (error: unknown) {
       console.error('Error saving settings:', error);
       if (error instanceof Error) {
@@ -84,12 +96,10 @@ export default function MainSettings() {
       } else {
         setAlertMessage('An unknown error occurred while saving settings.');
       }
-      setShowAlert(true);
       setAlertVariant('danger');
     } finally {
       setIsSpinning(false);
       setShowAlert(true);
-      setAlertMessage('Settings Saved!');
     }
   };
 
@@ -111,7 +121,10 @@ export default function MainSettings() {
         <Row className='justify-content-center'>
           <Col className='d-flex flex-wrap justify-content-center'>
             {tableHeaders.map((header) => (
-              <div key={header} className='d-flex' style={{ width: '50%', maxWidth: '150px' }}>
+              <div
+                key={header}
+                className='d-flex'
+                style={{ width: '50%', maxWidth: '200px', padding: '0.5rem' }}>
                 <Form.Check
                   type='checkbox'
                   id={`checkbox-${header.replace(/\s/g, '')}`}

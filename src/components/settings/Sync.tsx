@@ -10,7 +10,7 @@ import { pushData } from '@/helpers/sync/pushData';
 import { pullData } from '@/helpers/sync/pullData';
 import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
 // --- DB ---
-import getDocumentByColumn from '@silocitypages/data-access';
+import { getDocumentByColumn } from '@silocitypages/data-access';
 import saveSettings from '@/helpers/database/settings/saveSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { exportDB } from '@/helpers/exportDB';

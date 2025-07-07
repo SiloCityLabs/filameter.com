@@ -20,7 +20,6 @@ import Link from 'next/link';
 // --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
 // --- DB ---
-import deleteRow from '@silocitypages/data-access';
 import getAllFilaments from '@/helpers/database/filament/getAllFilaments';
 import getAllSettings from '@/helpers/database/settings/getAllSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
@@ -28,7 +27,7 @@ import { exportDB } from '@/helpers/exportDB';
 import { pushData } from '@/helpers/sync/pushData';
 import { pullData } from '@/helpers/sync/pullData';
 import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
-import getDocumentByColumn from '@silocitypages/data-access';
+import { getDocumentByColumn, deleteRow } from '@silocitypages/data-access';
 import { importPulledData } from '@/helpers/sync/importPulledData';
 // --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -241,7 +240,7 @@ export default function SpoolsPage() {
             }
             const importResult = await importPulledData(
               { filament: dbs.filament, settings: dbs.settings },
-              pullResponse
+              pullResponse.data // Corrected: Pass the nested data object
             );
             if (importResult.success) {
               setAlertMessage('Data synced successfully');
@@ -259,7 +258,8 @@ export default function SpoolsPage() {
               throw new Error(importResult.message);
             }
           } else {
-            throw new Error(pullResponse.message || 'Failed to pull data');
+            // Corrected: Use the 'error' property from ApiErrorResponse
+            throw new Error(pullResponse.error || 'Failed to pull data');
           }
         } else if (dbs.filament) {
           // Push data if local is newer
@@ -272,7 +272,8 @@ export default function SpoolsPage() {
               setLastSyncTime(Date.now());
               setSyncCooldown(60);
             } else {
-              throw new Error(pushResponse.message || 'Failed to push data');
+              // Corrected: Use the 'error' property from ApiErrorResponse
+              throw new Error(pushResponse.error || 'Failed to push data');
             }
           }
         } else {

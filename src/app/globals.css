@@ -1,6 +1,15 @@
+:root {
+  --primary-color: #117ace;
+  --complementary-color: #ce6511;
+  --background-light: #e7f1fa;
+  --text-dark: #212529;
+  --white: #ffffff;
+  --hover-color: #0b5a8a; /* A darker shade of the primary blue for hover effects */
+}
+
 .custom-checkbox .form-check-input {
   transform: scale(1.2);
-  border: 2px solid #007bff;
+  border: 2px solid var(--primary-color);
   cursor: pointer;
 }
 

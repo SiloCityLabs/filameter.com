@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "esnext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react-jsx", // Or "react" depending on your React version/setup
+    "declaration": true, // Generate .d.ts files
+    "declarationDir": "./dist",
+    "outDir": "./dist", // Output directory for compiled JS
+    "rootDir": "./src", // Source directory
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node", // Or "nodenext"
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["src"], // Compile files in the src directory
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}

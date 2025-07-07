@@ -1,0 +1,27 @@
+{
+  "name": "@silocitypages/utils",
+  "version": "1.0.0",
+  "description": "Core utility functions for SiloCityPages projects",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^22.13.14",
+    "@types/uuid": "^10.0.0",
+    "schema-dts": "^1.1.5",
+    "typescript": "^5.8.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

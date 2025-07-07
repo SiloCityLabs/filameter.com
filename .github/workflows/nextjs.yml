@@ -2,10 +2,12 @@ name: Deploy Next.js site to Pages
 
 on:
   push:
-    branches: ['main']
+    branches: ['main'] # Triggers on push to main
 
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# Sets permissions needed for GitHub Pages deployment
 permissions:
   contents: read
   pages: write
@@ -19,58 +21,70 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Detect package manager
-        id: detect-package-manager
-        run: |
-          if [ -f "${{ github.workspace }}/yarn.lock" ]; then
-            echo "manager=yarn" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT
-            echo "runner=yarn" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ -f "${{ github.workspace }}/package.json" ]; then
-            echo "manager=npm" >> $GITHUB_OUTPUT
-            echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "Unable to determine package manager"
-            exit 1
-          fi
+
+      # Set up Node.js environment
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Restore cache
+
+      # --- Enable Corepack and Prepare pnpm ---
+      - name: Enable Corepack
+        run: corepack enable
+
+      # Prepare/Activate pnpm using the version defined in package.json or latest
+      - name: Prepare pnpm
+        run: corepack prepare pnpm@latest --activate
+
+      # --- Explicitly cache pnpm dependencies ---
+      # Get the path to the pnpm store
+      - name: Get pnpm store path
+        id: pnpm-cache
+        shell: bash # Specify bash shell for the command
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      # Cache the pnpm store path identified in the previous step
+      - name: Cache pnpm dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }} # Use the determined store path
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }} # Cache key based on OS, Node version, and lockfile
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+            ${{ runner.os }}- # Fallback keys
+
+      # Sets up GitHub Pages environment
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Install dependencies
-        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        # Use pnpm install --frozen-lockfile for deterministic install
+        run: pnpm install --frozen-lockfile
+
       - name: Build with Next.js (Production Mode)
-        run: npx --no-install next build && npx workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-*.js out/
+        run: pnpm run build
         env:
           NODE_ENV: production
+
+      # Uploads the build artifact for deployment
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: ./out # Adjust path if your build output is elsewhere
 
+  # Deployment job depends on the build job
   deploy:
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      name: github-pages # Specifies the deployment environment
+      url: ${{ steps.deployment.outputs.page_url }} # URL of the deployed site
     runs-on: ubuntu-latest
-    needs: build
+    needs: build # Ensures build job completes successfully before deployment starts
     steps:
+      # Deploys the uploaded artifact to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

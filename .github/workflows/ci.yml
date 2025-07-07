@@ -1,9 +1,12 @@
-name: CI (Lint & Build)
+name: CI (Lint, Build & Test)
 
 on:
-  push:
+  push: # Trigger on push to *any* branch
   pull_request:
-    branches: [main] # Trigger on pull requests targeting the main branch
+    branches: [main, legacy-solo] # Trigger on pull requests targeting these branches
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   ci:
@@ -18,25 +21,45 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Cache dependencies
+      # Enable Corepack (comes with Node.js)
+      - name: Enable Corepack
+        run: corepack enable
+
+      # Prepare/Activate pnpm using the version possibly defined in package.json
+      - name: Prepare pnpm
+        run: corepack prepare pnpm@latest --activate
+
+      - name: Get pnpm store path
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      # Cache the store path identified in the previous step
+      - name: Cache pnpm dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-node-20-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node-20-pnpm-
+            ${{ runner.os }}-node-20-
+            ${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace packages (for linting, testing, etc.)
+        run: pnpm run --recursive --if-present build
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
 
-      - name: Build
-        run: npm run build
+      - name: Build (main application build)
+        run: pnpm run build
 
-      - name: Run Unit Tests
-        run: npm test
+      - name: Run Tests and Generate Coverage
+        run: pnpm run test

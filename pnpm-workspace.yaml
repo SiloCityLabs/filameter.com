@@ -1,0 +1,3 @@
+packages:
+  - . # The root project (your SiloCityPages app shell)
+  - packages/* # Where your core packages will live

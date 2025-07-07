@@ -1,0 +1,87 @@
+/*
+  .baseBadge is applied to ALL SclBadge instances.
+  It uses CSS variables that can be set inline by the React component (--scl-badge-current-*)
+  or fall back to globally defined defaults (--scl-badge-bg-color-default, etc.).
+*/
+.baseBadge {
+  /*
+    Define default global CSS Custom Properties that users can override in their :root { ... }.
+    These are also used as fallbacks if specific --scl-badge-current-* variables are not set.
+  */
+  --scl-badge-padding: 0.5em;
+  --scl-badge-text-color: #ffffff;
+  --scl-badge-text-shadow-color: rgba(0, 0, 0, 0.6);
+  --scl-badge-bg-color-default: #6c757e;
+  --scl-badge-border-radius: 0.25rem;
+
+  /* Apply themed styles using the variables */
+  padding: var(--scl-badge-padding);
+  border-radius: var(--scl-badge-border-radius);
+
+  /*
+    These !important rules are crucial for overriding Bootstrap styles when a colorScheme is used.
+    The React component sets --scl-badge-current-bg and --scl-badge-current-text via inline style.
+  */
+  color: var(--scl-badge-current-text, var(--scl-badge-text-color)) !important;
+  text-shadow: 1px 1px 2px var(--scl-badge-text-shadow-color);
+
+  /*
+    Minimal structural styles. The SclBadge component adds d-flex, align-items-center, etc.
+  */
+  display: inline-flex; /* This is added by the component logic, but good to have a base display */
+  vertical-align: baseline;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.useCustomBg {
+  background-color: var(--scl-badge-current-bg, var(--scl-badge-bg-color-default)) !important;
+}
+
+/*
+  Styles for dark text, typically used on lighter backgrounds.
+  Applied when `textStyle="dark"` prop is used on the SclBadge component.
+*/
+.textDark {
+  /* Define default CSS Custom Properties for dark text */
+  --scl-badge-text-dark-color: #333333;
+  --scl-badge-text-dark-shadow-color: rgba(255, 255, 255, 0.4);
+
+  /* This color needs to override the color from .baseBadge when .textDark is applied */
+  color: var(--scl-badge-text-dark-color) !important;
+  text-shadow: 1px 1px 1px var(--scl-badge-text-dark-shadow-color) !important;
+}
+
+/*
+  Example of a specific predefined variant class.
+  This would be used if a user passes className="styles.bgGray" to SclBadge
+*/
+.bgGray {
+  --scl-badge-bg-color-gray: #6c757e;
+  background-color: var(--scl-badge-bg-color-gray) !important;
+}
+
+/*
+  --- How Users Define Custom Colors (e.g., Fire, Water, etc.) ---
+
+  This SclBadges.module.css file provides the *system* and *default fallbacks*.
+  The SclBadge.tsx component uses the `colorScheme` prop to look for CSS variables like:
+  `--scl-badge-bg-[colorScheme]`
+  `--scl-badge-text-[colorScheme]`
+
+  Example (in user's global CSS):
+  :root {
+    // Override framework defaults
+    // --scl-badge-bg-color-default: #your-new-default-bg;
+    // --scl-badge-text-color: #your-new-default-text;
+
+    // Define specific color schemes
+    --scl-badge-bg-fire: #EE8130;
+    --scl-badge-text-fire: #FFFFFF; // Optional: if 'fire' needs a specific text color
+
+    --scl-badge-bg-electric: #F7D02C;
+    // For 'electric', if it needs dark text, the component would be used with textStyle="dark"
+    // and the user can customize --scl-badge-text-dark-color if needed.
+  }
+*/

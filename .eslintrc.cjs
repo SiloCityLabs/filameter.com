@@ -5,13 +5,20 @@ const config = {
   ignorePatterns: [
     'node_modules/',
     '.next/',
-    'dist/', // Root dist folder
-    'out/', // Root out folder
-    'build/', // Root build folder
+    'dist/',
+    'out/',
+    'build/',
     '.pnpm/',
     '.pnpm-store/',
-    // 'packages/', // Only if you truly want to ignore all packages from root linting
+    'packages/',
   ],
+  // Add this 'rules' section to override the default behavior
+  rules: {
+    '@typescript-eslint/no-unused-vars': [
+      'warn', // or 'error'
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+    ],
+  },
 };
 
 module.exports = config;

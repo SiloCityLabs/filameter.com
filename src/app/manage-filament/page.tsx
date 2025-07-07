@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 // --- Components ---
 import ManageFilament from '@/components/ManageFilament';
 // --- DB ---
-import getDocumentByColumn from '@/helpers/_silabs/pouchDb/getDocumentByColumn';
+import getDocumentByColumn from '@silocitypages/data-access';
 import { useDatabase } from '@/contexts/DatabaseContext';
 // --- Types ---
 import { Filament } from '@/types/Filament';

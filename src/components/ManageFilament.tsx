@@ -9,7 +9,7 @@ import { CustomAlert } from '@silocitypages/ui-core';
 // --- Types ---
 import { ManageFilamentProps, Filament } from '@/types/Filament';
 // --- DB ---
-import { save } from '@/helpers/_silabs/pouchDb/save';
+import { save } from '@silocitypages/data-access';
 import { filamentSchema } from '@/helpers/database/filament/migrateFilamentDB';
 
 const defaultValue: Filament = {

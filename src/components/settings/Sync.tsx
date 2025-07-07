@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Form, Button } from 'react-bootstrap';
 // --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
@@ -10,14 +10,15 @@ import { pushData } from '@/helpers/sync/pushData';
 import { pullData } from '@/helpers/sync/pullData';
 import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
 // --- DB ---
-import getDocumentByColumn from '@/helpers/_silabs/pouchDb/getDocumentByColumn';
+import getDocumentByColumn from '@silocitypages/data-access';
 import saveSettings from '@/helpers/database/settings/saveSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { exportDB } from '@/helpers/exportDB';
 import { importDB } from '@/helpers/importDB';
 // --- Types ---
-import type { sclSettings } from '@/types/_fw';
+import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
+import { ApiErrorResponse } from '@/types/api';
 
 interface SyncDataStructure {
   local: Filament[];
@@ -40,13 +41,88 @@ export default function Sync({ verifyKey }: SyncProps) {
   const [initialType, setInitialType] = useState('');
   const [syncEmail, setSyncEmail] = useState('');
   const [syncKey, setSyncKey] = useState('');
-  const [dbExport, setDbExport] = useState(defaultSyncData);
+  const [dbExport, setDbExport] = useState<SyncDataStructure>(defaultSyncData);
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
   const [syncCooldown, setSyncCooldown] = useState<number>(0);
 
-  const handleInputChange = (setter) => (event) => {
-    setter(event.target.value);
-  };
+  const handleInputChange =
+    (setter: (value: string) => void) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      setter(event.target.value);
+    };
+
+  const save = useCallback(
+    async (saveData: sclSettings) => {
+      if (!dbs?.settings) {
+        console.error('Settings database is not initialized.');
+        setAlertMessage('Database not ready. Cannot save settings.');
+        setAlertVariant('warning');
+        setShowAlert(true);
+        return;
+      }
+
+      setIsSpinning(true);
+
+      try {
+        await saveSettings(dbs.settings, saveData);
+      } catch (error: unknown) {
+        console.error('Error saving settings:', error);
+        if (error instanceof Error) {
+          setAlertMessage(error.message);
+        } else {
+          setAlertMessage('An unknown error occurred while saving settings.');
+        }
+        setShowAlert(true);
+        setAlertVariant('danger');
+      } finally {
+        setIsSpinning(false);
+      }
+    },
+    [dbs]
+  );
+
+  const existingKey = useCallback(
+    async (key = '') => {
+      if (!syncKey && !key) {
+        setShowAlert(true);
+        setAlertVariant('danger');
+        setAlertMessage('Key is required!');
+        return;
+      }
+
+      const userKey = key || syncKey;
+
+      try {
+        setIsSpinning(true);
+        const response = await setupSyncByKey(userKey);
+        if (response.status === 'success' && response.data) {
+          const keyData = {
+            syncKey: response.data.token,
+            email: (response.data.userData as { email?: string })?.email ?? '',
+            accountType: response.data.keyType,
+            lastSynced: null,
+            needsVerification: false, // Key verification successful
+          };
+          setData(keyData);
+          await save({ 'scl-sync': keyData });
+          setInitialType('engaged');
+          setAlertVariant('success');
+          setAlertMessage('Sync setup with key!');
+        } else if (response.status === 'error') {
+          setShowAlert(true);
+          setAlertVariant('danger');
+          setAlertMessage(response.error);
+        }
+        setShowAlert(true);
+      } catch (error) {
+        console.error('Failed to setup sync with key:', error);
+        setShowAlert(true);
+        setAlertVariant('danger');
+        setAlertMessage('Sync Failed!');
+      }
+      setIsSpinning(false);
+    },
+    [syncKey, save]
+  );
 
   useEffect(() => {
     async function fetchData() {
@@ -97,7 +173,7 @@ export default function Sync({ verifyKey }: SyncProps) {
     } else {
       setIsLoading(true);
     }
-  }, [dbs, isReady]);
+  }, [dbs, isReady, verifyKey, existingKey]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -111,38 +187,11 @@ export default function Sync({ verifyKey }: SyncProps) {
     };
   }, [syncCooldown]);
 
-  const canSync = () => {
+  const canSync = useCallback(() => {
     if (!lastSyncTime) return true;
     const now = Date.now();
     return now - lastSyncTime >= 60000; // 60 seconds
-  };
-
-  const save = async (saveData: sclSettings) => {
-    if (!dbs?.settings) {
-      console.error('Settings database is not initialized.');
-      setAlertMessage('Database not ready. Cannot save settings.');
-      setAlertVariant('warning');
-      setShowAlert(true);
-      return;
-    }
-
-    setIsSpinning(true);
-
-    try {
-      await saveSettings(dbs.settings, saveData);
-    } catch (error: unknown) {
-      console.error('Error saving settings:', error);
-      if (error instanceof Error) {
-        setAlertMessage(error.message);
-      } else {
-        setAlertMessage('An unknown error occurred while saving settings.');
-      }
-      setShowAlert(true);
-      setAlertVariant('danger');
-    } finally {
-      setIsSpinning(false);
-    }
-  };
+  }, [lastSyncTime]);
 
   const createSync = async () => {
     if (!isValidEmail(syncEmail)) {
@@ -156,10 +205,9 @@ export default function Sync({ verifyKey }: SyncProps) {
       setIsSpinning(true);
       const response = await setupSyncByEmail(syncEmail);
       if (response.status === 'message') {
-        data.email = syncEmail;
-        data.needsVerification = true;
-        setData(data);
-        save({ 'scl-sync': data });
+        const newData = { ...data, email: syncEmail, needsVerification: true };
+        setData(newData);
+        save({ 'scl-sync': newData });
         setInitialType('needs-verification');
         setAlertVariant('info');
         setAlertMessage(response.msg);
@@ -177,81 +225,146 @@ export default function Sync({ verifyKey }: SyncProps) {
     setIsSpinning(false);
   };
 
-  const existingKey = async (key: string = '') => {
-    if (!syncKey && !key) {
-      setShowAlert(true);
-      setAlertVariant('danger');
-      setAlertMessage('Key is required!');
-      return;
-    }
+  const pullSyncData = useCallback(
+    async (force = false) => {
+      if (!dbs?.filament || !data?.syncKey) {
+        console.error('Database or sync key is not initialized.');
+        setAlertMessage('Database not ready or sync key missing.');
+        setAlertVariant('warning');
+        setShowAlert(true);
+        return;
+      }
 
-    const userKey = key || syncKey;
+      try {
+        setIsSpinning(true);
+        const response = await pullData(data.syncKey);
 
-    try {
-      setIsSpinning(true);
-      const response = await setupSyncByKey(userKey);
-      if (response.status === 'success' && response.data) {
-        const keyData = {
-          syncKey: response.data.token,
-          email: response.data.userData.email,
-          accountType: response.data.keyType,
-          lastSynced: null,
-        };
-        setData(keyData);
-        await save({ 'scl-sync': keyData });
-        setInitialType('engaged');
-        setAlertVariant('success');
-        setAlertMessage('Sync setup with key!');
-      } else if (response.status === 'error') {
+        if (response.status === 'success') {
+          const nowISO = new Date().toISOString();
+          const updatedSettingsData = {
+            ...data,
+            syncKey: response.data?.token ?? data.syncKey,
+            email: (response.data?.userData as { email?: string })?.email ?? data.email,
+            accountType: response.data?.keyType ?? data.accountType,
+            lastSynced: nowISO,
+            needsVerification: false,
+          };
+          setData(updatedSettingsData);
+          await save({ 'scl-sync': updatedSettingsData });
+          setLastSyncTime(Date.parse(nowISO));
+
+          const serverData: SyncDataStructure = {
+            local: (response.data?.data?.local as Filament[]) ?? [],
+            regular: (response.data?.data?.regular as Filament[]) ?? [],
+          };
+
+          if (serverData.local.length > 0 || serverData.regular.length > 0) {
+            let finalDataToImport: SyncDataStructure;
+            let importMessage = '';
+
+            if (force) {
+              finalDataToImport = serverData;
+              importMessage = 'Data has been force-pulled from the cloud, overwriting local data!';
+              setAlertVariant('warning');
+            } else {
+              const serverRegularMap = new Map(serverData.regular.map((item) => [item._id, item]));
+              const mergedRegular: Filament[] = [];
+              const processedServerIds = new Set<string>();
+
+              if (dbExport.regular && Array.isArray(dbExport.regular)) {
+                for (const localItem of dbExport.regular) {
+                  if (localItem?._id && serverRegularMap.has(localItem._id)) {
+                    mergedRegular.push(serverRegularMap.get(localItem._id)!);
+                    processedServerIds.add(localItem._id);
+                  } else {
+                    mergedRegular.push(localItem);
+                  }
+                }
+              }
+
+              for (const serverItem of serverData.regular) {
+                if (!processedServerIds.has(serverItem._id ?? '')) {
+                  mergedRegular.push(serverItem);
+                }
+              }
+
+              finalDataToImport = { local: serverData.local, regular: mergedRegular };
+              importMessage = 'Data has been pulled and merged with local data!';
+              setAlertVariant('success');
+            }
+
+            const pushResponse = await pushData(data.syncKey, finalDataToImport);
+            if (pushResponse.status === 'error') {
+              setShowAlert(true);
+              setAlertVariant('danger');
+              setAlertMessage((pushResponse as ApiErrorResponse).error);
+              return;
+            }
+            await importDB(dbs.filament, finalDataToImport);
+            setAlertMessage(importMessage);
+
+            const refreshedExportData = (await exportDB(dbs.filament, false)) ?? defaultSyncData;
+            setDbExport(refreshedExportData as SyncDataStructure);
+          } else {
+            setAlertVariant('info');
+            setAlertMessage('Cloud data was empty. Local data remains unchanged.');
+          }
+        } else if (response.status === 'error') {
+          setAlertVariant('danger');
+          setAlertMessage(response.error);
+        }
+        setShowAlert(true);
+      } catch (error) {
+        console.error('Failed to pull', error);
         setShowAlert(true);
         setAlertVariant('danger');
-        setAlertMessage(response.error);
+        setAlertMessage('Pull Failed!');
       }
-      setShowAlert(true);
-    } catch (error) {
-      console.error('Failed to setup sync with key:', error);
-      setShowAlert(true);
-      setAlertVariant('danger');
-      setAlertMessage('Sync Failed!');
-    }
-    setIsSpinning(false);
-  };
+      setIsSpinning(false);
+    },
+    [dbs, data, dbExport, save]
+  );
 
-  const pushSyncData = async (force = false) => {
-    if (!force && !canSync()) {
-      setAlertVariant('warning');
-      setAlertMessage('Please wait 60 seconds between syncs');
-      setShowAlert(true);
-      return;
-    }
+  const pushSyncData = useCallback(
+    async (force = false) => {
+      if (!data?.syncKey) {
+        return;
+      }
+      if (!force && !canSync()) {
+        setAlertVariant('warning');
+        setAlertMessage('Please wait 60 seconds between syncs');
+        setShowAlert(true);
+        return;
+      }
 
-    try {
-      setIsSpinning(true);
-      const response = await pushData(data?.syncKey, dbExport);
-      if (response.status === 'success') {
-        // Update lastSynced but preserve other data
-        const updatedData = { ...data, lastSynced: new Date().toISOString() };
-        setData(updatedData);
-        await save({ 'scl-sync': updatedData });
-        setLastSyncTime(Date.now());
-        setSyncCooldown(60);
-        setAlertVariant('success');
-        setAlertMessage('Data has been synced to the cloud!');
-      } else if (response.status === 'error') {
+      try {
+        setIsSpinning(true);
+        const response = await pushData(data.syncKey, dbExport);
+        if (response.status === 'success') {
+          const updatedData = { ...data, lastSynced: new Date().toISOString() };
+          setData(updatedData);
+          await save({ 'scl-sync': updatedData });
+          setLastSyncTime(Date.now());
+          setSyncCooldown(60);
+          setAlertVariant('success');
+          setAlertMessage('Data has been synced to the cloud!');
+        } else if (response.status === 'error') {
+          setAlertVariant('danger');
+          setAlertMessage(response.error);
+        }
+        setShowAlert(true);
+      } catch (error) {
+        console.error('Failed to export', error);
+        setShowAlert(true);
         setAlertVariant('danger');
-        setAlertMessage(response.error);
+        setAlertMessage('Sync Failed!');
       }
-      setShowAlert(true);
-    } catch (error) {
-      console.error('Failed to export', error);
-      setShowAlert(true);
-      setAlertVariant('danger');
-      setAlertMessage('Sync Failed!');
-    }
-    setIsSpinning(false);
-  };
+      setIsSpinning(false);
+    },
+    [data, dbExport, save, canSync]
+  );
 
-  const checkSyncTimestamp = async () => {
+  const checkSyncTimestamp = useCallback(async () => {
     if (!data?.syncKey) {
       setAlertVariant('warning');
       setAlertMessage('Sync key missing');
@@ -263,46 +376,25 @@ export default function Sync({ verifyKey }: SyncProps) {
       setIsSpinning(true);
       const response = await checkTimestamp(data.syncKey);
       if (response.status === 'success') {
-        // Ensure both timestamp values exist before attempting comparison
         if (response.timestamp) {
           const responseDate = new Date(response.timestamp);
           const lastSyncedDate = new Date(data?.lastSynced ?? 0);
 
-          // Check if dates are valid after parsing
           if (isNaN(responseDate.getTime()) || isNaN(lastSyncedDate.getTime())) {
-            console.error('Invalid date format encountered for comparison:', {
-              responseTimestamp: response.timestamp,
-              lastSynced: data.lastSynced,
-            });
-            // Set an appropriate error message if dates are invalid
             setAlertVariant('danger');
             setAlertMessage('Error comparing sync times: Invalid date format.');
           } else {
-            // Perform the comparison: Is responseDate later than lastSyncedDate?
             if (responseDate > lastSyncedDate) {
-              console.debug(
-                `Update available. Last sync: ${lastSyncedDate.toLocaleString()}, Remote timestamp: ${responseDate.toLocaleString()}`
-              );
-
               await pullSyncData();
-
               setLastSyncTime(Date.now());
               setSyncCooldown(60);
             } else {
-              // TODO: Add specific logic if local data is up-to-date or newer
               setAlertVariant('success');
-              setAlertMessage(
-                `Data is up-to-date. Last sync: ${lastSyncedDate.toLocaleString()}, Remote timestamp: ${responseDate.toLocaleString()}`
-              );
+              setAlertMessage('Data is up-to-date.');
               setShowAlert(true);
             }
           }
         } else {
-          // Handle cases where one of the timestamps might be missing even on success
-          console.warn('Timestamp missing in successful response or local data:', {
-            responseTimestamp: response.timestamp,
-            lastSynced: data.lastSynced,
-          });
           setAlertVariant('warning');
           setAlertMessage('Could not compare sync times: timestamp missing.');
           setShowAlert(true);
@@ -313,134 +405,13 @@ export default function Sync({ verifyKey }: SyncProps) {
         setShowAlert(true);
       }
     } catch (error) {
-      console.error('Failed to export', error);
+      console.error('Failed to check timestamp', error);
       setShowAlert(true);
       setAlertVariant('danger');
-      setAlertMessage('Sync Failed!');
+      setAlertMessage('Timestamp Check Failed!');
     }
     setIsSpinning(false);
-  };
-
-  const pullSyncData = async (force: boolean = false) => {
-    if (!dbs?.filament) {
-      console.error('Filament database is not initialized.');
-      setAlertMessage('Database not ready. Cannot save filaments.');
-      setAlertVariant('warning');
-      setShowAlert(true);
-      return;
-    }
-
-    // Refresh dbExport state right before pull/merge operation
-    const currentDbExport: SyncDataStructure = dbExport;
-
-    try {
-      setIsSpinning(true);
-      const response = await pullData(data?.syncKey);
-
-      if (response.status === 'success') {
-        const nowISO = new Date().toISOString();
-        // Update settings data immediately after successful pull API call
-        const updatedSettingsData = {
-          ...data,
-          syncKey: response.data?.token ?? data?.syncKey,
-          email: response.data?.userData?.email ?? data?.email,
-          accountType: response.data?.keyType ?? data?.accountType,
-          lastSynced: nowISO,
-          needsVerification: false,
-        };
-        setData(updatedSettingsData); // Update component state
-        await save({ 'scl-sync': updatedSettingsData }); // Save updated settings to DB
-        setLastSyncTime(Date.parse(nowISO)); // Update lastSyncTime for cooldown timer
-
-        // Ensure serverData has the expected structure, provide defaults if not
-        const serverData: SyncDataStructure = {
-          local: response.data?.data?.local ?? [],
-          regular: response.data?.data?.regular ?? [],
-        };
-
-        if (serverData.local.length > 0 || serverData.regular.length > 0) {
-          let finalDataToImport: SyncDataStructure;
-          let importMessage = '';
-
-          if (force) {
-            finalDataToImport = serverData;
-            importMessage = 'Data has been force-pulled from the cloud, overwriting local data!';
-            setAlertVariant('warning');
-          } else {
-            // Handle 'local' data: Always replace with server data
-            const mergedLocal = serverData.local;
-
-            // Handle 'regular' data: Merge based on _id
-            const serverRegularMap = new Map(serverData.regular.map((item) => [item._id, item]));
-            const mergedRegular: Filament[] = [];
-            const processedServerIds = new Set<string>();
-
-            // Iterate through local data
-            if (currentDbExport.regular && Array.isArray(currentDbExport.regular)) {
-              for (const localItem of currentDbExport.regular) {
-                if (localItem?._id && serverRegularMap.has(localItem._id)) {
-                  // ID exists in both: take server version
-                  mergedRegular.push(serverRegularMap.get(localItem._id)!);
-                  processedServerIds.add(localItem._id); // Mark server item as processed
-                } else {
-                  // ID only exists locally: keep local version
-                  mergedRegular.push(localItem);
-                }
-              }
-            }
-
-            // Add any server items that were not present locally
-            for (const serverItem of serverData.regular) {
-              if (!processedServerIds.has(serverItem._id ?? '')) {
-                mergedRegular.push(serverItem);
-              }
-            }
-
-            finalDataToImport = { local: mergedLocal, regular: mergedRegular };
-            importMessage = 'Data has been pulled and merged with local data!';
-            setAlertVariant('success');
-          }
-
-          //Push new synced data to cloud
-          const pushResponse = await pushData(data.syncKey, finalDataToImport);
-          if (pushResponse.status === 'error') {
-            setShowAlert(true);
-            setAlertVariant('danger');
-            setAlertMessage(response.error);
-            return;
-          }
-          // Import the final data structure (either forced or merged)
-          await importDB(dbs.filament, finalDataToImport);
-          setAlertMessage(importMessage);
-
-          // Refresh local export state *after* successful import
-          try {
-            const refreshedExportData = (await exportDB(dbs.filament, false)) ?? {
-              local: [],
-              regular: [],
-            };
-            setDbExport(refreshedExportData as SyncDataStructure);
-          } catch (err) {
-            console.error('Error refreshing local DB export after import:', err);
-            // Non-critical error, maybe just log it
-          }
-        } else {
-          setAlertVariant('info');
-          setAlertMessage('Cloud data was empty. Local data remains unchanged.');
-        }
-      } else if (response.status === 'error') {
-        setAlertVariant('danger');
-        setAlertMessage(response.error);
-      }
-      setShowAlert(true); // Show alert for success/info/error cases
-    } catch (error) {
-      console.error('Failed to pull', error);
-      setShowAlert(true);
-      setAlertVariant('danger');
-      setAlertMessage('Pull Failed!');
-    }
-    setIsSpinning(false);
-  };
+  }, [data, pullSyncData]);
 
   const removeSync = async () => {
     if (!window.confirm('Are you sure you want to remove your sync?')) {
@@ -453,7 +424,6 @@ export default function Sync({ verifyKey }: SyncProps) {
     setAlertMessage('Sync Removed');
     setShowAlert(true);
     setAlertVariant('info');
-    return;
   };
 
   if (!isReady || isLoading) {
@@ -524,9 +494,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                   variant='primary'
                   className='w-100'
                   disabled={isSpinning}
-                  onClick={async () => {
-                    await createSync();
-                  }}>
+                  onClick={createSync}>
                   Finish Setup
                 </Button>
               </Col>
@@ -563,9 +531,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                   variant='primary'
                   className='w-100'
                   disabled={isSpinning}
-                  onClick={async () => {
-                    await existingKey();
-                  }}>
+                  onClick={() => existingKey()}>
                   Finish Setup
                 </Button>
               </Col>
@@ -588,9 +554,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                   variant='primary'
                   className='w-100'
                   disabled={isSpinning}
-                  onClick={() => {
-                    removeSync();
-                  }}>
+                  onClick={removeSync}>
                   Remove Sync
                 </Button>
               </Col>
@@ -599,9 +563,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                   variant='primary'
                   className='w-100'
                   disabled={isSpinning || syncCooldown > 0 || initialType === 'needs-verification'}
-                  onClick={() => {
-                    checkSyncTimestamp();
-                  }}>
+                  onClick={checkSyncTimestamp}>
                   {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync Now'}
                 </Button>
               </Col>
@@ -610,9 +572,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                   variant='warning'
                   className='w-100'
                   disabled={isSpinning || initialType === 'needs-verification'}
-                  onClick={() => {
-                    pushSyncData(true);
-                  }}>
+                  onClick={() => pushSyncData(true)}>
                   Force Push
                 </Button>
               </Col>
@@ -621,9 +581,7 @@ export default function Sync({ verifyKey }: SyncProps) {
                   variant='info'
                   className='w-100'
                   disabled={isSpinning || initialType === 'needs-verification'}
-                  onClick={() => {
-                    pullSyncData(true);
-                  }}>
+                  onClick={() => pullSyncData(true)}>
                   Force Pull
                 </Button>
               </Col>

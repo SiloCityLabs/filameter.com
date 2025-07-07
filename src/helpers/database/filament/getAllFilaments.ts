@@ -1,19 +1,34 @@
+// --- PouchDB ---
 import PouchDB from 'pouchdb';
-import type { Filament } from '@/types/Filament'; // Ensure correct import path
+// --- Types ---
+import type { Filament } from '@/types/Filament';
 
-// Define the structure for a row that includes the 'doc' field,
-// using PouchDB's type for existing documents.
-interface RowWithExistingDoc<T extends {}> {
-  id: string; // The row ID (often same as doc._id)
-  key: string; // The key emitted by the view/query
-  value: { rev: string }; // The row value (just the revision here)
-  // Use PouchDB's ExistingDocument<T>. This type represents T & { _id: string; _rev: string; }
+/**
+ * Defines the structure for a row from allDocs that includes the full document.
+ * This uses a generic constraint to ensure T is an object type.
+ */
+interface RowWithExistingDoc<T extends object> {
+  id: string;
+  key: string;
+  value: { rev: string };
   doc: PouchDB.Core.ExistingDocument<T>;
 }
 
-// Define the expected return type, ensuring calc_weight is required
+// Define the expected return type, which is the base Filament type plus a calculated weight.
 type FilamentWithCalcWeight = Filament & { calc_weight: number };
 
+/**
+ * Retrieves all filament documents from the database and calculates remaining weight.
+ *
+ * This function fetches all documents, filters out PouchDB's design documents,
+ * and then for each filament, it calculates the remaining weight (`calc_weight`)
+ * by subtracting the `used_weight` from the `total_weight`.
+ *
+ * @param {PouchDB.Database} db - The PouchDB database instance for filaments.
+ * @returns {Promise<FilamentWithCalcWeight[]>} A promise that resolves to an array of
+ * filament objects, each including the calculated remaining weight.
+ * @throws {Error} Throws an error if fetching from the database fails.
+ */
 async function getAllFilaments(db: PouchDB.Database): Promise<FilamentWithCalcWeight[]> {
   if (!db) {
     console.error('Database is not initialized.');
@@ -21,30 +36,26 @@ async function getAllFilaments(db: PouchDB.Database): Promise<FilamentWithCalcWe
   }
 
   try {
-    // Fetch documents. The <Filament> generic tells PouchDB the expected content structure.
+    // Fetch all documents, specifying the expected document type.
     const result = await db.allDocs<Filament>({ include_docs: true, attachments: false });
 
-    // Use the corrected RowWithExistingDoc interface in the type guard
+    // Filter out rows without docs (and design docs) and use a type guard to assert the correct row structure.
     const data = result.rows
       .filter(
         (row): row is RowWithExistingDoc<Filament> =>
-          Boolean(row.doc) && !row.id.startsWith('_design/') // Asserting the row contains an ExistingDocument
+          Boolean(row.doc) && !row.id.startsWith('_design/')
       )
       .map((row) => {
-        // row is now correctly typed as RowWithExistingDoc<Filament>
-        // row.doc is type PouchDB.Core.ExistingDocument<Filament>
-        // This means doc has all properties of Filament PLUS required _id and _rev
+        // Thanks to the type guard, row.doc is known to be a full document.
         const doc = row.doc;
 
         const totalWeight = typeof doc.total_weight === 'number' ? doc.total_weight : 0;
         const usedWeight = typeof doc.used_weight === 'number' ? doc.used_weight : 0;
 
-        // Spread ExistingDocument<Filament> properties and add calc_weight
-        // The result is compatible with FilamentWithCalcWeight
+        // Return a new object with all original properties plus the calculated weight.
         return { ...doc, calc_weight: totalWeight - usedWeight };
       });
 
-    // Type is compatible with FilamentWithCalcWeight[]
     return data;
   } catch (error: unknown) {
     console.error('Error getting all filaments:', error);

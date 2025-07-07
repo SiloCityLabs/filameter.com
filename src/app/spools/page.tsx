@@ -20,7 +20,7 @@ import Link from 'next/link';
 // --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
 // --- DB ---
-import deleteRow from '@/helpers/_silabs/pouchDb/deleteRow';
+import deleteRow from '@silocitypages/data-access';
 import getAllFilaments from '@/helpers/database/filament/getAllFilaments';
 import getAllSettings from '@/helpers/database/settings/getAllSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
@@ -28,13 +28,13 @@ import { exportDB } from '@/helpers/exportDB';
 import { pushData } from '@/helpers/sync/pushData';
 import { pullData } from '@/helpers/sync/pullData';
 import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
-import getDocumentByColumn from '@/helpers/_silabs/pouchDb/getDocumentByColumn';
+import getDocumentByColumn from '@silocitypages/data-access';
 import { importPulledData } from '@/helpers/sync/importPulledData';
 // --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faTrash, faCopy, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 // --- Types ---
-import type { sclSettings } from '@/types/_fw';
+import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
 
 export default function SpoolsPage() {

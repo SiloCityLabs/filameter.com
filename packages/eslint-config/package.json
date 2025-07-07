@@ -1,0 +1,29 @@
+{
+  "name": "@silocitypages/eslint-config",
+  "version": "1.0.0",
+  "description": "Shareable ESLint config for SiloCityPages projects",
+  "author": "Bana0615",
+  "main": "loader.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "loader.js"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "peerDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "15.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.23.0",
+    "typescript": "^5.8.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

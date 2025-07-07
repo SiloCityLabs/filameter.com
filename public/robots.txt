@@ -1,3 +1,0 @@
-User-agent: *
-Sitemap: https://filameter.com/sitemap.xml
-Crawl-delay: 1

@@ -3,48 +3,54 @@ name: Prettier Format
 on:
   push:
   pull_request:
-    branches: [main]
+    branches: [main, legacy-solo] # Trigger on pull requests targeting the main and legacy-solo branches
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   format:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      actions: write
-      pull-requests: write
-      packages: write
+      contents: write # Needed for auto-commit/PR actions
+      pull-requests: write # Needed only for the create-pull-request action
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for git operations
+          fetch-depth: 0
 
+      # Step 1: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          # Do not use cache: 'pnpm' here if pnpm/action-setup is also caching
 
+      # Step 2: Set up pnpm (this action also handles caching the pnpm store)
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false # We will run install manually in the next step
+
+      # Step 3: Install dependencies using pnpm
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run Prettier format
-        run: npx prettier . --write --ignore-path .prettierignore-ci
+        run: pnpm exec prettier . --write --ignore-path .prettierignore-ci
 
-      # Step to commit and push changes directly on non-main branches
+      # --- Commit/PR Steps ---
       - name: Commit and push changes (non-main branches)
-        # Only run this step if the current branch is NOT 'main' and NOT a pull request
         if: github.ref != 'refs/heads/main' && github.event_name == 'push'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: |
-            Apply Prettier formatting
-
+            Prettier Snap! Formatting applied. ✨
             Co-authored-by: Bana0615 <aelbaneh0615@gmail.com>
 
-      # Step to create a pull request if pushing directly to main
       - name: Create Pull Request (push to main)
-        # Only run this step if the current branch IS 'main' and it's a push event
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: peter-evans/create-pull-request@v6
         with:
@@ -56,7 +62,6 @@ jobs:
             Like a certain Mad Titan, Prettier is here to bring balance (of formatting) to the codebase. Inconsistent styles were temporary... this clean, consistent code? It is inevitable.
 
             ✨ Code aesthetic upgraded. 💯
-
             Co-authored-by: Bana0615 <aelbaneh0615@gmail.com>
           branch: prettier-formatting
           branch-suffix: timestamp

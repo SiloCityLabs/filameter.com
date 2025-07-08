@@ -6,6 +6,7 @@ import PageLayout from '@/components/PageLayout';
 import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
+import Sync from '@/components/home/Sync';
 
 export default function HomePage() {
   return (
@@ -13,6 +14,7 @@ export default function HomePage() {
       <Hero />
       <Features />
       <WhyChooseUs />
+      <Sync />
     </PageLayout>
   );
 }

@@ -1,9 +1,10 @@
 'use client';
 
+// --- React ---
 import React from 'react';
 import { Container, Row, Col, Image } from 'react-bootstrap';
+// --- Styles ---
 import styles from '@/public/styles/components/home/WhyChooseUs.module.css';
-
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGift, faUsers, faShieldAlt, faCodeBranch } from '@fortawesome/free-solid-svg-icons';

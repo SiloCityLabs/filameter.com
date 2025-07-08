@@ -1,9 +1,10 @@
 'use client';
 
+// --- React ---
 import React from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
+// --- Styles ---
 import styles from '@/public/styles/components/home/Features.module.css';
-
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {

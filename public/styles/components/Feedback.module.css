@@ -1,0 +1,47 @@
+.feedbackPage {
+  background-color: var(--background-light);
+  padding: 8rem 0 4rem 0; /* Add padding top to account for fixed header */
+  min-height: 100vh;
+}
+
+.formCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  background-color: var(--white);
+  padding: 1.5rem;
+}
+
+.pageTitle {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+/* --- Form Styles --- */
+.feedbackForm .form-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.feedbackForm .form-control,
+.feedbackForm .form-select {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  padding: 0.6rem 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.feedbackForm .form-control:focus,
+.feedbackForm .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(17, 122, 206, 0.15);
+}
+
+.feedbackForm button {
+  font-weight: 500;
+  padding: 0.75rem;
+  border-radius: 8px;
+  min-width: 120px;
+}

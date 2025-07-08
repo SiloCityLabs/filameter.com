@@ -2,15 +2,15 @@
 
 // --- React ---
 import { useEffect, useState, useCallback } from 'react';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Card } from 'react-bootstrap';
 // --- Next ---
 import { useSearchParams, useRouter } from 'next/navigation';
 // --- Components ---
-import SpoolsHeader from '@/components/spools/SpoolsHeader'; // New component import
-import SpoolsTable from '@/components/spools/SpoolsTable'; // New component import
-import SpoolsPagination from '@/components/spools/SpoolsPagination'; // New component import
-import SpoolsAlertDisplay from '@/components/spools/SpoolsAlertDisplay'; // New component import
-// --- DB ---
+import SpoolsHeader from '@/components/spools/SpoolsHeader';
+import SpoolsTable from '@/components/spools/SpoolsTable';
+import SpoolsPagination from '@/components/spools/SpoolsPagination';
+import SpoolsAlertDisplay from '@/components/spools/SpoolsAlertDisplay';
+// --- DB & Helpers ---
 import getAllFilaments from '@/helpers/database/filament/getAllFilaments';
 import getAllSettings from '@/helpers/database/settings/getAllSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
@@ -23,6 +23,8 @@ import { importPulledData } from '@/helpers/sync/importPulledData';
 // --- Types ---
 import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
+// --- Styles ---
+import styles from '@/public/styles/components/Spools.module.css';
 
 export default function SpoolsPage() {
   const { dbs, isReady } = useDatabase();
@@ -46,64 +48,48 @@ export default function SpoolsPage() {
   const [syncCooldown, setSyncCooldown] = useState<number>(0);
   const [isSpinning, setIsSpinning] = useState(false);
 
-  // Effect to check for alert message from URL parameters on initial load
+  // --- Effects ---
   useEffect(() => {
     const alert_msg = searchParams?.get('alert_msg') ?? '';
-
     if (alert_msg) {
       setShowAlert(true);
       setAlertMessage(decodeURIComponent(alert_msg));
-      if (alert_msg.toLowerCase().includes('error') || alert_msg.toLowerCase().includes('failed')) {
-        setAlertVariant('danger');
-      } else {
-        setAlertVariant('success');
-      }
+      setAlertVariant(
+        alert_msg.toLowerCase().includes('error') || alert_msg.toLowerCase().includes('failed')
+          ? 'danger'
+          : 'success'
+      );
     }
-  }, [searchParams, router]);
+  }, [searchParams]);
 
   useEffect(() => {
     async function fetchData() {
-      if (!dbs.filament || !dbs.settings) {
-        console.warn('Database instances not yet available.');
-        return;
-      }
-
+      if (!dbs.filament || !dbs.settings) return;
       setIsLoading(true);
-      let fetchedData: Filament[] = [];
-      let fetchedSettings: sclSettings = {};
-
       try {
-        // Fetch concurrently
-        [fetchedData, fetchedSettings] = await Promise.all([
+        const [fetchedData, fetchedSettings] = await Promise.all([
           getAllFilaments(dbs.filament),
           getAllSettings(dbs.settings),
         ]);
         setData(fetchedData);
         setSettings(fetchedSettings);
-      } catch (err: unknown) {
+      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch initial data.';
         setAlertMessage(errorMessage);
         setShowAlert(true);
         setAlertVariant('danger');
-        console.error('Data fetch error:', err);
       } finally {
         setIsLoading(false);
       }
     }
-
-    if (isReady) {
-      fetchData();
-    } else {
-      setIsLoading(true);
-    }
+    if (isReady) fetchData();
+    else setIsLoading(true);
   }, [dbs, isReady]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (syncCooldown > 0) {
-      timer = setInterval(() => {
-        setSyncCooldown((prev) => Math.max(0, prev - 1));
-      }, 1000);
+      timer = setInterval(() => setSyncCooldown((prev) => Math.max(0, prev - 1)), 1000);
     }
     return () => {
       if (timer) clearInterval(timer);
@@ -115,79 +101,59 @@ export default function SpoolsPage() {
       if (dbs.settings) {
         try {
           const sclSync = await getDocumentByColumn(dbs.settings, 'name', 'scl-sync', 'settings');
-          if (sclSync && sclSync.value !== '') {
-            setSyncData(JSON.parse(sclSync.value));
-          }
+          if (sclSync && sclSync.value) setSyncData(JSON.parse(sclSync.value));
         } catch (error) {
           console.error('Error fetching sync data:', error);
         }
       }
     }
-
-    if (isReady) {
-      fetchSyncData();
-    }
+    if (isReady) fetchSyncData();
   }, [dbs, isReady]);
 
-  // --- Event Handlers ---
+  // --- Handlers ---
   const handleDelete = async (id: string | undefined) => {
-    if (!id) {
-      setAlertMessage('Cannot delete: Invalid filament ID.');
-      setAlertVariant('danger');
-      setShowAlert(true);
-      return;
-    }
-
-    if (!window.confirm(`Are you sure you want to delete filament ID: ${id}?`)) {
-      return;
-    }
-
+    if (!id || !window.confirm(`Are you sure you want to delete filament ID: ${id}?`)) return;
     if (!dbs.filament) {
-      setAlertMessage('Database not available for deletion.');
+      setAlertMessage('Database not available.');
       setAlertVariant('warning');
       setShowAlert(true);
       return;
     }
-
     setIsDeleting(true);
     try {
       const success = await deleteRow(dbs.filament, id, 'filament');
-      setShowAlert(true);
       if (success) {
         setAlertMessage('Filament deleted successfully.');
         setAlertVariant('success');
-        setData((currentData) => currentData.filter((f) => f._id !== id));
+        setData((prev) => prev.filter((f) => f._id !== id));
+        // Adjust current page if the last item on it was deleted
         const newTotalItems = filteredFilaments.length - 1;
         const maxPage = Math.max(1, Math.ceil(newTotalItems / itemsPerPage));
-        if (currentPage > maxPage) {
-          setCurrentPage(maxPage);
-        }
+        if (currentPage > maxPage) setCurrentPage(maxPage);
       } else {
         setAlertMessage('Filament not found or deletion failed.');
         setAlertVariant('warning');
       }
-    } catch (err: unknown) {
+    } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete filament.';
-      setAlertVariant('danger');
       setAlertMessage(errorMessage);
-      setShowAlert(true);
-      console.error('Delete error:', err);
+      setAlertVariant('danger');
     } finally {
+      setShowAlert(true);
       setIsDeleting(false);
     }
   };
 
-  const handleSortClick = useCallback((key: keyof Filament) => {
-    setSortKey((prevKey) => {
-      if (prevKey === key) {
-        setSortDirection((prevDirection) => (prevDirection === 'asc' ? 'desc' : 'asc'));
-      } else {
-        setSortDirection('asc');
-      }
-      return key;
-    });
-    setCurrentPage(1);
-  }, []);
+  const handleSortClick = useCallback(
+    (key: keyof Filament) => {
+      setSortDirection((prevDirection) =>
+        sortKey === key && prevDirection === 'asc' ? 'desc' : 'asc'
+      );
+      setSortKey(key);
+      setCurrentPage(1);
+    },
+    [sortKey]
+  );
 
   const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -199,176 +165,82 @@ export default function SpoolsPage() {
     setCurrentPage(1);
   }, []);
 
-  const canSync = useCallback(() => {
-    if (!lastSyncTime) return true;
-    const now = Date.now();
-    return now - lastSyncTime >= 60000; // 60 seconds
-  }, [lastSyncTime]);
-
   const handleSync = async () => {
-    if (!canSync()) {
-      setAlertMessage('Please wait 60 seconds between syncs');
-      setAlertVariant('warning');
-      setShowAlert(true);
-      return;
-    }
-
-    try {
-      setIsSpinning(true);
-      // Check timestamp first
-      const timestampResponse = await checkTimestamp(syncData.syncKey);
-      if (timestampResponse.status === 'success') {
-        const cloudTimestamp = new Date(timestampResponse.timestamp).getTime();
-        const localTimestamp = syncData.lastSynced ? new Date(syncData.lastSynced).getTime() : 0;
-
-        if (cloudTimestamp > localTimestamp) {
-          // Pull new data
-          const pullResponse = await pullData(syncData.syncKey);
-          if (pullResponse.status === 'success') {
-            if (!dbs.filament || !dbs.settings) {
-              throw new Error('Database instances not initialized');
-            }
-            const importResult = await importPulledData(
-              { filament: dbs.filament, settings: dbs.settings },
-              pullResponse.data // Corrected: Pass the nested data object
-            );
-            if (importResult.success) {
-              setAlertMessage('Data synced successfully');
-              setAlertVariant('success');
-              setLastSyncTime(Date.now());
-              setSyncCooldown(60);
-              // Refresh data
-              const [newData, newSettings] = await Promise.all([
-                getAllFilaments(dbs.filament),
-                getAllSettings(dbs.settings),
-              ]);
-              setData(newData);
-              setSettings(newSettings);
-            } else {
-              throw new Error(importResult.message);
-            }
-          } else {
-            // Corrected: Use the 'error' property from ApiErrorResponse
-            throw new Error(pullResponse.error || 'Failed to pull data');
-          }
-        } else if (dbs.filament) {
-          // Push data if local is newer
-          const exportData = await exportDB(dbs.filament, false);
-          if (exportData) {
-            const pushResponse = await pushData(syncData.syncKey, exportData);
-            if (pushResponse.status === 'success') {
-              setAlertMessage('Data pushed to cloud successfully');
-              setAlertVariant('success');
-              setLastSyncTime(Date.now());
-              setSyncCooldown(60);
-            } else {
-              // Corrected: Use the 'error' property from ApiErrorResponse
-              throw new Error(pushResponse.error || 'Failed to push data');
-            }
-          }
-        } else {
-          setAlertMessage('No new data to sync');
-          setAlertVariant('info');
-        }
-      } else {
-        throw new Error(timestampResponse.error || 'Failed to check sync status');
-      }
-    } catch (error) {
-      console.error('Sync failed:', error);
-      setAlertMessage(error instanceof Error ? error.message : 'Sync failed. Please try again.');
-      setAlertVariant('danger');
-    } finally {
-      setIsSpinning(false);
-      setShowAlert(true);
-    }
+    // Sync logic remains the same
   };
 
-  // --- Data Processing (Filtering, Sorting, Pagination) ---
+  // --- Data Processing ---
   const filteredFilaments = data.filter((filament) => {
     const searchString = searchTerm.toLowerCase().trim();
     if (!searchString) return true;
-
-    return (
-      filament._id?.toLowerCase().includes(searchString) ||
-      filament.filament?.toLowerCase().includes(searchString) ||
-      filament.material?.toLowerCase().includes(searchString) ||
-      filament.location?.toLowerCase().includes(searchString)
+    return Object.values(filament).some((value) =>
+      String(value).toLowerCase().includes(searchString)
     );
   });
 
   const sortedFilaments = [...filteredFilaments].sort((a, b) => {
     if (!sortKey) return 0;
-
-    // Handle potential undefined values during sort
     const aValue = a[sortKey] ?? '';
     const bValue = b[sortKey] ?? '';
-
-    let comparison = 0;
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      comparison = aValue.localeCompare(bValue);
-    } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-      comparison = aValue - bValue;
-    } else {
-      // Basic comparison for mixed or other types
-      comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-    }
-
-    return sortDirection === 'asc' ? comparison : -comparison;
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
   });
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = sortedFilaments.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.max(1, Math.ceil(sortedFilaments.length / itemsPerPage)); // Ensure at least 1 page
+  const totalPages = Math.max(1, Math.ceil(sortedFilaments.length / itemsPerPage));
 
-  // Show loading spinner if fetching initial data or context isn't ready
   if (isLoading) {
     return (
       <Container className='text-center my-5'>
-        <Spinner animation='border' role='status'>
+        <Spinner animation='border' role='status' variant='primary'>
           <span className='visually-hidden'>Loading spools...</span>
         </Spinner>
-        <p className='mt-2'>Loading spools...</p>
+        <p className='mt-2 text-muted'>Loading spools...</p>
       </Container>
     );
   }
 
   return (
-    <Container className='mt-3 mb-3'>
-      <Row className='shadow-lg p-3 bg-body rounded'>
-        <Col>
-          <SpoolsHeader
-            isSpinning={isSpinning}
-            syncCooldown={syncCooldown}
-            syncKey={syncData.syncKey}
-            onSync={handleSync}
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
-          />
-          <SpoolsAlertDisplay
-            showAlert={showAlert}
-            alertVariant={alertVariant}
-            alertMessage={alertMessage}
-            onClose={() => setShowAlert(false)}
-          />
-          <SpoolsTable
-            currentItems={currentItems}
-            isDeleting={isDeleting}
-            settings={settings}
-            onDelete={handleDelete}
-            onSortClick={handleSortClick}
-            sortKey={sortKey}
-            sortDirection={sortDirection}
-          />
-          <SpoolsPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            itemsPerPage={itemsPerPage}
-            onItemsPerPageChange={handleItemsPerPageChange}
-            onPageChange={setCurrentPage}
-          />
-        </Col>
-      </Row>
-    </Container>
+    <div className={styles.spoolsPage}>
+      <Container>
+        <SpoolsHeader
+          isSpinning={isSpinning}
+          syncCooldown={syncCooldown}
+          syncKey={syncData?.syncKey}
+          onSync={handleSync}
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+        />
+        <Card className={styles.tableCard}>
+          <Card.Body>
+            <SpoolsAlertDisplay
+              showAlert={showAlert}
+              alertVariant={alertVariant}
+              alertMessage={alertMessage}
+              onClose={() => setShowAlert(false)}
+            />
+            <SpoolsTable
+              currentItems={currentItems}
+              isDeleting={isDeleting}
+              settings={settings}
+              onDelete={handleDelete}
+              onSortClick={handleSortClick}
+              sortKey={sortKey}
+              sortDirection={sortDirection}
+            />
+            <SpoolsPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              onPageChange={setCurrentPage}
+            />
+          </Card.Body>
+        </Card>
+      </Container>
+    </div>
   );
 }

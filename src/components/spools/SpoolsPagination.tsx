@@ -1,8 +1,8 @@
 'use client';
 
-// --- React ---
 import React from 'react';
 import { Row, Col, Pagination, Form } from 'react-bootstrap';
+import styles from '@/public/styles/components/Spools.module.css';
 
 interface SpoolsPaginationProps {
   currentPage: number;
@@ -20,13 +20,29 @@ const SpoolsPagination: React.FC<SpoolsPaginationProps> = ({
   onPageChange,
 }) => {
   if (totalPages <= 1) {
-    return null; // Don't render pagination if there's only one page or no items
+    return null;
   }
 
   return (
-    <Row>
-      <Col xs={12} className='d-flex justify-content-between align-items-center mt-3'>
-        <Pagination size='sm' className='mb-0'>
+    <Row className='mt-3'>
+      <Col className='d-flex justify-content-between align-items-center'>
+        <div className='d-flex align-items-center'>
+          <span className='me-2 text-muted' style={{ fontSize: '0.9rem' }}>
+            Items per page:
+          </span>
+          <Form.Select
+            value={itemsPerPage}
+            onChange={onItemsPerPageChange}
+            size='sm'
+            className={styles.itemsPerPageSelect}
+            aria-label='Items per page'>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </Form.Select>
+        </div>
+        <Pagination className={`mb-0 ${styles.pagination}`}>
           <Pagination.Prev
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
@@ -41,22 +57,6 @@ const SpoolsPagination: React.FC<SpoolsPaginationProps> = ({
             disabled={currentPage === totalPages}
           />
         </Pagination>
-        <div className='d-flex align-items-center'>
-          <span className='me-2 text-muted' style={{ fontSize: '0.8rem' }}>
-            Items/page:
-          </span>
-          <Form.Select
-            value={itemsPerPage}
-            onChange={onItemsPerPageChange}
-            size='sm'
-            style={{ width: 'auto' }}
-            aria-label='Items per page'>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </Form.Select>
-        </div>
       </Col>
     </Row>
   );

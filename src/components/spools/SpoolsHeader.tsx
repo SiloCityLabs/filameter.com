@@ -1,13 +1,11 @@
 'use client';
 
-// --- React ---
 import React from 'react';
 import { Row, Col, Form, Button } from 'react-bootstrap';
-// --- Next ---
 import Link from 'next/link';
-// --- FontAwesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { faCloudArrowUp, faPlus } from '@fortawesome/free-solid-svg-icons';
+import styles from '@/public/styles/components/Spools.module.css';
 
 interface SpoolsHeaderProps {
   isSpinning: boolean;
@@ -28,36 +26,39 @@ const SpoolsHeader: React.FC<SpoolsHeaderProps> = ({
 }) => {
   return (
     <>
-      <Row className='mb-3'>
+      <Row className={`align-items-center mb-4 ${styles.pageHeader}`}>
         <Col>
-          <h1>Spools</h1>
+          <h1 className='mb-0'>Your Filament Spools</h1>
         </Col>
-        <Col xs='auto'>
+        <Col xs='auto' className='d-flex gap-2'>
           <Button
-            variant='primary'
+            variant='outline-secondary'
             disabled={isSpinning || syncCooldown > 0 || !syncKey}
-            onClick={onSync}>
-            <FontAwesomeIcon icon={faCloudArrowUp} className='me-2' />
+            onClick={onSync}
+            className={styles.headerButton}>
+            <FontAwesomeIcon
+              icon={faCloudArrowUp}
+              className={isSpinning ? 'fa-spin me-2' : 'me-2'}
+            />
             {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync'}
           </Button>
+          <Link href='/manage-filament' passHref>
+            <Button variant='primary' className={styles.headerButton}>
+              <FontAwesomeIcon icon={faPlus} className='me-2' />
+              Add Filament
+            </Button>
+          </Link>
         </Col>
       </Row>
-      <Row>
-        <Col xs={12} md={8} className='mb-2'>
+      <Row className='mb-3'>
+        <Col>
           <Form.Control
             type='text'
             placeholder='Search by ID, Name, Material, Location...'
             value={searchTerm}
             onChange={onSearchChange}
-            size='sm'
+            className={styles.searchInput}
           />
-        </Col>
-        <Col xs={12} md={4} className='text-md-end mb-2'>
-          <Link href='/manage-filament' passHref>
-            <Button variant='primary' size='sm' className='w-50 w-md-auto'>
-              Add Filament
-            </Button>
-          </Link>
         </Col>
       </Row>
     </>

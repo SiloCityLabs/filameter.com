@@ -1,0 +1,103 @@
+/* --- Main Page Layout --- */
+.spoolsPage {
+  background-color: var(--background-light);
+  padding: 8rem 0 4rem 0; /* Add padding top to account for fixed header */
+  min-height: 100vh;
+}
+
+.tableCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+}
+
+/* --- Header Styles --- */
+.pageHeader h1 {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.headerButton {
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+.searchInput {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  padding: 0.5rem 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(17, 122, 206, 0.15);
+}
+
+/* --- Table Styles --- */
+.spoolsTable {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.tableHeader {
+  cursor: pointer;
+  user-select: none;
+  background-color: #f8f9fa;
+  color: var(--text-dark);
+  font-weight: 600;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.spoolsTable th,
+.spoolsTable td {
+  padding: 0.9rem;
+  vertical-align: middle;
+}
+
+.spoolsTable tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.spoolsTable tbody tr:hover {
+  background-color: var(--background-light);
+}
+
+.actionButton {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* --- Pagination Styles --- */
+.pagination .page-item .page-link {
+  border-radius: 0.3rem;
+  margin: 0 2px;
+  border: 1px solid #dee2e6;
+  color: var(--primary-color);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white);
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+}
+
+.itemsPerPageSelect {
+  width: auto;
+  border-radius: 8px;
+}

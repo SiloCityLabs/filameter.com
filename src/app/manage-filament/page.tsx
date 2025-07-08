@@ -105,7 +105,7 @@ export default function ManageFilamentPage() {
 
           // Apply cloning logic for both 'duplicate' and 'create-from-existing'
           if (determinedType === 'duplicate' || determinedType === 'create-from-existing') {
-            const { _id, _rev, calc_weight, ...clonableData } = fetchedData;
+            const { _id, _rev, calc_weight: _calc_weight, ...clonableData } = fetchedData;
             // Reset used_weight for a new "spool" from clone
             setFilament(applyUsedWeight({ ...defaultValue, ...clonableData, used_weight: 0 }));
           } else {
@@ -131,6 +131,13 @@ export default function ManageFilamentPage() {
       setIsLoading(false);
     }
   }, [searchParams, isReady, dbs.filament]);
+
+  const pageTitle =
+    operationType === 'edit'
+      ? 'Edit Filament'
+      : operationType === 'duplicate' || operationType === 'create-from-existing'
+        ? 'Duplicate Filament'
+        : 'Add New Filament';
 
   if (isLoading) {
     return (
@@ -166,29 +173,25 @@ export default function ManageFilamentPage() {
     );
   }
 
-  // Adjust page title to reflect the clone operation
-  const pageTitle =
-    operationType === 'edit'
-      ? 'Edit Filament'
-      : operationType === 'duplicate' || operationType === 'create-from-existing'
-        ? 'Duplicate Filament'
-        : 'Add New Filament';
-
   return (
     <div className={styles.managePage}>
       <Container fluid className='py-3'>
         <Row className='justify-content-center'>
           <Col xs={12} md={10} lg={8}>
-            <div className='shadow-lg p-3 p-md-4 bg-body rounded'>
-              <h2 className='text-center mb-4'>{pageTitle}</h2>
-              {isReady && dbs.filament ? (
-                <ManageFilament data={filament} db={dbs.filament} />
-              ) : (
-                <Alert variant='info' className='text-center'>
-                  Database connection is initializing... Form will load shortly.
-                </Alert>
-              )}
-            </div>
+            {/* Replaced generic div with Card for proper styling */}
+            <Card className={styles.formCard}>
+              <Card.Body>
+                {/* Changed h2 to h1 for consistency with CSS and previous code */}
+                <h1 className='text-center mb-4'>{pageTitle}</h1>
+                {isReady && dbs.filament ? (
+                  <ManageFilament data={filament} db={dbs.filament} />
+                ) : (
+                  <Alert variant='info' className='text-center'>
+                    Database connection is initializing... Form will load shortly.
+                  </Alert>
+                )}
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
       </Container>

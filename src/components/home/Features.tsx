@@ -44,8 +44,7 @@ const features = [
   {
     icon: <FontAwesomeIcon icon={faQrcode} size='2x' />,
     title: 'QR Code Integration',
-    description:
-      'Use QR codes for quick spool identification. Get 5 free labels to start managing your inventory effortlessly.',
+    description: 'Use QR codes for quick spool identification.',
   },
 ];
 

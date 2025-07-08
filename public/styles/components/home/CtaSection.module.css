@@ -1,0 +1,38 @@
+.ctaSection {
+  padding: 6rem 0;
+  /* A vibrant gradient using your brand colors */
+  background: linear-gradient(45deg, var(--primary-color) 0%, var(--complementary-color) 100%);
+  color: var(--white);
+}
+
+.ctaContent {
+  position: relative;
+}
+
+.ctaIcon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+}
+
+.ctaText {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.ctaButton {
+  color: var(--primary-color);
+  font-weight: bold;
+  padding: 0.8rem 2rem;
+  border-radius: 50px; /* Fully rounded for a modern look */
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ctaButton:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}

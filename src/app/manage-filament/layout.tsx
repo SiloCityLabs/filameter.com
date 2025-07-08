@@ -4,8 +4,27 @@ import type { Metadata } from 'next';
 import PageLayout from '@/components/PageLayout';
 
 export const metadata: Metadata = {
-  title: 'Manage Filament',
-  description: 'Add, edit, or duplicate filament spool records.',
+  title: 'Manage 3D Printer Filament Spools',
+  description:
+    'Effortlessly track, add, edit, and duplicate your 3D printer filament spools with Filameter. Organize your inventory, monitor usage, and optimize your 3D printing workflow.',
+  keywords: [
+    'filament management',
+    '3D printer filament',
+    'spool management',
+    'filament inventory',
+    'track filament',
+    'filament usage',
+    '3D printing workflow',
+    'add filament',
+    'edit filament',
+    'duplicate filament',
+    'filament tracker',
+    '3D print supplies',
+    'material management',
+    'filament database',
+    'filameter',
+    '3D printing organization',
+  ],
 };
 
 export default function ManageFilamentLayout({ children }: { children: React.ReactNode }) {

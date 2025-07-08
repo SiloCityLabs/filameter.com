@@ -5,8 +5,19 @@ import PageLayout from '@/components/PageLayout';
 
 export const metadata: Metadata = {
   title: 'Spools',
-  description: 'View and manage your filament spools.',
-  keywords: ['filament', 'spool', 'manage', '3d printing'],
+  description:
+    'View, search, and manage all of your 3D printing filament spools in one place. Keep track of weight, material, location, and more.',
+  keywords: [
+    'filament',
+    'spool',
+    'inventory',
+    'manage',
+    '3d printing',
+    'pla',
+    'abs',
+    'petg',
+    'filament tracker',
+  ],
 };
 
 export default function SsiLayout({ children }: { children: React.ReactNode }) {

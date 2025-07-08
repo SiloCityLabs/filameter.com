@@ -2,23 +2,26 @@
 
 // --- React ---
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Card } from 'react-bootstrap';
 // --- Next ---
 import { useRouter, useSearchParams } from 'next/navigation';
 // --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
 // --- Context Hook ---
 import { useDatabase } from '@/contexts/DatabaseContext';
-// ---DB Helpers ---
+// --- DB Helpers ---
 import { getDocumentByColumn } from '@silocitypages/data-access';
+// --- Styles & Icons ---
+import styles from '@/public/styles/components/Qr.module.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faQrcode, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 
 export default function QrScanPage() {
+  // --- STATE AND LOGIC (UNCHANGED FROM YOUR ORIGINAL) ---
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const { dbs, isReady: isDbReady, error: dbError } = useDatabase();
   const filamentDb = dbs?.filament;
-
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
@@ -54,7 +57,6 @@ export default function QrScanPage() {
       console.error('Database context error:', dbError);
       setLocalError('Database unavailable.');
       setShowAlert(true);
-      // Use the error string directly from context
       setAlertMessage(`Database error: ${dbError}`);
       setAlertVariant('danger');
       setIsProcessing(false);
@@ -73,12 +75,9 @@ export default function QrScanPage() {
 
     const fetchFilament = async (id: string) => {
       setLocalError(null);
-
       try {
         const fetchedFilament = await getDocumentByColumn(filamentDb, '_id', id, 'filament');
-
         const filamentDoc = Array.isArray(fetchedFilament) ? fetchedFilament : null;
-
         if (!filamentDoc) {
           router.push(`/manage-filament?id=${id}&type=create`);
         } else {
@@ -100,68 +99,70 @@ export default function QrScanPage() {
     }
   }, [filamentId, filamentDb, isDbReady, dbError, router, localError]);
 
+  // --- JSX / STYLING (UPDATED) ---
   const isLoading = !isDbReady || isProcessing;
   const hasError = !!localError || !!dbError;
 
-  if (isLoading && !hasError) {
+  const renderContent = () => {
+    if (isLoading && !hasError) {
+      return (
+        <>
+          <FontAwesomeIcon icon={faQrcode} className={styles.statusIcon} />
+          <h2 className={styles.statusTitle}>Processing QR Code</h2>
+          <p className='text-muted'>
+            {!isDbReady ? 'Initializing database...' : 'Looking for your spool...'}
+          </p>
+          <Spinner animation='border' variant='primary' role='status' className='mt-3'>
+            <span className='visually-hidden'>Loading...</span>
+          </Spinner>
+        </>
+      );
+    }
+    // This state covers both error and non-loading states to show the alert correctly.
     return (
-      <Container className='text-center my-5'>
-        <Spinner animation='border' role='status'>
-          <span className='visually-hidden'>Loading...</span>
-        </Spinner>
-        <p className='mt-2'>{!isDbReady ? 'Initializing database...' : 'Processing QR Code...'}</p>
-      </Container>
+      <>
+        {hasError ? (
+          <>
+            <FontAwesomeIcon
+              icon={faExclamationTriangle}
+              className={`${styles.statusIcon} text-danger`}
+            />
+            <h2 className={styles.statusTitle}>Processing Error</h2>
+          </>
+        ) : (
+          <>
+            <FontAwesomeIcon icon={faQrcode} className={styles.statusIcon} />
+            <h2 className={styles.statusTitle}>Redirecting...</h2>
+            <div className='mt-3'>
+              {[...Array(5)].map((_, i) => (
+                <Spinner key={i} animation='grow' size='sm' className='mx-1' variant='primary' />
+              ))}
+            </div>
+          </>
+        )}
+        <div className='w-100 mt-4'>
+          <CustomAlert
+            variant={alertVariant || 'info'}
+            message={alertMessage || 'An unexpected issue occurred.'}
+            show={showAlert}
+            onClose={() => setShowAlert(false)}
+          />
+        </div>
+      </>
     );
-  }
+  };
 
   return (
-    <Container fluid>
-      <Row>
-        <Col>
-          <h2 className='text-center my-4'>Spool Sense QR Scan</h2>
-          <Container
-            className='shadow-lg p-3 mb-5 bg-body rounded text-center'
-            style={{ maxWidth: '600px', margin: 'auto' }}>
-            <Row className='justify-content-md-center'>
-              <CustomAlert
-                variant={alertVariant}
-                message={alertMessage}
-                show={showAlert}
-                onClose={() => setShowAlert(false)}
-              />
-
-              {isLoading && !hasError && (
-                <Col lg={8}>
-                  <div className='text-center'>
-                    <Spinner animation='border' size='sm' className='me-2' />
-                    {!isDbReady ? 'Initializing database...' : 'Processing...'}
-                  </div>
-                </Col>
-              )}
-
-              {hasError && !isLoading && (
-                <Col lg={8}>
-                  <p className='text-danger'>
-                    Could not process the QR code. {localError || `Database error: ${dbError}`}
-                  </p>
-                </Col>
-              )}
-
-              {!isLoading && !hasError && (
-                <Col lg={8}>
-                  <div className='text-center'>
-                    Redirecting...
-                    <br />
-                    {[...Array(5)].map((_, i) => (
-                      <Spinner key={i} animation='grow' size='sm' className='mx-1' />
-                    ))}
-                  </div>
-                </Col>
-              )}
-            </Row>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+    <div className={styles.qrPage}>
+      <Container>
+        <Row className='justify-content-center'>
+          <Col md={8} lg={6}>
+            <Card className={styles.statusCard}>
+              <Card.Body>{renderContent()}</Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 }

@@ -1,0 +1,73 @@
+.footer {
+  background-color: var(--background-light);
+  color: var(--text-dark);
+  padding: 3rem 0;
+  border-top: 1px solid #dee2e6;
+}
+
+.footerLogo {
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.copyright {
+  font-size: 0.9rem;
+  margin: 0;
+  color: #6c757d; /* A softer text color for the copyright */
+}
+
+.footerLink {
+  color: var(--text-dark);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease;
+}
+
+.footerLink:hover {
+  color: var(--primary-color);
+}
+
+.licenseSection {
+  text-align: center;
+}
+
+.licenseLink {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-dark);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.licenseLink:hover {
+  color: var(--primary-color);
+}
+
+.licenseIcons {
+  display: flex;
+  gap: 5px;
+}
+
+.licenseIcons img {
+  vertical-align: middle;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+  .footer {
+    padding: 2rem 0;
+  }
+
+  .footerLogo,
+  .copyright,
+  .licenseSection {
+    text-align: center;
+  }
+
+  .footerLogo {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

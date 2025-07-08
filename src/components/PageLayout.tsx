@@ -32,21 +32,16 @@ export default function PageLayout({
   navLinks = [],
   showHeader = true,
   showFooter = true,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   headerDarkLinks = false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   headerShowBadge = false,
   containerClassName = '',
   contentClassName = '',
 }: PageLayoutProps) {
   return (
     <div className={`main-container ${containerClassName}`}>
-      {showHeader && (
-        <Header
-          className={headerClassName}
-          navLinks={navLinks}
-          darkLinks={headerDarkLinks}
-          showBadge={headerShowBadge}
-        />
-      )}
+      {showHeader && <Header className={headerClassName} navLinks={navLinks} />}
       <main className={`main-content ${contentClassName}`}>{children}</main>
       {showFooter && <Footer className={footerClassName} />}
     </div>

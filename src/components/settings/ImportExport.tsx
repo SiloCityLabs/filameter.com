@@ -1,31 +1,37 @@
+'use client';
+
+// --- React ---
 import { useCallback, useState, useEffect } from 'react';
-import { Row, Col, Button, Form } from 'react-bootstrap';
-//DB
+import { Button, Form, Spinner, Alert } from 'react-bootstrap';
+// --- Context ---
 import { useDatabase } from '@/contexts/DatabaseContext';
+// --- Helpers ---
 import { exportDB } from '@/helpers/exportDB';
 import { importDB } from '@/helpers/importDB';
+// --- Styles ---
+import styles from '@/public/styles/components/Settings.module.css';
+// --- Font Awesome ---
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFileExport, faFileImport } from '@fortawesome/free-solid-svg-icons';
 
 export default function ImportExport() {
   const { dbs, isReady } = useDatabase();
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [importStatus, setImportStatus] = useState<'success' | 'error' | null>(null);
-  const [exportError, setExportError] = useState<string | null>(null);
-  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [clearBeforeImport, setClearBeforeImport] = useState(false);
   const [triggerImport, setTriggerImport] = useState(false);
 
-  // Load selectedFile from localStorage on component mount
+  // Load selectedFile from localStorage on component mount to handle page reload
   useEffect(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('selectedFile')) {
       const fileData = JSON.parse(localStorage.getItem('selectedFile')!);
       const file = new File([new Blob([fileData.content])], fileData.name, { type: fileData.type });
-
-      //check for triggerImport
       const shouldTriggerImport = localStorage.getItem('triggerImport') === 'true';
 
       setSelectedFile(file);
       localStorage.removeItem('selectedFile');
+
       if (shouldTriggerImport) {
         setTriggerImport(true);
         localStorage.removeItem('triggerImport');
@@ -33,37 +39,32 @@ export default function ImportExport() {
     }
   }, []);
 
-  const exportDatabase = async () => {
+  const handleExport = async () => {
     if (!dbs.filament) return;
     setIsSpinning(true);
-    setExportError(null);
+    setStatus(null);
     try {
       await exportDB(dbs.filament);
     } catch (error) {
       console.error('Failed to export', error);
-      setExportError('Failed to export the database. See console for details.');
+      setStatus({
+        type: 'error',
+        message: 'Failed to export the database. See console for details.',
+      });
     } finally {
       setIsSpinning(false);
     }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type === 'application/json') {
-        setSelectedFile(file);
-        setImportStatus(null); // Reset import status
-        setImportMessage(null); // Clear any previous message
-      } else {
-        setSelectedFile(null);
-        setImportStatus('error');
-        setImportMessage('Invalid file type. Please select a JSON file.');
-      }
+    const file = event.target.files?.[0];
+    if (file && file.type === 'application/json') {
+      setSelectedFile(file);
+      setStatus(null);
     } else {
       setSelectedFile(null);
-      setImportStatus(null);
-      setImportMessage(null);
+      if (file)
+        setStatus({ type: 'error', message: 'Invalid file type. Please select a JSON file.' });
     }
   };
 
@@ -73,12 +74,17 @@ export default function ImportExport() {
     }
 
     setIsSpinning(true);
-    setImportStatus(null);
-    setImportMessage(null);
+    setStatus(null);
 
     try {
+      // Correctly handle the clear-before-import logic using page reload
       if (clearBeforeImport) {
-        if (!window.confirm('Are you sure you want to clear the filament database?')) {
+        if (
+          !window.confirm(
+            'Are you sure you want to clear the filament database? This action cannot be undone.'
+          )
+        ) {
+          setIsSpinning(false);
           return;
         }
         const fileContent = await selectedFile.text();
@@ -87,38 +93,28 @@ export default function ImportExport() {
         localStorage.setItem('clearDatabase', 'true');
         localStorage.setItem('triggerImport', 'true');
         window.location.reload();
-        return;
+        return; // Return to prevent further execution until after reload
       }
 
       const data = await selectedFile.text();
       const jsonData = JSON.parse(data);
 
-      if (
-        typeof jsonData === 'object' &&
-        jsonData !== null &&
-        Array.isArray(jsonData.regular) &&
-        Array.isArray(jsonData.local)
-      ) {
-        await importDB(dbs.filament, jsonData);
-        setImportStatus('success');
-        setImportMessage('Data imported successfully!');
-      } else {
-        setImportStatus('error');
-        setImportMessage(
-          "Invalid JSON format. Expected an object with 'regular' and 'local' arrays."
-        );
-      }
+      // The importDB function should handle both cases (with and without clearing)
+      await importDB(dbs.filament, jsonData);
+      setStatus({ type: 'success', message: 'Data imported successfully!' });
     } catch (error) {
       console.error('Import error:', error);
-      setImportStatus('error');
-      setImportMessage(
-        'Error importing data: ' + (error instanceof Error ? error.message : String(error))
-      );
+      setStatus({
+        type: 'error',
+        message: `Error importing data: ${error instanceof Error ? error.message : String(error)}`,
+      });
     } finally {
+      // This will only be reached for non-reloading imports
       setIsSpinning(false);
     }
   }, [dbs.filament, selectedFile, clearBeforeImport]);
 
+  // This effect runs after a page reload to trigger the import
   useEffect(() => {
     if (triggerImport && dbs.filament && selectedFile) {
       handleImport();
@@ -126,69 +122,63 @@ export default function ImportExport() {
   }, [triggerImport, dbs.filament, selectedFile, handleImport]);
 
   if (!isReady) {
-    return <div className='text-center'>Loading database...</div>;
+    return (
+      <div className='text-center p-4'>
+        <Spinner animation='border' variant='primary' />
+      </div>
+    );
   }
 
   return (
-    <Row>
-      <Col>
-        <Row className='justify-content-center'>
-          <Col xs={12} sm={6} md={3}>
-            <div className='d-flex justify-content-center'>
-              <Button
-                variant='primary'
-                className='w-100'
-                disabled={isSpinning}
-                onClick={exportDatabase}>
-                Export Database
-              </Button>
-              {exportError && <p className='text-danger'>{exportError}</p>}
-            </div>
-          </Col>
-        </Row>
-        <hr />
-        <Row>
-          <Col>
-            <Form>
-              <Form.Group controlId='formFile' className='mb-3 text-center'>
-                <Form.Label>Import JSON Database</Form.Label>
-                <Form.Control type='file' accept='.json' onChange={handleFileChange} />
-              </Form.Group>
+    <div className={styles.settingsPane}>
+      {status && (
+        <Alert variant={status.type} onClose={() => setStatus(null)} dismissible>
+          {status.message}
+        </Alert>
+      )}
 
-              <Form.Group className='my-3'>
-                <Form.Check
-                  type='checkbox'
-                  id='clearBeforeImport'
-                  label='Clear database before import'
-                  className='custom-checkbox'
-                  checked={clearBeforeImport}
-                  onChange={(e) => setClearBeforeImport(e.target.checked)}
-                />
-              </Form.Group>
-              <Row className='justify-content-center'>
-                <Col xs={12} sm={6} md={3}>
-                  <div className='d-flex justify-content-center'>
-                    <Button
-                      variant='primary'
-                      onClick={handleImport}
-                      className='w-100'
-                      disabled={!selectedFile || isSpinning}>
-                      Import Data
-                    </Button>
-                  </div>
-                </Col>
-              </Row>
+      <div className={styles.ioSection}>
+        <h5 className={styles.paneSubtitle}>Export Database</h5>
+        <p className='text-muted'>Download a JSON backup of your entire filament inventory.</p>
+        <Button
+          variant='outline-primary'
+          disabled={isSpinning}
+          onClick={handleExport}
+          className={styles.settingsButton}>
+          <FontAwesomeIcon icon={faFileExport} className='me-2' />
+          {isSpinning ? 'Exporting...' : 'Export Data'}
+        </Button>
+      </div>
 
-              {importMessage && (
-                <p
-                  className={importStatus === 'success' ? 'text-success mt-2' : 'text-danger mt-2'}>
-                  {importMessage}
-                </p>
-              )}
-            </Form>
-          </Col>
-        </Row>
-      </Col>
-    </Row>
+      <hr className='my-4' />
+
+      <div className={styles.ioSection}>
+        <h5 className={styles.paneSubtitle}>Import Database</h5>
+        <p className='text-muted'>Import a previously exported JSON file to restore your data.</p>
+        <Form>
+          <Form.Group controlId='formFile' className='mb-3'>
+            <Form.Control type='file' accept='.json' onChange={handleFileChange} />
+          </Form.Group>
+          <Form.Group className='mb-3'>
+            <Form.Check
+              type='checkbox'
+              id='clearBeforeImport'
+              label='Clear existing database before import'
+              className={styles.settingsCheckbox}
+              checked={clearBeforeImport}
+              onChange={(e) => setClearBeforeImport(e.target.checked)}
+            />
+          </Form.Group>
+          <Button
+            variant='primary'
+            onClick={handleImport}
+            disabled={!selectedFile || isSpinning}
+            className={styles.settingsButton}>
+            <FontAwesomeIcon icon={faFileImport} className='me-2' />
+            {isSpinning ? 'Importing...' : 'Import Data'}
+          </Button>
+        </Form>
+      </div>
+    </div>
   );
 }

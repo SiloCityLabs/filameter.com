@@ -1,0 +1,80 @@
+.contactSection {
+  padding: 6rem 0;
+  background-color: var(--white);
+}
+
+.infoCard,
+.formCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.infoCard {
+  background-color: var(--background-light);
+  padding: 1rem;
+}
+
+.formCard {
+  padding: 1rem;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.contactIcon {
+  font-size: 1.25rem;
+  color: var(--primary-color);
+  margin-right: 1rem;
+  width: 20px;
+}
+
+.contactLink {
+  color: var(--text-dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.contactLink:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.submitButton {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: 2px solid var(--primary-color);
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+}
+
+.submitButton:hover {
+  background-color: var(--hover-color);
+  border-color: var(--hover-color);
+  transform: translateY(-2px);
+}
+
+/* Custom form styling */
+.formCard .form-label {
+  font-weight: 500;
+}
+
+.formCard .form-control {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.formCard .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(17, 122, 206, 0.15);
+}

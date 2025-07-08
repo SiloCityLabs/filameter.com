@@ -1,39 +1,43 @@
+'use client';
+
 // --- React ---
 import React, { Suspense } from 'react';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
-// --- Next ---
-import type { Metadata } from 'next';
-// --- Layout ---
-import PageLayout from '@/components/PageLayout';
+import { Container, Row, Col, Spinner, Card } from 'react-bootstrap';
 // --- Components ---
 import FeedbackForm from '@/components/feedback/FeedbackForm';
-
-export const metadata: Metadata = {
-  title: 'Feedback',
-  description: 'Provide feedback or report an issue via GitHub.',
-};
+// --- Styles ---
+import styles from '@/public/styles/components/Feedback.module.css';
 
 export default function FeedbackPage() {
   return (
-    <PageLayout>
-      <Container className='py-3'>
-        <h3 className='text-center'>Feedback</h3>
-        <Row className='justify-content-center mt-3'>
-          <Col md={10} lg={8}>
-            <Suspense
-              fallback={
-                <div className='text-center py-5'>
-                  <Spinner animation='border' role='status'>
-                    <span className='visually-hidden'>Loading Form...</span>
-                  </Spinner>
-                  <p className='mt-2'>Loading Form...</p>
+    <div className={styles.feedbackPage}>
+      <Container>
+        <Row className='justify-content-center'>
+          <Col lg={10} xl={8}>
+            <Card className={styles.formCard}>
+              <Card.Body>
+                <div className='text-center'>
+                  <h1 className={styles.pageTitle}>Submit Feedback</h1>
+                  <p className='text-muted'>
+                    Have a bug report or a feature request? Let us know! Your feedback helps improve
+                    FilaMeter.
+                  </p>
                 </div>
-              }>
-              <FeedbackForm />
-            </Suspense>
+                <Suspense
+                  fallback={
+                    <div className='text-center py-5'>
+                      <Spinner animation='border' variant='primary' role='status'>
+                        <span className='visually-hidden'>Loading Form...</span>
+                      </Spinner>
+                    </div>
+                  }>
+                  <FeedbackForm />
+                </Suspense>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
       </Container>
-    </PageLayout>
+    </div>
   );
 }

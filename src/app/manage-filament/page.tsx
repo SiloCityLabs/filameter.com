@@ -2,7 +2,7 @@
 
 // --- React ---
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Alert, Card } from 'react-bootstrap';
 // --- Next ---
 import { useSearchParams } from 'next/navigation';
 // --- Components ---
@@ -12,6 +12,8 @@ import { getDocumentByColumn } from '@silocitypages/data-access';
 import { useDatabase } from '@/contexts/DatabaseContext';
 // --- Types ---
 import { Filament } from '@/types/Filament';
+// --- Styles ---
+import styles from '@/public/styles/components/ManageFilament.module.css';
 
 // --- Default Value ---
 const defaultValue: Omit<Filament, '_id' | '_rev'> = {
@@ -27,7 +29,9 @@ export default function ManageFilamentPage() {
   const { dbs, isReady } = useDatabase();
   const searchParams = useSearchParams();
   const [filament, setFilament] = useState<Filament | null>(null);
-  const [operationType, setOperationType] = useState<'create' | 'edit' | 'duplicate'>('create');
+  const [operationType, setOperationType] = useState<
+    'create' | 'edit' | 'duplicate' | 'create-from-existing'
+  >('create');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,15 +48,15 @@ export default function ManageFilamentPage() {
     const typeParam = searchParams.get('type') ?? '';
     const usedWeightParam = searchParams.get('used_weight') ?? '';
 
-    let determinedType: 'create' | 'edit' | 'duplicate' = 'create';
+    let determinedType: 'create' | 'edit' | 'duplicate' | 'create-from-existing' = 'create';
     if (currentId) {
       if (typeParam === 'duplicate') determinedType = 'duplicate';
-      else if (typeParam === 'create') determinedType = 'create';
+      else if (typeParam === 'create')
+        determinedType = 'create-from-existing'; // Treat 'create' with ID as a clone operation
       else determinedType = 'edit';
     } else {
       determinedType = 'create';
     }
-
     setOperationType(determinedType);
 
     // --- Define Helper ---
@@ -66,9 +70,14 @@ export default function ManageFilamentPage() {
       return data;
     };
 
-    if (determinedType === 'edit' || determinedType === 'duplicate') {
+    // Include 'create-from-existing' in the data fetching logic
+    if (
+      determinedType === 'edit' ||
+      determinedType === 'duplicate' ||
+      determinedType === 'create-from-existing'
+    ) {
       if (!currentId) {
-        setError('Filament ID is missing for edit/duplicate operation.');
+        setError('Filament ID is missing for edit/duplicate/clone operation.');
         setFilament(applyUsedWeight({ ...defaultValue }));
         setIsLoading(false);
         return;
@@ -83,7 +92,6 @@ export default function ManageFilamentPage() {
       // Fetch Data Asynchronously
       const fetchData = async (id: string) => {
         try {
-          // Assuming getDocumentByColumn returns the single document or null/throws
           const fetchedData: Filament = await getDocumentByColumn(
             dbs.filament!,
             '_id',
@@ -92,15 +100,14 @@ export default function ManageFilamentPage() {
           );
 
           if (!fetchedData) {
-            // Check if data is actually found
             throw new Error(`Filament with ID "${id}" not found.`);
           }
 
-          if (determinedType === 'duplicate') {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { _id, _rev, calc_weight, ...duplicableData } = fetchedData;
-            // Reset used_weight for duplicate, apply other fetched vals over default
-            setFilament(applyUsedWeight({ ...defaultValue, ...duplicableData, used_weight: 0 }));
+          // Apply cloning logic for both 'duplicate' and 'create-from-existing'
+          if (determinedType === 'duplicate' || determinedType === 'create-from-existing') {
+            const { _id, _rev, calc_weight: _calc_weight, ...clonableData } = fetchedData;
+            // Reset used_weight for a new "spool" from clone
+            setFilament(applyUsedWeight({ ...defaultValue, ...clonableData, used_weight: 0 }));
           } else {
             // --- Edit ---
             setFilament(applyUsedWeight(fetchedData));
@@ -118,36 +125,43 @@ export default function ManageFilamentPage() {
 
       fetchData(currentId); // Execute the fetch
     } else {
-      // Create Operation
+      // Regular 'create' operation (no ID in URL)
       const initialData: Filament = { ...defaultValue };
-      if (currentId && typeParam === 'create') {
-        // Handle create with pre-filled ID if needed
-        initialData._id = currentId;
-      }
       setFilament(applyUsedWeight(initialData));
       setIsLoading(false);
     }
   }, [searchParams, isReady, dbs.filament]);
 
+  const pageTitle =
+    operationType === 'edit'
+      ? 'Edit Filament'
+      : operationType === 'duplicate' || operationType === 'create-from-existing'
+        ? 'Duplicate Filament'
+        : 'Add New Filament';
+
   if (isLoading) {
     return (
-      <Container className='text-center my-5'>
-        <Spinner animation='border' role='status'>
-          <span className='visually-hidden'>Loading...</span>
-        </Spinner>
-        <p className='mt-2'>Loading Filament Data...</p>
-      </Container>
+      <div className={styles.managePage}>
+        <Container className='text-center my-5'>
+          <Spinner animation='border' role='status'>
+            <span className='visually-hidden'>Loading...</span>
+          </Spinner>
+          <p className='mt-2'>Loading Filament Data...</p>
+        </Container>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container className='my-4'>
-        <Alert variant='danger'>
-          <Alert.Heading>Error Loading Filament</Alert.Heading>
-          <p>{error}</p>
-        </Alert>
-      </Container>
+      <div className={styles.managePage}>
+        <Container className='my-4'>
+          <Alert variant='danger'>
+            <Alert.Heading>Error Loading Filament</Alert.Heading>
+            <p>{error}</p>
+          </Alert>
+        </Container>
+      </div>
     );
   }
 
@@ -159,24 +173,28 @@ export default function ManageFilamentPage() {
     );
   }
 
-  const pageTitle = operationType === 'edit' ? 'Edit Filament' : 'Add Filament';
-
   return (
-    <Container fluid className='py-3'>
-      <Row className='justify-content-center'>
-        <Col xs={12} md={10} lg={8}>
-          <div className='shadow-lg p-3 p-md-4 bg-body rounded'>
-            <h2 className='text-center mb-4'>{pageTitle}</h2>
-            {isReady && dbs.filament ? (
-              <ManageFilament data={filament} db={dbs.filament} />
-            ) : (
-              <Alert variant='info' className='text-center'>
-                Database connection is initializing... Form will load shortly.
-              </Alert>
-            )}
-          </div>
-        </Col>
-      </Row>
-    </Container>
+    <div className={styles.managePage}>
+      <Container fluid className='py-3'>
+        <Row className='justify-content-center'>
+          <Col xs={12} md={10} lg={8}>
+            {/* Replaced generic div with Card for proper styling */}
+            <Card className={styles.formCard}>
+              <Card.Body>
+                {/* Changed h2 to h1 for consistency with CSS and previous code */}
+                <h1 className='text-center mb-4'>{pageTitle}</h1>
+                {isReady && dbs.filament ? (
+                  <ManageFilament data={filament} db={dbs.filament} />
+                ) : (
+                  <Alert variant='info' className='text-center'>
+                    Database connection is initializing... Form will load shortly.
+                  </Alert>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 }

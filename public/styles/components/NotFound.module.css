@@ -1,0 +1,40 @@
+.notFoundPage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-light);
+  min-height: calc(100vh - 72px); /* Adjust 72px to your header's height */
+  padding: 2rem 0;
+}
+
+.statusCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  background-color: var(--white);
+  padding: 2rem;
+  text-align: center;
+}
+
+.statusIcon {
+  font-size: 3.5rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+.errorCode {
+  font-size: 6rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.statusTitle {
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.statusCard button {
+  font-weight: 500;
+}

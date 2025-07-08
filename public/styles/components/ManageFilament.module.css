@@ -1,0 +1,62 @@
+/* --- Main Page Layout --- */
+.managePage {
+  background-color: var(--background-light);
+  padding: 8rem 0 4rem 0; /* Add padding top to account for fixed header */
+  min-height: 100vh;
+}
+
+.formCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  background-color: var(--white);
+}
+
+.formCard h1 {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+/* --- Form Styles --- */
+.manageForm .form-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.manageForm .form-control,
+.manageForm .form-select {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  padding: 0.6rem 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.manageForm .form-control:disabled {
+  background-color: #e9ecef;
+}
+
+.manageForm .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(17, 122, 206, 0.15);
+}
+
+.formCheck input[type='checkbox'] {
+  border-color: var(--primary-color);
+  border-radius: 4px;
+}
+
+.formCheck input[type='checkbox']:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.multipleOptionWrapper {
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}

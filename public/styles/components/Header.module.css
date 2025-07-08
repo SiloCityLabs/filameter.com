@@ -1,0 +1,95 @@
+/* --- Base Navbar Styling --- */
+.navbar {
+  padding: 1rem 0;
+  transition:
+    background-color 0.4s ease-out,
+    box-shadow 0.4s ease-out;
+  background-color: transparent; /* Transparent when at the top */
+}
+
+/* --- Scrolled State Styling --- */
+.navbarScrolled {
+  background-color: rgba(255, 255, 255, 0.85); /* Frosted glass effect */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* For Safari */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Logo Styling --- */
+.logo {
+  height: 40px; /* Adjust height as needed */
+  width: auto;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* --- Nav Link Styling --- */
+.navLink {
+  color: var(--text-dark) !important; /* Override default bootstrap colors */
+  font-weight: 500;
+  position: relative;
+  padding: 0.5rem 1rem !important;
+  transition: color 0.3s ease;
+}
+
+/* Underline effect for nav links */
+.navLink::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: -5px;
+  left: 0;
+  background-color: var(--primary-color);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease-out;
+}
+
+.navLink:hover {
+  color: var(--primary-color) !important;
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* --- Active Nav Link Styling --- */
+.activeNavLink {
+  color: var(--primary-color) !important;
+  font-weight: 700;
+}
+
+.activeNavLink::after {
+  transform: scaleX(1) !important;
+  transform-origin: bottom left !important;
+}
+
+/* --- Hamburger Menu Toggler --- */
+.navbarToggler {
+  border: none;
+  box-shadow: none !important;
+}
+
+.navbarToggler:focus {
+  outline: none;
+}
+
+.navbarToggler .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Style for the expanded mobile menu */
+@media (max-width: 991.98px) {
+  .navbar .navbar-collapse {
+    padding: 1rem;
+    margin-top: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+}

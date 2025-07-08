@@ -1,5 +1,8 @@
+'use client';
+
+// --- React ---
 import { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Form, Button } from 'react-bootstrap';
+import { Form, Button, Spinner, Card } from 'react-bootstrap';
 // --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
 // --- Helpers ---
@@ -19,6 +22,8 @@ import { importDB } from '@/helpers/importDB';
 import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
 import { ApiErrorResponse } from '@/types/api';
+// --- Styles ---
+import styles from '@/public/styles/components/Settings.module.css';
 
 interface SyncDataStructure {
   local: Filament[];
@@ -59,9 +64,7 @@ export default function Sync({ verifyKey }: SyncProps) {
         setShowAlert(true);
         return;
       }
-
       setIsSpinning(true);
-
       try {
         await saveSettings(dbs.settings, saveData);
       } catch (error: unknown) {
@@ -88,11 +91,9 @@ export default function Sync({ verifyKey }: SyncProps) {
         setAlertMessage('Key is required!');
         return;
       }
-
       const userKey = key || syncKey;
-
+      setIsSpinning(true);
       try {
-        setIsSpinning(true);
         const response = await setupSyncByKey(userKey);
         if (response.status === 'success' && response.data) {
           const keyData = {
@@ -100,7 +101,7 @@ export default function Sync({ verifyKey }: SyncProps) {
             email: (response.data.userData as { email?: string })?.email ?? '',
             accountType: response.data.keyType,
             lastSynced: null,
-            needsVerification: false, // Key verification successful
+            needsVerification: false,
           };
           setData(keyData);
           await save({ 'scl-sync': keyData });
@@ -129,16 +130,11 @@ export default function Sync({ verifyKey }: SyncProps) {
       if (dbs.settings && dbs.filament) {
         try {
           setIsLoading(true);
-
-          //Get Sync Data
           const sclSync = await getDocumentByColumn(dbs.settings, 'name', 'scl-sync', 'settings');
-
           if (sclSync && sclSync.value !== '') {
-            const syncData = JSON.parse(sclSync.value);
+            const syncData = JSON.parse(sclSync.value as string);
             setData(syncData);
-
             if (syncData.syncKey === '' || syncData.needsVerification) {
-              //Setup sync via key verification
               if (verifyKey) {
                 existingKey(verifyKey);
               } else {
@@ -153,8 +149,6 @@ export default function Sync({ verifyKey }: SyncProps) {
           } else if (verifyKey) {
             existingKey(verifyKey);
           }
-
-          //Get Filament Export Data
           const exportData = (await exportDB(dbs.filament, false)) ?? defaultSyncData;
           setDbExport(exportData as SyncDataStructure);
         } catch (err: unknown) {
@@ -167,7 +161,6 @@ export default function Sync({ verifyKey }: SyncProps) {
         }
       }
     }
-
     if (isReady) {
       fetchData();
     } else {
@@ -189,8 +182,7 @@ export default function Sync({ verifyKey }: SyncProps) {
 
   const canSync = useCallback(() => {
     if (!lastSyncTime) return true;
-    const now = Date.now();
-    return now - lastSyncTime >= 60000; // 60 seconds
+    return Date.now() - lastSyncTime >= 60000;
   }, [lastSyncTime]);
 
   const createSync = async () => {
@@ -200,7 +192,6 @@ export default function Sync({ verifyKey }: SyncProps) {
       setAlertMessage('Invalid Email!');
       return;
     }
-
     try {
       setIsSpinning(true);
       const response = await setupSyncByEmail(syncEmail);
@@ -234,11 +225,9 @@ export default function Sync({ verifyKey }: SyncProps) {
         setShowAlert(true);
         return;
       }
-
       try {
         setIsSpinning(true);
         const response = await pullData(data.syncKey);
-
         if (response.status === 'success') {
           const nowISO = new Date().toISOString();
           const updatedSettingsData = {
@@ -252,16 +241,13 @@ export default function Sync({ verifyKey }: SyncProps) {
           setData(updatedSettingsData);
           await save({ 'scl-sync': updatedSettingsData });
           setLastSyncTime(Date.parse(nowISO));
-
           const serverData: SyncDataStructure = {
             local: (response.data?.data?.local as Filament[]) ?? [],
             regular: (response.data?.data?.regular as Filament[]) ?? [],
           };
-
           if (serverData.local.length > 0 || serverData.regular.length > 0) {
             let finalDataToImport: SyncDataStructure;
             let importMessage = '';
-
             if (force) {
               finalDataToImport = serverData;
               importMessage = 'Data has been force-pulled from the cloud, overwriting local data!';
@@ -270,7 +256,6 @@ export default function Sync({ verifyKey }: SyncProps) {
               const serverRegularMap = new Map(serverData.regular.map((item) => [item._id, item]));
               const mergedRegular: Filament[] = [];
               const processedServerIds = new Set<string>();
-
               if (dbExport.regular && Array.isArray(dbExport.regular)) {
                 for (const localItem of dbExport.regular) {
                   if (localItem?._id && serverRegularMap.has(localItem._id)) {
@@ -281,18 +266,15 @@ export default function Sync({ verifyKey }: SyncProps) {
                   }
                 }
               }
-
               for (const serverItem of serverData.regular) {
                 if (!processedServerIds.has(serverItem._id ?? '')) {
                   mergedRegular.push(serverItem);
                 }
               }
-
               finalDataToImport = { local: serverData.local, regular: mergedRegular };
               importMessage = 'Data has been pulled and merged with local data!';
               setAlertVariant('success');
             }
-
             const pushResponse = await pushData(data.syncKey, finalDataToImport);
             if (pushResponse.status === 'error') {
               setShowAlert(true);
@@ -302,7 +284,6 @@ export default function Sync({ verifyKey }: SyncProps) {
             }
             await importDB(dbs.filament, finalDataToImport);
             setAlertMessage(importMessage);
-
             const refreshedExportData = (await exportDB(dbs.filament, false)) ?? defaultSyncData;
             setDbExport(refreshedExportData as SyncDataStructure);
           } else {
@@ -336,7 +317,6 @@ export default function Sync({ verifyKey }: SyncProps) {
         setShowAlert(true);
         return;
       }
-
       try {
         setIsSpinning(true);
         const response = await pushData(data.syncKey, dbExport);
@@ -371,7 +351,6 @@ export default function Sync({ verifyKey }: SyncProps) {
       setShowAlert(true);
       return;
     }
-
     try {
       setIsSpinning(true);
       const response = await checkTimestamp(data.syncKey);
@@ -379,7 +358,6 @@ export default function Sync({ verifyKey }: SyncProps) {
         if (response.timestamp) {
           const responseDate = new Date(response.timestamp);
           const lastSyncedDate = new Date(data?.lastSynced ?? 0);
-
           if (isNaN(responseDate.getTime()) || isNaN(lastSyncedDate.getTime())) {
             setAlertVariant('danger');
             setAlertMessage('Error comparing sync times: Invalid date format.');
@@ -417,7 +395,6 @@ export default function Sync({ verifyKey }: SyncProps) {
     if (!window.confirm('Are you sure you want to remove your sync?')) {
       return;
     }
-
     setInitialType('');
     setData({});
     save({ 'scl-sync': '' });
@@ -427,168 +404,142 @@ export default function Sync({ verifyKey }: SyncProps) {
   };
 
   if (!isReady || isLoading) {
-    return <div className='text-center'>Loading database...</div>;
+    return (
+      <div className='text-center p-4'>
+        <Spinner animation='border' variant='primary' />
+      </div>
+    );
   }
 
   return (
-    <Row>
-      <Col>
-        <CustomAlert
-          variant={alertVariant ? alertVariant : 'success'}
-          message={alertMessage}
-          show={showAlert}
-          onClose={() => setShowAlert(false)}
-        />
-        {initialType === '' && (
-          <Row className='justify-content-center align-items-center'>
-            <Col xs='auto'>
-              <Button
-                variant='primary'
-                className='w-100'
-                disabled={isSpinning}
-                onClick={() => setInitialType('setupEmail')}>
-                Setup Sync
-              </Button>
-            </Col>
-            <Col xs='auto' className='text-center'>
-              OR
-            </Col>
-            <Col xs='auto'>
-              <Button
-                variant='primary'
-                className='w-100'
-                disabled={isSpinning}
-                onClick={() => setInitialType('setupKey')}>
-                Use Existing Key
-              </Button>
-            </Col>
-          </Row>
-        )}
-        {initialType === 'setupEmail' && (
-          <Row className='justify-content-center align-items-center'>
-            <Col xs={12} md={6}>
-              <Form.Group controlId='syncEmail'>
-                <Form.Label>Sync Email</Form.Label>
-                <Form.Control
-                  type='email'
-                  placeholder='Enter sync email'
-                  value={syncEmail}
-                  onChange={handleInputChange(setSyncEmail)}
-                  disabled={isSpinning}
-                  required
-                />
-              </Form.Group>
-            </Col>
-            <Row className='justify-content-center align-items-center mt-3'>
-              <Col xs='auto'>
-                <Button
-                  variant='primary'
-                  className='w-100'
-                  disabled={isSpinning}
-                  onClick={() => setInitialType('')}>
-                  Cancel
-                </Button>
-              </Col>
-              <Col xs='auto'>
-                <Button
-                  variant='primary'
-                  className='w-100'
-                  disabled={isSpinning}
-                  onClick={createSync}>
-                  Finish Setup
-                </Button>
-              </Col>
-            </Row>
-          </Row>
-        )}
-        {initialType === 'setupKey' && (
-          <Row className='justify-content-center align-items-center'>
-            <Col xs={12} md={6}>
-              <Form.Group controlId='syncKey'>
-                <Form.Label>Sync Key</Form.Label>
-                <Form.Control
-                  type='text'
-                  placeholder='Enter sync key'
-                  value={syncKey}
-                  onChange={handleInputChange(setSyncKey)}
-                  disabled={isSpinning}
-                  required
-                />
-              </Form.Group>
-            </Col>
-            <Row className='justify-content-center align-items-center mt-3'>
-              <Col xs='auto'>
-                <Button
-                  variant='primary'
-                  className='w-100'
-                  disabled={isSpinning}
-                  onClick={() => setInitialType('')}>
-                  Cancel
-                </Button>
-              </Col>
-              <Col xs='auto'>
-                <Button
-                  variant='primary'
-                  className='w-100'
-                  disabled={isSpinning}
-                  onClick={() => existingKey()}>
-                  Finish Setup
-                </Button>
-              </Col>
-            </Row>
-          </Row>
-        )}
-        {(initialType === 'engaged' || initialType === 'needs-verification') && (
-          <>
-            <Row className='justify-content-center align-items-center'>
-              <Col xs='auto'>Email: {data?.email ?? 'N/A'}</Col>
-              <Col xs='auto'>Key: {data?.syncKey ?? 'N/A'}</Col>
-              <Col xs='auto'>
-                Last Synced: {data?.lastSynced ? new Date(data.lastSynced).toLocaleString() : 'N/A'}
-              </Col>
-              <Col xs='auto'>Account Type: {data?.accountType || 'Free'}</Col>
-            </Row>
-            <Row className='mt-4 justify-content-center align-items-center'>
-              <Col xs='auto'>
-                <Button
-                  variant='primary'
-                  className='w-100'
-                  disabled={isSpinning}
-                  onClick={removeSync}>
-                  Remove Sync
-                </Button>
-              </Col>
-              <Col xs='auto'>
-                <Button
-                  variant='primary'
-                  className='w-100'
-                  disabled={isSpinning || syncCooldown > 0 || initialType === 'needs-verification'}
-                  onClick={checkSyncTimestamp}>
-                  {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync Now'}
-                </Button>
-              </Col>
-              <Col xs='auto'>
-                <Button
-                  variant='warning'
-                  className='w-100'
-                  disabled={isSpinning || initialType === 'needs-verification'}
-                  onClick={() => pushSyncData(true)}>
-                  Force Push
-                </Button>
-              </Col>
-              <Col xs='auto'>
-                <Button
-                  variant='info'
-                  className='w-100'
-                  disabled={isSpinning || initialType === 'needs-verification'}
-                  onClick={() => pullSyncData(true)}>
-                  Force Pull
-                </Button>
-              </Col>
-            </Row>
-          </>
-        )}
-      </Col>
-    </Row>
+    <div className={styles.settingsPane}>
+      <CustomAlert
+        variant={alertVariant || 'success'}
+        message={alertMessage}
+        show={showAlert}
+        onClose={() => setShowAlert(false)}
+      />
+
+      {initialType === '' && (
+        <div className='text-center'>
+          <h5 className={styles.paneSubtitle}>Setup Cloud Sync</h5>
+          <p className='text-muted'>Sync your data across devices securely.</p>
+          <Button variant='primary' onClick={() => setInitialType('setupEmail')} className='me-2'>
+            Setup with Email
+          </Button>
+          <Button variant='outline-secondary' onClick={() => setInitialType('setupKey')}>
+            Use Existing Key
+          </Button>
+        </div>
+      )}
+
+      {initialType === 'setupEmail' && (
+        <div>
+          <h5 className={styles.paneSubtitle}>Setup with Email</h5>
+          <Form.Group className='mb-3'>
+            <Form.Label>Your Email Address</Form.Label>
+            <Form.Control
+              type='email'
+              placeholder='Enter your email'
+              value={syncEmail}
+              onChange={handleInputChange(setSyncEmail)}
+              disabled={isSpinning}
+            />
+          </Form.Group>
+          <Button variant='primary' onClick={createSync} disabled={isSpinning}>
+            {isSpinning ? <Spinner as='span' size='sm' /> : 'Finish Setup'}
+          </Button>
+          <Button variant='link' onClick={() => setInitialType('')} className='ms-2'>
+            Cancel
+          </Button>
+        </div>
+      )}
+
+      {initialType === 'setupKey' && (
+        <div>
+          <h5 className={styles.paneSubtitle}>Setup with Existing Key</h5>
+          <Form.Group className='mb-3'>
+            <Form.Label>Your Sync Key</Form.Label>
+            <Form.Control
+              type='text'
+              placeholder='Enter your sync key'
+              value={syncKey}
+              onChange={handleInputChange(setSyncKey)}
+              disabled={isSpinning}
+            />
+          </Form.Group>
+          <Button variant='primary' onClick={() => existingKey()} disabled={isSpinning}>
+            {isSpinning ? <Spinner as='span' size='sm' /> : 'Finish Setup'}
+          </Button>
+          <Button variant='link' onClick={() => setInitialType('')} className='ms-2'>
+            Cancel
+          </Button>
+        </div>
+      )}
+
+      {initialType === 'needs-verification' && (
+        <div>
+          <h5 className={styles.paneSubtitle}>Check Your Email</h5>
+          <p className='text-muted'>
+            We&apos;ve sent a verification key to <strong>{data.email}</strong>. Please enter it
+            below.
+          </p>
+          <Form.Group className='mb-3'>
+            <Form.Label>Verification Key</Form.Label>
+            <Form.Control
+              type='text'
+              placeholder='Enter key from email'
+              value={syncKey}
+              onChange={handleInputChange(setSyncKey)}
+            />
+          </Form.Group>
+          <Button variant='primary' onClick={() => existingKey()} disabled={isSpinning}>
+            {isSpinning ? <Spinner as='span' size='sm' /> : 'Complete Setup'}
+          </Button>
+        </div>
+      )}
+
+      {initialType === 'engaged' && (
+        <div>
+          <h5 className={styles.paneSubtitle}>Sync Status</h5>
+          <Card body className={styles.syncStatusCard}>
+            <p>
+              <strong>Email:</strong> {data.email}
+            </p>
+            <p>
+              <strong>Status:</strong> <span className='text-success'>Active</span>
+            </p>
+            <p className='mb-0'>
+              <strong>Last Synced:</strong>{' '}
+              {data.lastSynced ? new Date(data.lastSynced).toLocaleString() : 'Never'}
+            </p>
+          </Card>
+          <div className='mt-3 d-flex flex-wrap gap-2'>
+            <Button
+              variant='primary'
+              onClick={checkSyncTimestamp}
+              disabled={isSpinning || syncCooldown > 0}>
+              {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync Now'}
+            </Button>
+            <Button
+              variant='outline-warning'
+              onClick={() => pushSyncData(true)}
+              disabled={isSpinning}>
+              Force Push
+            </Button>
+            <Button variant='outline-info' onClick={() => pullSyncData(true)} disabled={isSpinning}>
+              Force Pull
+            </Button>
+            <Button
+              variant='outline-danger'
+              onClick={removeSync}
+              disabled={isSpinning}
+              className='ms-md-auto'>
+              Remove Sync
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

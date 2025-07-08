@@ -10,7 +10,7 @@ import { exportDB } from '@/helpers/exportDB';
 import { importDB } from '@/helpers/importDB';
 // --- Styles ---
 import styles from '@/public/styles/components/Settings.module.css';
-// --- FontAwesome ---
+// --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExport, faFileImport } from '@fortawesome/free-solid-svg-icons';
 

@@ -2,7 +2,7 @@
 
 // --- React ---
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Alert, Card } from 'react-bootstrap';
 // --- Next ---
 import { useSearchParams } from 'next/navigation';
 // --- Components ---
@@ -12,6 +12,8 @@ import { getDocumentByColumn } from '@silocitypages/data-access';
 import { useDatabase } from '@/contexts/DatabaseContext';
 // --- Types ---
 import { Filament } from '@/types/Filament';
+// --- Styles ---
+import styles from '@/public/styles/components/ManageFilament.module.css';
 
 // --- Default Value ---
 const defaultValue: Omit<Filament, '_id' | '_rev'> = {
@@ -52,10 +54,8 @@ export default function ManageFilamentPage() {
     } else {
       determinedType = 'create';
     }
-
     setOperationType(determinedType);
 
-    // --- Define Helper ---
     const applyUsedWeight = (data: Filament): Filament => {
       if (usedWeightParam) {
         const parsedWeight = parseInt(usedWeightParam, 10);
@@ -67,42 +67,28 @@ export default function ManageFilamentPage() {
     };
 
     if (determinedType === 'edit' || determinedType === 'duplicate') {
-      if (!currentId) {
-        setError('Filament ID is missing for edit/duplicate operation.');
-        setFilament(applyUsedWeight({ ...defaultValue }));
-        setIsLoading(false);
-        return;
-      }
-      if (!dbs.filament) {
-        setError('Database connection is not available.');
+      if (!currentId || !dbs.filament) {
+        setError(currentId ? 'Database connection is not available.' : 'Filament ID is missing.');
         setFilament(applyUsedWeight({ ...defaultValue }));
         setIsLoading(false);
         return;
       }
 
-      // Fetch Data Asynchronously
       const fetchData = async (id: string) => {
         try {
-          // Assuming getDocumentByColumn returns the single document or null/throws
           const fetchedData: Filament = await getDocumentByColumn(
             dbs.filament!,
             '_id',
             id,
             'filament'
           );
-
           if (!fetchedData) {
-            // Check if data is actually found
             throw new Error(`Filament with ID "${id}" not found.`);
           }
-
           if (determinedType === 'duplicate') {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { _id, _rev, calc_weight, ...duplicableData } = fetchedData;
-            // Reset used_weight for duplicate, apply other fetched vals over default
             setFilament(applyUsedWeight({ ...defaultValue, ...duplicableData, used_weight: 0 }));
           } else {
-            // --- Edit ---
             setFilament(applyUsedWeight(fetchedData));
           }
         } catch (err: unknown) {
@@ -115,13 +101,10 @@ export default function ManageFilamentPage() {
           setIsLoading(false);
         }
       };
-
-      fetchData(currentId); // Execute the fetch
+      fetchData(currentId);
     } else {
-      // Create Operation
       const initialData: Filament = { ...defaultValue };
       if (currentId && typeParam === 'create') {
-        // Handle create with pre-filled ID if needed
         initialData._id = currentId;
       }
       setFilament(applyUsedWeight(initialData));
@@ -131,52 +114,55 @@ export default function ManageFilamentPage() {
 
   if (isLoading) {
     return (
-      <Container className='text-center my-5'>
-        <Spinner animation='border' role='status'>
-          <span className='visually-hidden'>Loading...</span>
-        </Spinner>
-        <p className='mt-2'>Loading Filament Data...</p>
-      </Container>
+      <div className={styles.managePage}>
+        <Container className='text-center'>
+          <Spinner animation='border' variant='primary' role='status'>
+            <span className='visually-hidden'>Loading...</span>
+          </Spinner>
+          <p className='mt-2 text-muted'>Loading Filament Data...</p>
+        </Container>
+      </div>
     );
   }
 
-  if (error) {
-    return (
-      <Container className='my-4'>
-        <Alert variant='danger'>
-          <Alert.Heading>Error Loading Filament</Alert.Heading>
-          <p>{error}</p>
-        </Alert>
-      </Container>
-    );
-  }
-
-  if (!filament) {
-    return (
-      <Container className='my-4'>
-        <Alert variant='warning'>Could not initialize filament data.</Alert>
-      </Container>
-    );
-  }
-
-  const pageTitle = operationType === 'edit' ? 'Edit Filament' : 'Add Filament';
+  const pageTitle =
+    operationType === 'edit'
+      ? 'Edit Filament'
+      : operationType === 'duplicate'
+        ? 'Duplicate Filament'
+        : 'Add New Filament';
 
   return (
-    <Container fluid className='py-3'>
-      <Row className='justify-content-center'>
-        <Col xs={12} md={10} lg={8}>
-          <div className='shadow-lg p-3 p-md-4 bg-body rounded'>
-            <h2 className='text-center mb-4'>{pageTitle}</h2>
-            {isReady && dbs.filament ? (
-              <ManageFilament data={filament} db={dbs.filament} />
-            ) : (
-              <Alert variant='info' className='text-center'>
-                Database connection is initializing... Form will load shortly.
-              </Alert>
-            )}
-          </div>
-        </Col>
-      </Row>
-    </Container>
+    <div className={styles.managePage}>
+      <Container>
+        <Row className='justify-content-center'>
+          <Col xs={12} md={10} lg={8}>
+            <Card className={styles.formCard}>
+              <Card.Body>
+                <h1 className='text-center mb-4'>{pageTitle}</h1>
+                {error && (
+                  <Alert variant='danger'>
+                    <Alert.Heading>Error Loading Filament</Alert.Heading>
+                    <p>{error}</p>
+                  </Alert>
+                )}
+                {!filament && !error && (
+                  <Alert variant='warning'>Could not initialize filament data.</Alert>
+                )}
+                {isReady && dbs.filament && filament ? (
+                  <ManageFilament data={filament} db={dbs.filament} />
+                ) : (
+                  !error && (
+                    <Alert variant='info' className='text-center'>
+                      Database connection is initializing...
+                    </Alert>
+                  )
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 }

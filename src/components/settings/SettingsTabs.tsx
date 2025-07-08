@@ -7,7 +7,7 @@ import { Row, Col, Nav, Tab, Card, Spinner } from 'react-bootstrap';
 import { useSearchParams } from 'next/navigation';
 // --- Styles ---
 import styles from '@/public/styles/components/Settings.module.css';
-// --- FontAwesome ---
+// --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog, faSyncAlt, faFileImport } from '@fortawesome/free-solid-svg-icons';
 // --- Components ---

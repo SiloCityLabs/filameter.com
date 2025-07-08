@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Form, Button } from 'react-bootstrap';
-// --- Next ---
+import { Form, Button, Row, Col, Spinner } from 'react-bootstrap';
 import { useRouter } from 'next/navigation';
-// --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
-// --- Types ---
 import { ManageFilamentProps, Filament } from '@/types/Filament';
-// --- DB ---
 import { save } from '@silocitypages/data-access';
 import { filamentSchema } from '@/helpers/database/filament/migrateFilamentDB';
+// --- Styles ---
+import styles from '@/public/styles/components/ManageFilament.module.css';
+// --- Font Awesome ---
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const defaultValue: Filament = {
   filament: '',
@@ -24,6 +25,7 @@ const defaultValue: Filament = {
 function ManageFilament({ data, db }: ManageFilamentProps) {
   const router = useRouter();
   const [isEdit, setIsEdit] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
@@ -45,7 +47,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!db) {
       setAlertVariant('danger');
       setAlertMessage('Database not initialized.');
@@ -53,136 +54,162 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       return;
     }
 
+    setIsSaving(true);
     const type = isEdit ? 'updated' : 'added';
-    let result;
-    for (let x = 0; x < numberOfRows; x++) {
-      result = await save(db, formData, filamentSchema, 'filament');
-    }
+    let finalResult;
+    try {
+      for (let x = 0; x < (createMultiple && !isEdit ? numberOfRows : 1); x++) {
+        // For multiple creations, ensure each gets a unique ID by not passing formData with an _id
+        const dataToSave =
+          createMultiple && !isEdit ? { ...formData, _id: undefined, _rev: undefined } : formData;
+        finalResult = await save(db, dataToSave, filamentSchema, 'filament');
+        if (!finalResult.success) {
+          // Stop on first error
+          throw new Error(JSON.stringify(finalResult.error));
+        }
+      }
 
-    if (result.success) {
+      // Redirect with success message
+      const successMessage = encodeURIComponent(
+        `Filament ${isEdit ? 'updated' : `(${numberOfRows}) added`} successfully!`
+      );
+      router.push(`/spools?alert_msg=${successMessage}`);
+    } catch (error: any) {
+      console.error(`Error: Filament not ${type}:`, error);
+      let message = 'An unexpected error occurred.';
+      try {
+        // Attempt to parse nested error messages
+        const errorObj = JSON.parse(error.message);
+        if (Array.isArray(errorObj)) {
+          message = errorObj.map((e) => e.message).join(', ');
+        }
+      } catch (e) {
+        // Fallback for non-json errors
+        message = error.message || message;
+      }
+      setAlertMessage(message);
+      setAlertVariant('danger');
       setShowAlert(true);
-      setAlertMessage(`Filament ${type} successfully`);
-
-      //Clear form data if adding
-      if (!isEdit) {
-        router.replace('/spools');
-      }
-    } else {
-      console.error(`Error: Filament not ${type}:`, result.error);
-      if (
-        typeof result.error === 'object' &&
-        result.error !== null &&
-        Array.isArray(result.error)
-      ) {
-        result.error.forEach((err) => {
-          setAlertMessage(err.message);
-        });
-        setAlertVariant('danger');
-        setShowAlert(true);
-      } else {
-        setAlertVariant('danger');
-        setAlertMessage('An unexpected error occurred.');
-        setShowAlert(true);
-      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <>
       <CustomAlert
-        variant={alertVariant ? alertVariant : 'success'}
+        variant={alertVariant || 'success'}
         message={alertMessage}
         show={showAlert}
         onClose={() => setShowAlert(false)}
       />
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSubmit} className={styles.manageForm}>
         {formData._id && (
-          <Form.Group controlId='_id'>
-            <Form.Label>ID:</Form.Label>
-            <Form.Control type='text' name='_id' value={formData._id} disabled={true} />
+          <Form.Group as={Row} className='mb-3' controlId='_id'>
+            <Form.Label column sm={1}>
+              ID:
+            </Form.Label>
+            <Col sm={11}>
+              <Form.Control type='text' value={formData._id} disabled readOnly />
+            </Col>
           </Form.Group>
         )}
 
-        <Form.Group controlId='filament'>
-          <Form.Label>Filament:</Form.Label>
-          <Form.Control
-            type='text'
-            name='filament'
-            value={formData.filament}
-            onChange={handleInputChange}
-          />
-        </Form.Group>
+        <Row>
+          <Col md={6}>
+            <Form.Group className='mb-3' controlId='filament'>
+              <Form.Label>Filament Name</Form.Label>
+              <Form.Control
+                type='text'
+                name='filament'
+                value={formData.filament}
+                onChange={handleInputChange}
+                placeholder='e.g., Galaxy Black'
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className='mb-3' controlId='material'>
+              <Form.Label>Material</Form.Label>
+              <Form.Control
+                type='text'
+                name='material'
+                value={formData.material}
+                onChange={handleInputChange}
+                placeholder='e.g., PLA'
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group controlId='material'>
-          <Form.Label>Material:</Form.Label>
-          <Form.Control
-            type='text'
-            name='material'
-            value={formData.material}
-            onChange={handleInputChange}
-            required
-          />
-        </Form.Group>
+        <Row>
+          <Col md={6}>
+            <Form.Group className='mb-3' controlId='usedWeight'>
+              <Form.Label>Used Weight (g)</Form.Label>
+              <Form.Control
+                type='number'
+                name='used_weight'
+                value={formData.used_weight}
+                onChange={handleInputChange}
+                min='0'
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className='mb-3' controlId='totalWeight'>
+              <Form.Label>Total Weight (g)</Form.Label>
+              <Form.Control
+                type='number'
+                name='total_weight'
+                value={formData.total_weight}
+                onChange={handleInputChange}
+                min='0'
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group controlId='usedWeight'>
-          <Form.Label>Used Weight:</Form.Label>
-          <Form.Control
-            type='number'
-            name='used_weight'
-            value={formData.used_weight}
-            onChange={handleInputChange}
-            min='0'
-            required
-          />
-        </Form.Group>
-
-        <Form.Group controlId='totalWeight'>
-          <Form.Label>Total Weight:</Form.Label>
-          <Form.Control
-            type='number'
-            name='total_weight'
-            value={formData.total_weight}
-            onChange={handleInputChange}
-            min='0'
-            required
-          />
-        </Form.Group>
-
-        <Form.Group controlId='location'>
-          <Form.Label>Location:</Form.Label>
+        <Form.Group className='mb-3' controlId='location'>
+          <Form.Label>Location</Form.Label>
           <Form.Control
             type='text'
             name='location'
             value={formData.location}
             onChange={handleInputChange}
+            placeholder='e.g., Shelf A, Bin 3'
           />
         </Form.Group>
 
-        <Form.Group controlId='comments'>
-          <Form.Label>Comments:</Form.Label>
+        <Form.Group className='mb-3' controlId='comments'>
+          <Form.Label>Comments</Form.Label>
           <Form.Control
-            as='textarea' // Use textarea component
-            rows={3} // Set number of rows
+            as='textarea'
+            rows={3}
             name='comments'
             value={formData.comments}
             onChange={handleInputChange}
+            placeholder='e.g., Prints best at 215°C'
           />
         </Form.Group>
+
         {!isEdit && (
-          <Form.Group controlId='createMultiple'>
+          <Form.Group controlId='createMultiple' className={styles.multipleOptionWrapper}>
             <Form.Check
               type='checkbox'
-              label='Create multiple rows'
+              label='Create multiple spools with these details'
               checked={createMultiple}
-              className='custom-checkbox my-3'
+              className={styles.formCheck}
               onChange={(e) => setCreateMultiple(e.target.checked)}
             />
           </Form.Group>
         )}
 
         {createMultiple && !isEdit && (
-          <Form.Group controlId='numberOfRows'>
-            <Form.Label>Number of rows:</Form.Label>
+          <Form.Group className='mb-3' controlId='numberOfRows'>
+            <Form.Label>Number of spools to create:</Form.Label>
             <Form.Control
               type='number'
               value={numberOfRows}
@@ -193,12 +220,14 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Form.Group>
         )}
 
-        <div className='text-center mt-2 d-flex justify-content-center'>
-          <Button href='/spools' variant='primary' className='me-2'>
+        <div className='mt-4 d-flex justify-content-end gap-2'>
+          <Button href='/spools' variant='outline-secondary'>
+            <FontAwesomeIcon icon={faTimes} className='me-2' />
             {isEdit ? 'Back to Spools' : 'Cancel'}
           </Button>
-          <Button variant='primary' type='submit'>
-            Save
+          <Button variant='primary' type='submit' disabled={isSaving}>
+            <FontAwesomeIcon icon={faSave} className='me-2' />
+            {isSaving ? <Spinner as='span' size='sm' /> : 'Save Filament'}
           </Button>
         </div>
       </Form>

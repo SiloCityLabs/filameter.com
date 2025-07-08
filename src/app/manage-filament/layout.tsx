@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import PageLayout from '@/components/PageLayout';
 
 export const metadata: Metadata = {
-  title: 'Manage 3D Printer Filament Spools | Filameter',
+  title: 'Manage 3D Printer Filament Spools',
   description:
     'Effortlessly track, add, edit, and duplicate your 3D printer filament spools with Filameter. Organize your inventory, monitor usage, and optimize your 3D printing workflow.',
   keywords: [

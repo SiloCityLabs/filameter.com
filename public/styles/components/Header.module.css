@@ -4,7 +4,7 @@
   transition:
     background-color 0.4s ease-out,
     box-shadow 0.4s ease-out;
-  background-color: transparent; /* Transparent when at the top */
+  background-color: transparent; /* Transparent when at the top on desktop */
 }
 
 /* --- Scrolled State Styling --- */
@@ -27,16 +27,21 @@
 }
 
 /* --- Nav Link Styling --- */
-.navLink {
-  color: var(--text-dark) !important; /* Override default bootstrap colors */
+/* By adding .mainNav, we make this selector more specific than Bootstrap's default */
+.mainNav .navLink {
+  color: var(--text-dark) !important;
   font-weight: 500;
   position: relative;
   padding: 0.5rem 1rem !important;
   transition: color 0.3s ease;
 }
 
-/* Underline effect for nav links */
-.navLink::after {
+/* Using the orange complementary color for hover and active states */
+.mainNav .navLink:hover {
+  color: var(--complementary-color) !important;
+}
+
+.mainNav .navLink::after {
   content: '';
   position: absolute;
   width: 100%;
@@ -44,27 +49,23 @@
   height: 2px;
   bottom: -5px;
   left: 0;
-  background-color: var(--primary-color);
+  background-color: var(--complementary-color); /* Orange underline */
   transform-origin: bottom right;
   transition: transform 0.3s ease-out;
 }
 
-.navLink:hover {
-  color: var(--primary-color) !important;
-}
-
-.navLink:hover::after {
+.mainNav .navLink:hover::after {
   transform: scaleX(1);
   transform-origin: bottom left;
 }
 
 /* --- Active Nav Link Styling --- */
-.activeNavLink {
-  color: var(--primary-color) !important;
+.mainNav .activeNavLink {
+  color: var(--complementary-color) !important; /* Orange for active link text */
   font-weight: 700;
 }
 
-.activeNavLink::after {
+.mainNav .activeNavLink::after {
   transform: scaleX(1) !important;
   transform-origin: bottom left !important;
 }
@@ -83,12 +84,21 @@
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-/* Style for the expanded mobile menu */
+/* --- Mobile & Tablet Styling --- */
 @media (max-width: 991.98px) {
+  .navbar {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Style for the expanded mobile menu dropdown */
   .navbar .navbar-collapse {
     padding: 1rem;
     margin-top: 0.5rem;
     border-radius: 0.5rem;
+    /* The dropdown itself can be more solid */
     background-color: rgba(255, 255, 255, 0.98);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   }

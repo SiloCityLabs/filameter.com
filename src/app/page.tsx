@@ -8,6 +8,7 @@ import Features from '@/components/home/Features';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import Sync from '@/components/home/Sync';
 import OpenSourceSection from '@/components/home/OpenSourceSection';
+import ContactSection from '@/components/home/ContactSection';
 
 export default function HomePage() {
   return (
@@ -17,6 +18,7 @@ export default function HomePage() {
       <WhyChooseUs />
       <Sync />
       <OpenSourceSection />
+      <ContactSection />
     </PageLayout>
   );
 }

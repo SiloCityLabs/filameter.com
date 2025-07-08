@@ -1,0 +1,28 @@
+.qrPage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-light);
+  min-height: calc(100vh - 72px); /* Adjust 72px to your header's height */
+  padding: 2rem 0;
+}
+
+.statusCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  background-color: var(--white);
+  padding: 2rem;
+  text-align: center;
+}
+
+.statusIcon {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.statusTitle {
+  font-weight: 700;
+  color: var(--text-dark);
+}

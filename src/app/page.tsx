@@ -7,6 +7,7 @@ import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import Sync from '@/components/home/Sync';
+import OpenSourceSection from '@/components/home/OpenSourceSection';
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
       <Features />
       <WhyChooseUs />
       <Sync />
+      <OpenSourceSection />
     </PageLayout>
   );
 }

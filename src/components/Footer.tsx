@@ -2,72 +2,78 @@
 
 // --- React ---
 import React from 'react';
-import { Nav } from 'react-bootstrap';
+import { Container, Row, Col, Nav } from 'react-bootstrap';
+
 // --- Next ---
 import Image from 'next/image';
 
+// --- Styles ---
+import styles from '@/public/styles/components/Footer.module.css';
+
 export default function Footer({ className }: { className?: string }) {
   const showLicense =
-    process.env.NEXT_PUBLIC_FOOTER_SITE !== '' &&
-    process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT_URL !== '';
+    process.env.NEXT_PUBLIC_FOOTER_SITE && process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT_URL;
+
   const images = [
     { src: 'https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1', alt: 'CC' },
     { src: 'https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1', alt: 'BY' },
     { src: 'https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1', alt: 'NC' },
     { src: 'https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1', alt: 'SA' },
   ];
+
   return (
-    <>
-      <footer id='site-footer' className={`${className} bg-light text-center`}>
-        <Nav className='justify-content-center flex-column flex-md-row'>
-          {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT !== '' && (
-            <Nav.Item style={{ padding: '7px' }}>
-              ©2025 Copyright: {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT}
-            </Nav.Item>
-          )}
-          <Nav.Item>
-            <Nav.Link href='/terms'>Terms</Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link href='/privacy'>Privacy Policy</Nav.Link>
-          </Nav.Item>
-        </Nav>
-        {showLicense && (
-          <div className='text-center p-3'>
-            <a property='dct:title' rel='cc:attributionURL' href={process.env.NEXT_PUBLIC_APP_URL}>
-              {process.env.NEXT_PUBLIC_FOOTER_SITE}
-            </a>{' '}
-            by{' '}
-            <a
-              rel='cc:attributionURL dct:creator'
-              property='cc:attributionName'
-              href={process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT_URL}>
-              {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT}
-            </a>{' '}
-            is licensed under{' '}
-            <a
-              href='https://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1'
-              target='_blank'
-              rel='license noopener noreferrer'
-              style={{ display: 'inline-block' }}>
-              CC BY-NC-SA 4.0
-              {images.map((image, index) => (
-                <Image
-                  key={index}
-                  src={image.src}
-                  alt={image.alt}
-                  width={22}
-                  height={22}
-                  style={{ marginLeft: '3px', verticalAlign: 'text-bottom' }}
-                />
-              ))}
-            </a>
-          </div>
-        )}
-      </footer>
-      <span style={{ display: 'none' }} attr-type='author'>
-        Bana0615
-      </span>
-    </>
+    <footer id='site-footer' className={`${styles.footer} ${className}`}>
+      <Container>
+        <Row className='align-items-center text-center text-md-start'>
+          {/* Column 1: Copyright and Logo */}
+          <Col md={4} className='mb-3 mb-md-0'>
+            <Image
+              src='/images/logos/filameter-logo.svg'
+              alt='FilaMeter Logo'
+              width={120}
+              height={40}
+              className={styles.footerLogo}
+            />
+            {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT && (
+              <p className={styles.copyright}>
+                ©{new Date().getFullYear()} {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT}
+              </p>
+            )}
+          </Col>
+
+          {/* Column 2: Navigation Links */}
+          <Col md={4} className='mb-3 mb-md-0'>
+            <Nav className='justify-content-center'>
+              <Nav.Link href='/terms' className={styles.footerLink}>
+                Terms
+              </Nav.Link>
+              <Nav.Link href='/privacy' className={styles.footerLink}>
+                Privacy Policy
+              </Nav.Link>
+            </Nav>
+          </Col>
+
+          {/* Column 3: License Information */}
+          <Col md={4}>
+            {showLicense && (
+              <div className={styles.licenseSection}>
+                <a
+                  href='https://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1'
+                  target='_blank'
+                  rel='license noopener noreferrer'
+                  className={styles.licenseLink}>
+                  <span>Licensed under CC BY-NC-SA 4.0</span>
+                  <div className={styles.licenseIcons}>
+                    {images.map((image, index) => (
+                      <Image key={index} src={image.src} alt={image.alt} width={22} height={22} />
+                    ))}
+                  </div>
+                </a>
+              </div>
+            )}
+          </Col>
+        </Row>
+      </Container>
+    </footer>
   );
 }

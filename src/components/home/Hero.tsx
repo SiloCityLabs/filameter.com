@@ -4,7 +4,7 @@
 import React from 'react';
 import { Container, Row, Col, Button, Image } from 'react-bootstrap';
 // --- Styles ---
-import styles from './Hero.module.css';
+import styles from '@/public/styles/components/home/Hero.module.css';
 
 const Hero: React.FC = () => {
   return (
@@ -12,7 +12,7 @@ const Hero: React.FC = () => {
       <Container>
         <Row className='justify-content-center text-center'>
           <Col md={10} lg={8}>
-            <div className={styles.heroContent}>
+            <div className={`${styles.heroContent} mt-3`}>
               {/* Logo Area */}
               <Image
                 src='/images/logos/filameter-logo.svg'

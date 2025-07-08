@@ -1,0 +1,69 @@
+/* Settings.module.css */
+
+/* --- Main Page Layout --- */
+.settingsPage {
+  background-color: var(--background-light);
+  padding: 8rem 0 4rem 0; /* Add padding top to account for fixed header */
+  min-height: 100vh;
+}
+
+.pageHeader {
+  color: var(--text-dark);
+  font-weight: 700;
+}
+
+.settingsCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  overflow: hidden; /* Important for child border-radius */
+}
+
+/* --- Vertical Tab Navigation --- */
+.settingsNav {
+  padding: 1rem;
+  border-right: 1px solid #dee2e6;
+  height: 100%;
+}
+
+.settingsNav .nav-link {
+  color: var(--text-dark);
+  font-weight: 500;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.settingsNav .nav-link:hover {
+  background-color: var(--background-light);
+}
+
+.settingsNav .nav-link.active {
+  background-color: var(--primary-color);
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* --- Tab Content Area --- */
+.settingsContent {
+  padding: 1.5rem;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 576px) {
+  .settingsNav {
+    flex-direction: row !important; /* Make tabs horizontal on mobile */
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+
+  .settingsNav .nav-item {
+    white-space: nowrap;
+  }
+}

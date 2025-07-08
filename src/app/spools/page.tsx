@@ -2,9 +2,9 @@
 
 // --- React ---
 import { useEffect, useState, useCallback } from 'react';
-import { Container, Row, Col, Spinner, Card } from 'react-bootstrap';
+import { Container, Spinner, Card } from 'react-bootstrap';
 // --- Next ---
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 // --- Components ---
 import SpoolsHeader from '@/components/spools/SpoolsHeader';
 import SpoolsTable from '@/components/spools/SpoolsTable';
@@ -14,12 +14,7 @@ import SpoolsAlertDisplay from '@/components/spools/SpoolsAlertDisplay';
 import getAllFilaments from '@/helpers/database/filament/getAllFilaments';
 import getAllSettings from '@/helpers/database/settings/getAllSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
-import { exportDB } from '@/helpers/exportDB';
-import { pushData } from '@/helpers/sync/pushData';
-import { pullData } from '@/helpers/sync/pullData';
-import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
 import { deleteRow, getDocumentByColumn } from '@silocitypages/data-access';
-import { importPulledData } from '@/helpers/sync/importPulledData';
 // --- Types ---
 import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
@@ -29,7 +24,6 @@ import styles from '@/public/styles/components/Spools.module.css';
 export default function SpoolsPage() {
   const { dbs, isReady } = useDatabase();
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -44,8 +38,8 @@ export default function SpoolsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [syncData, setSyncData] = useState<sclSettings>({});
-  const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
   const [syncCooldown, setSyncCooldown] = useState<number>(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSpinning, setIsSpinning] = useState(false);
 
   // --- Effects ---

@@ -59,17 +59,14 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     let finalResult;
     try {
       for (let x = 0; x < (createMultiple && !isEdit ? numberOfRows : 1); x++) {
-        // For multiple creations, ensure each gets a unique ID by not passing formData with an _id
         const dataToSave =
           createMultiple && !isEdit ? { ...formData, _id: undefined, _rev: undefined } : formData;
         finalResult = await save(db, dataToSave, filamentSchema, 'filament');
         if (!finalResult.success) {
-          // Stop on first error
           throw new Error(JSON.stringify(finalResult.error));
         }
       }
 
-      // Redirect with success message
       const successMessage = encodeURIComponent(
         `Filament ${isEdit ? 'updated' : `(${numberOfRows}) added`} successfully!`
       );
@@ -78,13 +75,11 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       console.error(`Error: Filament not ${type}:`, error);
       let message = 'An unexpected error occurred.';
       try {
-        // Attempt to parse nested error messages
         const errorObj = JSON.parse(error.message);
         if (Array.isArray(errorObj)) {
           message = errorObj.map((e) => e.message).join(', ');
         }
       } catch (e) {
-        // Fallback for non-json errors
         message = error.message || message;
       }
       setAlertMessage(message);
@@ -105,11 +100,11 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       />
       <Form onSubmit={handleSubmit} className={styles.manageForm}>
         {formData._id && (
-          <Form.Group as={Row} className='mb-3' controlId='_id'>
-            <Form.Label column sm={1}>
+          <Form.Group as={Row} className='mb-3 align-items-center' controlId='_id'>
+            <Form.Label column sm='auto' className='mb-0'>
               ID:
             </Form.Label>
-            <Col sm={11}>
+            <Col>
               <Form.Control type='text' value={formData._id} disabled readOnly />
             </Col>
           </Form.Group>

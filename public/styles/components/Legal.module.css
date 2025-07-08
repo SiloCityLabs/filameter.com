@@ -1,0 +1,65 @@
+.legalPage {
+  background-color: var(--background-light);
+  padding: 8rem 0 4rem 0; /* Add padding top to account for fixed header */
+  min-height: 100vh;
+}
+
+.legalCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  background-color: var(--white);
+  padding: 2rem;
+}
+
+.pageTitle {
+  color: var(--text-dark);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.lastUpdated {
+  text-align: center;
+  color: #6c757d;
+  margin-bottom: 2.5rem;
+  font-style: italic;
+}
+
+.legalContent section {
+  margin-bottom: 2rem;
+}
+
+.legalContent h2,
+.legalContent h3 {
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.legalContent p,
+.legalContent li {
+  line-height: 1.7;
+  color: #495057;
+}
+
+.legalContent ol,
+.legalContent ul {
+  padding-left: 2rem;
+}
+
+.legalContent ol ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 767.98px) {
+  .legalCard {
+    padding: 1.5rem;
+  }
+  .pageTitle {
+    font-size: 1.75rem;
+  }
+}

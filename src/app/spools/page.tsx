@@ -1,24 +1,15 @@
 'use client';
 
 // --- React ---
-import { useEffect, useState } from 'react';
-import {
-  Container,
-  Row,
-  Col,
-  Table,
-  Form,
-  Button,
-  OverlayTrigger,
-  Tooltip,
-  Pagination,
-  Spinner,
-} from 'react-bootstrap';
+import { useEffect, useState, useCallback } from 'react';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
 // --- Next ---
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 // --- Components ---
-import { CustomAlert } from '@silocitypages/ui-core';
+import SpoolsHeader from '@/components/spools/SpoolsHeader'; // New component import
+import SpoolsTable from '@/components/spools/SpoolsTable'; // New component import
+import SpoolsPagination from '@/components/spools/SpoolsPagination'; // New component import
+import SpoolsAlertDisplay from '@/components/spools/SpoolsAlertDisplay'; // New component import
 // --- DB ---
 import getAllFilaments from '@/helpers/database/filament/getAllFilaments';
 import getAllSettings from '@/helpers/database/settings/getAllSettings';
@@ -27,11 +18,8 @@ import { exportDB } from '@/helpers/exportDB';
 import { pushData } from '@/helpers/sync/pushData';
 import { pullData } from '@/helpers/sync/pullData';
 import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
-import { getDocumentByColumn, deleteRow } from '@silocitypages/data-access';
+import { deleteRow, getDocumentByColumn } from '@silocitypages/data-access';
 import { importPulledData } from '@/helpers/sync/importPulledData';
-// --- Icons ---
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare, faTrash, faCopy, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 // --- Types ---
 import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
@@ -189,31 +177,33 @@ export default function SpoolsPage() {
     }
   };
 
-  const handleSortClick = (key: keyof Filament) => {
-    if (sortKey === key) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortKey(key);
-      setSortDirection('asc');
-    }
+  const handleSortClick = useCallback((key: keyof Filament) => {
+    setSortKey((prevKey) => {
+      if (prevKey === key) {
+        setSortDirection((prevDirection) => (prevDirection === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortDirection('asc');
+      }
+      return key;
+    });
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleItemsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleItemsPerPageChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     setItemsPerPage(Number(event.target.value));
     setCurrentPage(1);
-  };
+  }, []);
 
-  const canSync = () => {
+  const canSync = useCallback(() => {
     if (!lastSyncTime) return true;
     const now = Date.now();
     return now - lastSyncTime >= 60000; // 60 seconds
-  };
+  }, [lastSyncTime]);
 
   const handleSync = async () => {
     if (!canSync()) {
@@ -331,32 +321,6 @@ export default function SpoolsPage() {
   const currentItems = sortedFilaments.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.max(1, Math.ceil(sortedFilaments.length / itemsPerPage)); // Ensure at least 1 page
 
-  // --- Render Helpers ---
-  const renderHeader = (key: keyof Filament, title: string) => {
-    // Check if header should be rendered based on settings
-    if (settings?.spoolHeaders && settings.spoolHeaders[title] === false) {
-      return null;
-    }
-
-    return (
-      <th
-        className='text-center align-middle'
-        style={{ cursor: 'pointer' }}
-        onClick={() => handleSortClick(key)}>
-        {title}{' '}
-        {sortKey === key ? (
-          sortDirection === 'asc' ? (
-            '▲'
-          ) : (
-            '▼'
-          )
-        ) : (
-          <span style={{ color: 'lightgrey' }}>▲▼</span>
-        )}
-      </th>
-    );
-  };
-
   // Show loading spinner if fetching initial data or context isn't ready
   if (isLoading) {
     return (
@@ -373,238 +337,36 @@ export default function SpoolsPage() {
     <Container className='mt-3 mb-3'>
       <Row className='shadow-lg p-3 bg-body rounded'>
         <Col>
-          <Row className='mb-3'>
-            <Col>
-              <h1>Spools</h1>
-            </Col>
-            <Col xs='auto'>
-              <Button
-                variant='primary'
-                disabled={isSpinning || syncCooldown > 0 || !syncData.syncKey}
-                onClick={handleSync}>
-                <FontAwesomeIcon icon={faCloudArrowUp} className='me-2' />
-                {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync'}
-              </Button>
-            </Col>
-          </Row>
-          <Row>
-            <Col xs={12} className='mb-3'>
-              <CustomAlert
-                variant={alertVariant}
-                message={alertMessage}
-                show={showAlert}
-                onClose={() => setShowAlert(false)}
-              />
-            </Col>
-          </Row>
-          <Row>
-            <Col xs={12} md={8} className='mb-2'>
-              <Form.Control
-                type='text'
-                placeholder='Search by ID, Name, Material, Location...'
-                value={searchTerm}
-                onChange={handleSearchChange}
-                size='sm'
-              />
-            </Col>
-            <Col xs={12} md={4} className='text-md-end mb-2'>
-              <Link href='/manage-filament' passHref>
-                <Button variant='primary' size='sm' className='w-50 w-md-auto'>
-                  Add Filament
-                </Button>
-              </Link>
-            </Col>
-          </Row>
-          <Row>
-            <Col xs={12}>
-              <div className='table-responsive'>
-                <Table striped bordered hover size='sm' className='align-middle'>
-                  <thead>
-                    <tr>
-                      {renderHeader('_id', 'ID')}
-                      {renderHeader('filament', 'Filament')}
-                      {renderHeader('material', 'Material')}
-                      {renderHeader('used_weight', 'Used (g)')}
-                      {renderHeader('total_weight', 'Total (g)')}
-                      {renderHeader('calc_weight', 'Remaining (g)')}
-                      {renderHeader('location', 'Location')}
-                      {renderHeader('comments', 'Comments')}
-                      <th className='text-center align-middle'>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {isDeleting && (
-                      <tr>
-                        <td colSpan={9} className='text-center text-muted'>
-                          <Spinner animation='border' size='sm' className='me-2' /> Deleting...
-                        </td>
-                      </tr>
-                    )}
-                    {!isDeleting && currentItems.length > 0
-                      ? currentItems.map((filament) => (
-                          <tr key={`filament-${filament._id}`}>
-                            {(!settings?.spoolHeaders || settings.spoolHeaders['ID'] !== false) && (
-                              <td className='text-center'>
-                                <OverlayTrigger
-                                  placement='top'
-                                  delay={{ show: 400, hide: 250 }}
-                                  overlay={
-                                    <Tooltip style={{ position: 'fixed' }}>
-                                      {filament._id || 'N/A'}
-                                    </Tooltip>
-                                  }>
-                                  <span style={{ cursor: 'help' }}>
-                                    {filament._id ? `${filament._id.substring(0, 5)}...` : 'N/A'}
-                                  </span>
-                                </OverlayTrigger>
-                              </td>
-                            )}
-                            {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders['Filament'] !== false) && (
-                              <td className='text-center'>{filament.filament}</td>
-                            )}
-                            {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders['Material'] !== false) && (
-                              <td className='text-center'>{filament.material}</td>
-                            )}
-                            {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders['Used (g)'] !== false) && (
-                              <td className='text-center'>{filament.used_weight}</td>
-                            )}
-                            {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders['Total (g)'] !== false) && (
-                              <td className='text-center'>{filament.total_weight}</td>
-                            )}
-                            {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders['Remaining (g)'] !== false) && (
-                              <td className='text-center'>{filament?.calc_weight ?? ''}</td>
-                            )}
-                            {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders['Location'] !== false) && (
-                              <td className='text-center'>{filament.location}</td>
-                            )}
-                            {(!settings?.spoolHeaders ||
-                              settings.spoolHeaders['Comments'] !== false) && (
-                              <td className='text-center'>
-                                {filament.comments && filament.comments.length > 20 ? (
-                                  <OverlayTrigger
-                                    placement='top'
-                                    delay={{ show: 400, hide: 250 }}
-                                    overlay={
-                                      <Tooltip style={{ position: 'fixed' }}>
-                                        {filament.comments}
-                                      </Tooltip>
-                                    }>
-                                    <span
-                                      style={{ cursor: 'help' }}>{`${filament.comments.substring(
-                                      0,
-                                      17
-                                    )}...`}</span>
-                                  </OverlayTrigger>
-                                ) : (
-                                  filament.comments
-                                )}
-                              </td>
-                            )}
-
-                            <td className='text-center'>
-                              <div className='d-flex justify-content-center align-items-center flex-nowrap'>
-                                <OverlayTrigger
-                                  placement='top'
-                                  overlay={<Tooltip style={{ position: 'fixed' }}>Edit</Tooltip>}>
-                                  <Link href={`/manage-filament?id=${filament._id}`} passHref>
-                                    <Button
-                                      variant='outline-primary'
-                                      size='sm'
-                                      className='me-1 py-0 px-1'>
-                                      <FontAwesomeIcon icon={faPenToSquare} />
-                                    </Button>
-                                  </Link>
-                                </OverlayTrigger>
-                                <OverlayTrigger
-                                  placement='top'
-                                  overlay={<Tooltip style={{ position: 'fixed' }}>Delete</Tooltip>}>
-                                  <Button
-                                    variant='outline-danger'
-                                    size='sm'
-                                    className='me-1 py-0 px-1'
-                                    onClick={() => handleDelete(filament._id)}
-                                    disabled={isDeleting}>
-                                    <FontAwesomeIcon icon={faTrash} />
-                                  </Button>
-                                </OverlayTrigger>
-                                <OverlayTrigger
-                                  placement='top'
-                                  overlay={
-                                    <Tooltip style={{ position: 'fixed' }}>Duplicate</Tooltip>
-                                  }>
-                                  <Link
-                                    href={`/manage-filament?id=${filament._id}&type=duplicate`}
-                                    passHref>
-                                    <Button
-                                      variant='outline-secondary'
-                                      size='sm'
-                                      className='py-0 px-1'>
-                                      <FontAwesomeIcon icon={faCopy} />
-                                    </Button>
-                                  </Link>
-                                </OverlayTrigger>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      : !isDeleting && (
-                          <tr>
-                            <td colSpan={9} className='text-center fst-italic text-muted'>
-                              No spools found matching your criteria.
-                            </td>
-                          </tr>
-                        )}
-                  </tbody>
-                </Table>
-              </div>
-            </Col>
-          </Row>
-          {/* Pagination and Items Per Page Selector */}
-          {!isLoading && sortedFilaments.length > itemsPerPage && (
-            <Row>
-              <Col xs={12} className='d-flex justify-content-between align-items-center mt-3'>
-                <Pagination size='sm' className='mb-0'>
-                  <Pagination.Prev
-                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                  />
-                  <Pagination.Item active>{currentPage}</Pagination.Item>
-                  {currentPage < totalPages && <Pagination.Ellipsis disabled />}
-                  {currentPage < totalPages && (
-                    <Pagination.Item onClick={() => setCurrentPage(totalPages)}>
-                      {totalPages}
-                    </Pagination.Item>
-                  )}
-                  <Pagination.Next
-                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                  />
-                </Pagination>
-                <div className='d-flex align-items-center'>
-                  <span className='me-2 text-muted' style={{ fontSize: '0.8rem' }}>
-                    Items/page:
-                  </span>
-                  <Form.Select
-                    value={itemsPerPage}
-                    onChange={handleItemsPerPageChange}
-                    size='sm'
-                    style={{ width: 'auto' }}
-                    aria-label='Items per page'>
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </Form.Select>
-                </div>
-              </Col>
-            </Row>
-          )}
+          <SpoolsHeader
+            isSpinning={isSpinning}
+            syncCooldown={syncCooldown}
+            syncKey={syncData.syncKey}
+            onSync={handleSync}
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+          />
+          <SpoolsAlertDisplay
+            showAlert={showAlert}
+            alertVariant={alertVariant}
+            alertMessage={alertMessage}
+            onClose={() => setShowAlert(false)}
+          />
+          <SpoolsTable
+            currentItems={currentItems}
+            isDeleting={isDeleting}
+            settings={settings}
+            onDelete={handleDelete}
+            onSortClick={handleSortClick}
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+          />
+          <SpoolsPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            onPageChange={setCurrentPage}
+          />
         </Col>
       </Row>
     </Container>

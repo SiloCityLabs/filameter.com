@@ -36,7 +36,8 @@ const ContactSection: React.FC = () => {
           <Col md={8}>
             <h2 className='display-5 fw-bold'>Get In Touch</h2>
             <p className='lead text-muted'>
-              Have a question, a feature request, or a bug to report? We'd love to hear from you.
+              Have a question, a feature request, or a bug to report? We&apos;d love to hear from
+              you.
             </p>
           </Col>
         </Row>
@@ -48,7 +49,7 @@ const ContactSection: React.FC = () => {
               <Card.Body>
                 <h4 className='fw-bold'>Contact Information</h4>
                 <p className='text-muted'>
-                  For general inquiries or questions, please don't hesitate to reach out.
+                  For general inquiries or questions, please don&apos;t hesitate to reach out.
                 </p>
                 <div className={styles.contactItem}>
                   <FontAwesomeIcon icon={faEnvelope} className={styles.contactIcon} />

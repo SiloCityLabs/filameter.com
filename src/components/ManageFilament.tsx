@@ -1,10 +1,13 @@
 'use client';
 
+// --- React ---
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Row, Col, Spinner } from 'react-bootstrap';
+// --- Next ---
 import { useRouter } from 'next/navigation';
+// --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
-import { ManageFilamentProps, Filament } from '@/types/Filament';
+// --- Helpers ---
 import { save } from '@silocitypages/data-access';
 import { filamentSchema } from '@/helpers/database/filament/migrateFilamentDB';
 // --- Styles ---
@@ -12,6 +15,8 @@ import styles from '@/public/styles/components/ManageFilament.module.css';
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+// --- Types ---
+import { ManageFilamentProps, Filament } from '@/types/Filament';
 
 const defaultValue: Filament = {
   filament: '',
@@ -71,16 +76,22 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         `Filament ${isEdit ? 'updated' : `(${numberOfRows}) added`} successfully!`
       );
       router.push(`/spools?alert_msg=${successMessage}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error: Filament not ${type}:`, error);
       let message = 'An unexpected error occurred.';
-      try {
-        const errorObj = JSON.parse(error.message);
-        if (Array.isArray(errorObj)) {
-          message = errorObj.map((e) => e.message).join(', ');
+      if (error instanceof Error) {
+        // Type guard to check if it's an Error instance
+        try {
+          const errorObj = JSON.parse(error.message);
+          if (Array.isArray(errorObj)) {
+            message = errorObj.map((eItem: { message: string }) => eItem.message).join(', '); // Add type for eItem
+          }
+        } catch (_e) {
+          // Prefix with underscore to mark as intentionally unused
+          message = error.message || message;
         }
-      } catch (e) {
-        message = error.message || message;
+      } else if (typeof error === 'string') {
+        message = error;
       }
       setAlertMessage(message);
       setAlertVariant('danger');

@@ -86,7 +86,7 @@ export default function ManageFilamentPage() {
             throw new Error(`Filament with ID "${id}" not found.`);
           }
           if (determinedType === 'duplicate') {
-            const { _id, _rev, calc_weight, ...duplicableData } = fetchedData;
+            const { _id, _rev, calc_weight: _calc_weight, ...duplicableData } = fetchedData;
             setFilament(applyUsedWeight({ ...defaultValue, ...duplicableData, used_weight: 0 }));
           } else {
             setFilament(applyUsedWeight(fetchedData));

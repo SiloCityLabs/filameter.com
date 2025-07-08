@@ -19,12 +19,12 @@ export default function PrivacyPolicyContent() {
 
           <p className='lead'>
             This Privacy Policy governs the manner in which FilaMeter collects, uses, maintains and
-            discloses information collected from users (each, a "User") of the{' '}
+            discloses information collected from users (each, a &quot;User&quot;) of the{' '}
             <a href={appUrl} target='_blank' rel='noopener noreferrer'>
               {appUrl}
             </a>{' '}
-            website ("Site"). This privacy policy applies to the Site and all products and services
-            offered by FilaMeter.
+            website (&quot;Site&quot;). This privacy policy applies to the Site and all products and
+            services offered by FilaMeter.
           </p>
 
           <section>
@@ -90,8 +90,8 @@ export default function PrivacyPolicyContent() {
             <p>
               We may offer the use of a secure server. All supplied sensitive/credit information is
               transmitted via Secure Socket Layer (SSL) technology and then encrypted into our
-              Payment gateway provider's database only to be accessible by those authorized with
-              special access rights to such systems, and are required to keep the information
+              Payment gateway provider&apos;s database only to be accessible by those authorized
+              with special access rights to such systems, and are required to keep the information
               confidential.
             </p>
             <p>
@@ -104,9 +104,9 @@ export default function PrivacyPolicyContent() {
             <h2>Do we use cookies?</h2>
             <p>
               Yes. Cookies are small files that a site or its service provider transfers to your
-              computer's hard drive through your Web browser (if you allow) that enables the site's
-              or service provider's systems to recognize your browser and capture and remember
-              certain information.
+              computer&apos;s hard drive through your Web browser (if you allow) that enables the
+              site&apos;s or service provider&apos;s systems to recognize your browser and capture
+              and remember certain information.
             </p>
             <p>
               We use cookies to understand and save your preferences for future visits and compile
@@ -178,7 +178,7 @@ export default function PrivacyPolicyContent() {
 
           <section>
             <h2>Your Consent</h2>
-            <p>By using our site, you consent to our website's privacy policy.</p>
+            <p>By using our site, you consent to our website&apos;s privacy policy.</p>
           </section>
 
           <section>

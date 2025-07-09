@@ -17,8 +17,8 @@ const config: Config = {
   transform: { '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }] },
   moduleFileExtensions: ['js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx', 'json', 'node'],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[tj]s?(x)'],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
-  coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/packages'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/packages'],
 };
 
 export default config;

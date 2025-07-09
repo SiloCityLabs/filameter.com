@@ -2,7 +2,7 @@
   "name": "filameter.com",
   "version": "1.2.0",
   "license": "CC-BY-SA-4.0",
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@10.12.4",
   "scripts": {
     "build:workbox": "workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-*.js out/",
     "build:workspaces": "pnpm run --filter \"./packages/*\" build",
@@ -48,10 +48,12 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.14",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
+    "@types/testing-library__react": "^10.2.0",
     "@typescript-eslint/eslint-plugin": "^8.32.0",
     "@typescript-eslint/parser": "^8.32.0",
     "autoprefixer": "^10.4.21",

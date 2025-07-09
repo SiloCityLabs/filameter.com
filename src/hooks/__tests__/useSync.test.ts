@@ -11,6 +11,7 @@ import { setupSyncByKey } from '../../helpers/sync/setupSyncByKey';
 import { pushData } from '../../helpers/sync/pushData';
 import { pullData } from '../../helpers/sync/pullData';
 import { checkTimestamp } from '../../helpers/sync/checkTimestamp';
+import { forgotSyncKey } from '../../helpers/sync/forgotSyncKey';
 
 // Mock dependencies
 jest.mock('@silocitypages/data-access', () => ({ getDocumentByColumn: jest.fn() }));
@@ -24,6 +25,7 @@ jest.mock('../../helpers/sync/setupSyncByKey', () => ({ setupSyncByKey: jest.fn(
 jest.mock('../../helpers/sync/pushData', () => ({ pushData: jest.fn() }));
 jest.mock('../../helpers/sync/pullData', () => ({ pullData: jest.fn() }));
 jest.mock('../../helpers/sync/checkTimestamp', () => ({ checkTimestamp: jest.fn() }));
+jest.mock('../../helpers/sync/forgotSyncKey', () => ({ forgotSyncKey: jest.fn() }));
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -72,6 +74,10 @@ describe('useSync Hook', () => {
     (checkTimestamp as jest.Mock).mockResolvedValue({
       status: 'success',
       timestamp: new Date().toISOString(),
+    });
+    (forgotSyncKey as jest.Mock).mockResolvedValue({
+      status: 'message',
+      msg: 'Check your email for your code',
     });
     localStorage.clear();
   });
@@ -134,6 +140,23 @@ describe('useSync Hook', () => {
 
     expect(setupSyncByKey).toHaveBeenCalledWith('existing-key');
     expect(result.current.initialType).toBe('engaged');
+  });
+
+  it('should handle forgot key request', async () => {
+    const { result } = renderHook(() => useSync(''));
+    await waitFor(() => expect(result.current.initialType).not.toBe('loading'));
+
+    act(() => {
+      result.current.setSyncEmail('test@example.com');
+    });
+
+    await act(async () => {
+      await result.current.handleForgotKey();
+    });
+
+    expect(forgotSyncKey).toHaveBeenCalledWith('test@example.com');
+    expect(result.current.initialType).toBe('setupKey');
+    expect(result.current.alertMessage).toBe('Check your email for your code');
   });
 
   it('should push data successfully', async () => {

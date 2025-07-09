@@ -44,6 +44,9 @@ export default function Footer({ className }: { className?: string }) {
           {/* Column 2: Navigation Links */}
           <Col md={4} className='mb-3 mb-md-0'>
             <Nav className='justify-content-center'>
+              <Nav.Link href='/faq' className={styles.footerLink}>
+                FAQ
+              </Nav.Link>
               <Nav.Link href='/terms' className={styles.footerLink}>
                 Terms
               </Nav.Link>

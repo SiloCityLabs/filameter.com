@@ -53,7 +53,7 @@ export const faqData: FaqItem[] = [
             <b>Filament</b> - The type or brand of filament
           </li>
           <li>
-            <b>Color</b> - The filament's color
+            <b>Color</b> - The filament&apos;s color
           </li>
           <li>
             <b>Used Weight</b> - The amount of filament used so far in grams

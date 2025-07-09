@@ -221,7 +221,7 @@ export default function Sync({ verifyKey }: SyncProps) {
       }
       setIsSpinning(false);
     },
-    [dbs, data, dbExport, save, pushSyncData]
+    [dbs, data, dbExport, save]
   );
 
   const existingKey = useCallback(

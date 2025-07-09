@@ -248,7 +248,8 @@ export default function Sync({ verifyKey }: SyncProps) {
           await save({ 'scl-sync': keyData });
           setInitialType('engaged');
 
-          if (key && dbs.filament) {
+          // Push data on initial setup from either verification link OR manual key entry.
+          if ((key || initialType === 'needs-verification') && dbs.filament) {
             const initialDbExport = (await exportDB(dbs.filament, false)) ?? defaultSyncData;
             await pushSyncData(true, keyData, initialDbExport as SyncDataStructure);
             setAlertMessage('Sync successful! Your data has been pushed to the cloud.');
@@ -270,7 +271,7 @@ export default function Sync({ verifyKey }: SyncProps) {
       }
       setIsSpinning(false);
     },
-    [syncKey, save, pushSyncData, dbs]
+    [syncKey, save, pushSyncData, dbs, initialType] // Added initialType to dependency array
   );
 
   const createSync = async () => {

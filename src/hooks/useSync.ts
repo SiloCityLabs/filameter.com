@@ -87,7 +87,7 @@ export const useSync = (verifyKey: string) => {
   }, []);
 
   const pushSyncData = useCallback(
-    async (force = false, syncData?: sclSettings, dataToPush: SyncDataStructure = dbExport) => {
+    async (_force = false, syncData?: sclSettings, dataToPush: SyncDataStructure = dbExport) => {
       if (syncCooldown > 0) {
         setAlertVariant('warning');
         setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
@@ -127,7 +127,7 @@ export const useSync = (verifyKey: string) => {
 
   const pullSyncData = useCallback(
     async (force = false) => {
-      if (syncCooldown > 0) {
+      if (syncCooldown > 0 && !force) {
         setAlertVariant('warning');
         setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
         setShowAlert(true);
@@ -217,7 +217,8 @@ export const useSync = (verifyKey: string) => {
       }
       setIsSpinning(false);
     },
-    [dbs, data, dbExport, save, syncCooldown, startCooldown, pushData]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dbs, data, dbExport, save, syncCooldown, startCooldown]
   );
 
   const existingKey = useCallback(

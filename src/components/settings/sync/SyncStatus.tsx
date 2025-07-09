@@ -43,11 +43,17 @@ export default function SyncStatus({
           disabled={isSpinning || syncCooldown > 0}>
           {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync Now'}
         </Button>
-        <Button variant='outline-warning' onClick={() => pushSyncData(true)} disabled={isSpinning}>
-          Force Push
+        <Button
+          variant='outline-warning'
+          onClick={() => pushSyncData(true)}
+          disabled={isSpinning || syncCooldown > 0}>
+          {syncCooldown > 0 ? `Push (${syncCooldown}s)` : 'Force Push'}
         </Button>
-        <Button variant='outline-info' onClick={() => pullSyncData(true)} disabled={isSpinning}>
-          Force Pull
+        <Button
+          variant='outline-info'
+          onClick={() => pullSyncData(true)}
+          disabled={isSpinning || syncCooldown > 0}>
+          {syncCooldown > 0 ? `Pull (${syncCooldown}s)` : 'Force Pull'}
         </Button>
         <Button
           variant='outline-danger'

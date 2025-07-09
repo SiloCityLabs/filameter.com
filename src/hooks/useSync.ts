@@ -30,6 +30,8 @@ type SyncInitialType =
   | '';
 
 const defaultSyncData: SyncDataStructure = { local: [], regular: [] };
+const LAST_SYNC_TIMESTAMP_KEY = 'scl-last-sync-timestamp';
+const COOLDOWN_SECONDS = 60;
 
 export const useSync = (verifyKey: string) => {
   const { dbs, isReady } = useDatabase();
@@ -78,21 +80,23 @@ export const useSync = (verifyKey: string) => {
     [dbs]
   );
 
-  const canSync = useCallback(() => {
-    if (!lastSyncTime) return true;
-    return Date.now() - lastSyncTime >= 60000;
-  }, [lastSyncTime]);
+  const startCooldown = useCallback(() => {
+    const now = Date.now();
+    localStorage.setItem(LAST_SYNC_TIMESTAMP_KEY, now.toString());
+    setLastSyncTime(now);
+  }, []);
 
   const pushSyncData = useCallback(
     async (force = false, syncData?: sclSettings, dataToPush: SyncDataStructure = dbExport) => {
-      const dataToUse = syncData || dataRef.current;
-      if (!dataToUse?.syncKey) {
+      if (syncCooldown > 0) {
+        setAlertVariant('warning');
+        setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
+        setShowAlert(true);
         return;
       }
-      if (!force && !canSync()) {
-        setAlertVariant('warning');
-        setAlertMessage('Please wait 60 seconds between syncs');
-        setShowAlert(true);
+
+      const dataToUse = syncData || dataRef.current;
+      if (!dataToUse?.syncKey) {
         return;
       }
       try {
@@ -102,8 +106,7 @@ export const useSync = (verifyKey: string) => {
           const updatedData = { ...dataToUse, lastSynced: new Date().toISOString() };
           setData(updatedData);
           await save({ 'scl-sync': updatedData });
-          setLastSyncTime(Date.now());
-          setSyncCooldown(60);
+          startCooldown();
           setAlertVariant('success');
           setAlertMessage('Data has been synced to the cloud!');
         } else if (response.status === 'error') {
@@ -119,11 +122,17 @@ export const useSync = (verifyKey: string) => {
       }
       setIsSpinning(false);
     },
-    [dbExport, save, canSync]
+    [dbExport, save, syncCooldown, startCooldown]
   );
 
   const pullSyncData = useCallback(
     async (force = false) => {
+      if (syncCooldown > 0) {
+        setAlertVariant('warning');
+        setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
+        setShowAlert(true);
+        return;
+      }
       if (!dbs?.filament || !data?.syncKey) {
         setAlertMessage('Database not ready or sync key missing.');
         setAlertVariant('warning');
@@ -145,7 +154,7 @@ export const useSync = (verifyKey: string) => {
           };
           setData(updatedSettingsData);
           await save({ 'scl-sync': updatedSettingsData });
-          setLastSyncTime(Date.parse(nowISO));
+          startCooldown();
           const serverData: SyncDataStructure = {
             local: (response.data?.data?.local as Filament[]) ?? [],
             regular: (response.data?.data?.regular as Filament[]) ?? [],
@@ -208,7 +217,7 @@ export const useSync = (verifyKey: string) => {
       }
       setIsSpinning(false);
     },
-    [dbs, data, dbExport, save]
+    [dbs, data, dbExport, save, syncCooldown, startCooldown, pushData]
   );
 
   const existingKey = useCallback(
@@ -292,6 +301,12 @@ export const useSync = (verifyKey: string) => {
   };
 
   const checkSyncTimestamp = useCallback(async () => {
+    if (syncCooldown > 0) {
+      setAlertVariant('warning');
+      setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
+      setShowAlert(true);
+      return;
+    }
     if (!data?.syncKey) {
       setAlertVariant('warning');
       setAlertMessage('Sync key missing');
@@ -310,10 +325,9 @@ export const useSync = (verifyKey: string) => {
             setAlertMessage('Error comparing sync times: Invalid date format.');
           } else {
             if (responseDate > lastSyncedDate) {
-              await pullSyncData();
-              setLastSyncTime(Date.now());
-              setSyncCooldown(60);
+              await pullSyncData(true); // Force pull to bypass its own cooldown check
             } else {
+              startCooldown(); // Start cooldown even if up-to-date to prevent spamming
               setAlertVariant('success');
               setAlertMessage('Data is up-to-date.');
               setShowAlert(true);
@@ -336,7 +350,7 @@ export const useSync = (verifyKey: string) => {
       setAlertMessage('Timestamp Check Failed!');
     }
     setIsSpinning(false);
-  }, [data, pullSyncData]);
+  }, [data, pullSyncData, syncCooldown, startCooldown]);
 
   const removeSync = async () => {
     if (!window.confirm('Are you sure you want to remove your sync?')) {
@@ -345,6 +359,8 @@ export const useSync = (verifyKey: string) => {
     setInitialType('');
     setData({});
     await save({ 'scl-sync': '' });
+    localStorage.removeItem(LAST_SYNC_TIMESTAMP_KEY);
+    setLastSyncTime(null);
     setAlertMessage('Sync Removed');
     setShowAlert(true);
     setAlertVariant('info');
@@ -357,6 +373,11 @@ export const useSync = (verifyKey: string) => {
       }
 
       try {
+        const lastSyncTimestamp = localStorage.getItem(LAST_SYNC_TIMESTAMP_KEY);
+        if (lastSyncTimestamp) {
+          setLastSyncTime(parseInt(lastSyncTimestamp, 10));
+        }
+
         const sclSync = await getDocumentByColumn(dbs.settings, 'name', 'scl-sync', 'settings');
         if (sclSync && sclSync.value) {
           const syncData = JSON.parse(sclSync.value as string);
@@ -399,16 +420,24 @@ export const useSync = (verifyKey: string) => {
   }, [isReady, isInitialLoad, dbs, verifyKey, existingKey]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (syncCooldown > 0) {
-      timer = setInterval(() => {
-        setSyncCooldown((prev) => Math.max(0, prev - 1));
-      }, 1000);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
+    const calculateCooldown = () => {
+      if (lastSyncTime) {
+        const elapsed = Date.now() - lastSyncTime;
+        const remaining = COOLDOWN_SECONDS * 1000 - elapsed;
+        if (remaining > 0) {
+          setSyncCooldown(Math.ceil(remaining / 1000));
+          return;
+        }
+      }
+      setSyncCooldown(0);
     };
-  }, [syncCooldown]);
+
+    calculateCooldown();
+
+    const intervalId = setInterval(calculateCooldown, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [lastSyncTime]);
 
   return {
     isSpinning,

@@ -12,6 +12,7 @@ import { setupSyncByKey } from '@/helpers/sync/setupSyncByKey';
 import { pushData } from '@/helpers/sync/pushData';
 import { pullData } from '@/helpers/sync/pullData';
 import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
+import { forgotSyncKey } from '@/helpers/sync/forgotSyncKey';
 import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
 import { ApiErrorResponse } from '@/types/api';
@@ -21,12 +22,13 @@ interface SyncDataStructure {
   regular: Filament[];
 }
 
-type SyncInitialType =
+export type SyncInitialType =
   | 'loading'
   | 'needs-verification'
   | 'engaged'
   | 'setupEmail'
   | 'setupKey'
+  | 'forgotKey'
   | '';
 
 const defaultSyncData: SyncDataStructure = { local: [], regular: [] };
@@ -189,6 +191,7 @@ export const useSync = (verifyKey: string) => {
               importMessage = 'Data has been pulled and merged with local data!';
               setAlertVariant('success');
             }
+            // This internal push should bypass cooldown checks.
             const pushResponse = await pushData(data.syncKey, finalDataToImport);
             if (pushResponse.status === 'error') {
               setShowAlert(true);
@@ -297,6 +300,34 @@ export const useSync = (verifyKey: string) => {
       setShowAlert(true);
       setAlertVariant('danger');
       setAlertMessage('Sync Failed!');
+    }
+    setIsSpinning(false);
+  };
+
+  const handleForgotKey = async () => {
+    if (!isValidEmail(syncEmail)) {
+      setShowAlert(true);
+      setAlertVariant('danger');
+      setAlertMessage('Invalid Email!');
+      return;
+    }
+    try {
+      setIsSpinning(true);
+      const response = await forgotSyncKey(syncEmail);
+      if (response.status === 'message') {
+        setInitialType('setupKey'); // Go back to the key entry screen
+        setAlertVariant('info');
+        setAlertMessage(response.msg);
+      } else if (response.status === 'error') {
+        setAlertVariant('danger');
+        setAlertMessage(response.error);
+      }
+      setShowAlert(true);
+    } catch (error) {
+      console.error('Failed to send recovery email', error);
+      setShowAlert(true);
+      setAlertVariant('danger');
+      setAlertMessage('Recovery email failed to send!');
     }
     setIsSpinning(false);
   };
@@ -461,5 +492,6 @@ export const useSync = (verifyKey: string) => {
     pullSyncData,
     removeSync,
     syncCooldown,
+    handleForgotKey,
   };
 };

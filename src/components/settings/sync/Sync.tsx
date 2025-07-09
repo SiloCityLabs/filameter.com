@@ -11,6 +11,7 @@ import SyncEmailForm from './SyncEmailForm';
 import SyncKeyForm from './SyncKeyForm';
 import SyncVerification from './SyncVerification';
 import SyncStatus from './SyncStatus';
+import SyncForgotKeyForm from './SyncForgotKeyForm';
 
 interface SyncProps {
   verifyKey: string;
@@ -38,6 +39,7 @@ export default function Sync({ verifyKey }: SyncProps) {
     pullSyncData,
     removeSync,
     syncCooldown,
+    handleForgotKey,
   } = useSync(verifyKey);
 
   const renderContent = () => {
@@ -64,6 +66,16 @@ export default function Sync({ verifyKey }: SyncProps) {
             syncKey={syncKey}
             handleInputChange={handleInputChange(setSyncKey)}
             existingKey={() => existingKey()}
+            isSpinning={isSpinning}
+            setInitialType={setInitialType}
+          />
+        );
+      case 'forgotKey':
+        return (
+          <SyncForgotKeyForm
+            syncEmail={syncEmail}
+            handleInputChange={handleInputChange(setSyncEmail)}
+            handleForgotKey={handleForgotKey}
             isSpinning={isSpinning}
             setInitialType={setInitialType}
           />

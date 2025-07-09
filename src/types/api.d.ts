@@ -42,9 +42,9 @@ export interface CreateSuccessResponse {
 }
 
 /**
- * Represents a message response from the CREATE API endpoint.
+ * Represents a generic message response from the API.
  */
-export interface CreateMessageResponse {
+export interface ApiMessageResponse {
   status: 'message';
   msg: string;
 }
@@ -78,7 +78,12 @@ export type PushResponse = PushSuccessResponse | ApiErrorResponse;
 /**
  * A union type representing all possible responses from the CREATE API.
  */
-export type CreateResponse = CreateSuccessResponse | CreateMessageResponse | ApiErrorResponse;
+export type CreateResponse = CreateSuccessResponse | ApiMessageResponse | ApiErrorResponse;
+
+/**
+ * A union type representing all possible responses from the FORGOT KEY API.
+ */
+export type ForgotResponse = ApiMessageResponse | ApiErrorResponse;
 
 /**
  * A union type representing all possible responses from the TIMESTAMP API.

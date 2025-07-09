@@ -1,36 +1,24 @@
 'use client';
 
-// --- React ---
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Form, Button, Spinner, Card } from 'react-bootstrap';
-// --- Components ---
-import { CustomAlert } from '@silocitypages/ui-core';
-// --- Helpers ---
+import { getDocumentByColumn } from '@silocitypages/data-access';
+import saveSettings from '@/helpers/database/settings/saveSettings';
+import { useDatabase } from '@/contexts/DatabaseContext';
+import { exportDB } from '@/helpers/exportDB';
+import { importDB } from '@/helpers/importDB';
 import { isValidEmail } from '@/helpers/isValidEmail';
 import { setupSyncByEmail } from '@/helpers/sync/setupSyncByEmail';
 import { setupSyncByKey } from '@/helpers/sync/setupSyncByKey';
 import { pushData } from '@/helpers/sync/pushData';
 import { pullData } from '@/helpers/sync/pullData';
 import { checkTimestamp } from '@/helpers/sync/checkTimestamp';
-// --- DB ---
-import { getDocumentByColumn } from '@silocitypages/data-access';
-import saveSettings from '@/helpers/database/settings/saveSettings';
-import { useDatabase } from '@/contexts/DatabaseContext';
-import { exportDB } from '@/helpers/exportDB';
-import { importDB } from '@/helpers/importDB';
-// --- Types ---
 import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
 import { ApiErrorResponse } from '@/types/api';
-// --- Styles ---
-import styles from '@/public/styles/components/Settings.module.css';
 
 interface SyncDataStructure {
   local: Filament[];
   regular: Filament[];
-}
-interface SyncProps {
-  verifyKey: string;
 }
 
 type SyncInitialType =
@@ -43,7 +31,7 @@ type SyncInitialType =
 
 const defaultSyncData: SyncDataStructure = { local: [], regular: [] };
 
-export default function Sync({ verifyKey }: SyncProps) {
+export const useSync = (verifyKey: string) => {
   const { dbs, isReady } = useDatabase();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -146,7 +134,6 @@ export default function Sync({ verifyKey }: SyncProps) {
         setIsSpinning(true);
         const response = await pullData(data.syncKey);
         if (response.status === 'success') {
-          console.log('Pull response:', response);
           const nowISO = new Date().toISOString();
           const updatedSettingsData = {
             ...data,
@@ -248,7 +235,6 @@ export default function Sync({ verifyKey }: SyncProps) {
           await save({ 'scl-sync': keyData });
           setInitialType('engaged');
 
-          // Push data on initial setup from either verification link OR manual key entry.
           if ((key || initialType === 'needs-verification') && dbs.filament) {
             const initialDbExport = (await exportDB(dbs.filament, false)) ?? defaultSyncData;
             await pushSyncData(true, keyData, initialDbExport as SyncDataStructure);
@@ -271,7 +257,7 @@ export default function Sync({ verifyKey }: SyncProps) {
       }
       setIsSpinning(false);
     },
-    [syncKey, save, pushSyncData, dbs, initialType] // Added initialType to dependency array
+    [syncKey, save, pushSyncData, dbs, initialType]
   );
 
   const createSync = async () => {
@@ -424,141 +410,26 @@ export default function Sync({ verifyKey }: SyncProps) {
     };
   }, [syncCooldown]);
 
-  return (
-    <div className={styles.settingsPane}>
-      <CustomAlert
-        variant={alertVariant || 'success'}
-        message={alertMessage}
-        show={showAlert}
-        onClose={() => setShowAlert(false)}
-      />
-
-      {initialType === 'loading' && (
-        <div className='text-center p-4'>
-          <Spinner animation='border' variant='primary' />
-        </div>
-      )}
-
-      {initialType === '' && (
-        <div className='text-center'>
-          <h5 className={styles.paneSubtitle}>Setup Cloud Sync</h5>
-          <p className='text-muted'>Sync your data across devices securely.</p>
-          <Button variant='primary' onClick={() => setInitialType('setupEmail')} className='me-2'>
-            Setup with Email
-          </Button>
-          <Button variant='outline-secondary' onClick={() => setInitialType('setupKey')}>
-            Use Existing Key
-          </Button>
-        </div>
-      )}
-
-      {initialType === 'setupEmail' && (
-        <div>
-          <h5 className={styles.paneSubtitle}>Setup with Email</h5>
-          <Form.Group className='mb-3'>
-            <Form.Label>Your Email Address</Form.Label>
-            <Form.Control
-              type='email'
-              placeholder='Enter your email'
-              value={syncEmail}
-              onChange={handleInputChange(setSyncEmail)}
-              disabled={isSpinning}
-            />
-          </Form.Group>
-          <Button variant='primary' onClick={createSync} disabled={isSpinning}>
-            {isSpinning ? <Spinner as='span' size='sm' /> : 'Finish Setup'}
-          </Button>
-          <Button variant='link' onClick={() => setInitialType('')} className='ms-2'>
-            Cancel
-          </Button>
-        </div>
-      )}
-
-      {initialType === 'setupKey' && (
-        <div>
-          <h5 className={styles.paneSubtitle}>Setup with Existing Key</h5>
-          <Form.Group className='mb-3'>
-            <Form.Label>Your Sync Key</Form.Label>
-            <Form.Control
-              type='text'
-              placeholder='Enter your sync key'
-              value={syncKey}
-              onChange={handleInputChange(setSyncKey)}
-              disabled={isSpinning}
-            />
-          </Form.Group>
-          <Button variant='primary' onClick={() => existingKey()} disabled={isSpinning}>
-            {isSpinning ? <Spinner as='span' size='sm' /> : 'Finish Setup'}
-          </Button>
-          <Button variant='link' onClick={() => setInitialType('')} className='ms-2'>
-            Cancel
-          </Button>
-        </div>
-      )}
-
-      {initialType === 'needs-verification' && (
-        <div>
-          <h5 className={styles.paneSubtitle}>Check Your Email</h5>
-          <p className='text-muted'>
-            We&apos;ve sent a verification key to <strong>{data.email}</strong>. Please enter it
-            below.
-          </p>
-          <Form.Group className='mb-3'>
-            <Form.Label>Verification Key</Form.Label>
-            <Form.Control
-              type='text'
-              placeholder='Enter key from email'
-              value={syncKey}
-              onChange={handleInputChange(setSyncKey)}
-            />
-          </Form.Group>
-          <Button variant='primary' onClick={() => existingKey()} disabled={isSpinning}>
-            {isSpinning ? <Spinner as='span' size='sm' /> : 'Complete Setup'}
-          </Button>
-        </div>
-      )}
-
-      {initialType === 'engaged' && (
-        <div>
-          <h5 className={styles.paneSubtitle}>Sync Status</h5>
-          <Card body className={styles.syncStatusCard}>
-            <p>
-              <strong>Email:</strong> {data.email}
-            </p>
-            <p>
-              <strong>Status:</strong> <span className='text-success'>Active</span>
-            </p>
-            <p className='mb-0'>
-              <strong>Last Synced:</strong>{' '}
-              {data.lastSynced ? new Date(data.lastSynced).toLocaleString() : 'Never'}
-            </p>
-          </Card>
-          <div className='mt-3 d-flex flex-wrap gap-2'>
-            <Button
-              variant='primary'
-              onClick={checkSyncTimestamp}
-              disabled={isSpinning || syncCooldown > 0}>
-              {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync Now'}
-            </Button>
-            <Button
-              variant='outline-warning'
-              onClick={() => pushSyncData(true)}
-              disabled={isSpinning}>
-              Force Push
-            </Button>
-            <Button variant='outline-info' onClick={() => pullSyncData(true)} disabled={isSpinning}>
-              Force Pull
-            </Button>
-            <Button
-              variant='outline-danger'
-              onClick={removeSync}
-              disabled={isSpinning}
-              className='ms-md-auto'>
-              Remove Sync
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+  return {
+    isSpinning,
+    data,
+    showAlert,
+    setShowAlert,
+    alertVariant,
+    alertMessage,
+    initialType,
+    setInitialType,
+    syncEmail,
+    setSyncEmail,
+    syncKey,
+    setSyncKey,
+    handleInputChange,
+    existingKey,
+    createSync,
+    checkSyncTimestamp,
+    pushSyncData,
+    pullSyncData,
+    removeSync,
+    syncCooldown,
+  };
+};

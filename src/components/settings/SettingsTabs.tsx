@@ -13,7 +13,7 @@ import { faCog, faSyncAlt, faFileImport } from '@fortawesome/free-solid-svg-icon
 // --- Components ---
 import ImportExport from '@/components/settings/ImportExport';
 import MainSettings from '@/components/settings/MainSettings';
-import Sync from '@/components/settings/Sync';
+import Sync from '@/components/settings/sync/Sync';
 
 export default function SettingsTabs() {
   const searchParams = useSearchParams();

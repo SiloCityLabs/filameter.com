@@ -1,0 +1,76 @@
+.faqSection {
+  background-color: var(--background-light);
+  padding: 8rem 0 4rem 0;
+  min-height: 100vh;
+}
+
+.faqCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  background-color: var(--white);
+  padding: 2rem;
+}
+
+.pageTitle {
+  color: var(--text-dark);
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.faqAccordion .accordion-item {
+  border: 1px solid #dee2e6;
+  border-radius: 8px !important; /* Override Bootstrap's more specific selectors */
+  margin-bottom: 1rem;
+  overflow: hidden; /* Ensures child elements respect the border radius */
+}
+
+.faqAccordion .accordion-button {
+  font-weight: 600;
+  color: var(--text-dark);
+  background-color: var(--white);
+  box-shadow: none; /* Remove the default focus shadow */
+  transition: background-color 0.3s ease;
+}
+
+.faqAccordion .accordion-button:not(.collapsed) {
+  color: var(--primary-color);
+  background-color: var(--background-light);
+  border-bottom: 1px solid #dee2e6;
+}
+
+.faqAccordion .accordion-button:focus {
+  box-shadow: 0 0 0 3px rgba(17, 122, 206, 0.25); /* Custom focus ring */
+}
+
+/* Custom Accordion Icon */
+.faqAccordion .accordion-button::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  transition: transform 0.2s ease-in-out;
+}
+
+.faqAccordion .accordion-button:not(.collapsed)::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23117ace'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  transform: rotate(-180deg);
+}
+
+.faqAccordion .accordion-body {
+  padding: 1.25rem;
+  line-height: 1.7;
+}
+
+.faqAccordion .accordion-body ul {
+  padding-left: 1.5rem;
+  margin-top: 1rem;
+}
+
+.faqAccordion .accordion-body a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.faqAccordion .accordion-body a:hover {
+  text-decoration: underline;
+  color: var(--hover-color);
+}

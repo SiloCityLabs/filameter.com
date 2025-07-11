@@ -15,7 +15,7 @@ export default function PrivacyPolicyContent() {
       <Card.Body>
         <div className={styles.legalContent}>
           <h1 className={styles.pageTitle}>Privacy Policy</h1>
-          <p className={styles.lastUpdated}>This policy was last modified on October 26, 2013</p>
+          <p className={styles.lastUpdated}>This policy was last modified on July 10, 2025</p>
 
           <p className='lead'>
             This Privacy Policy governs the manner in which FilaMeter collects, uses, maintains and
@@ -190,11 +190,12 @@ export default function PrivacyPolicyContent() {
           </section>
 
           <section>
-            <h2>Contacting Us</h2>
-            <p>If there are any questions regarding this privacy policy you may contact us.</p>
+            <h2>Contacting Us</h2>{' '}
+            <p>If there are any questions regarding this privacy policy you may contact us.</p>{' '}
             <address className='mt-3'>
-              <abbr title='Phone'>P:</abbr> 716-698-9236
-            </address>
+              <abbr title='Email'>E:</abbr>{' '}
+              <a href='mailto:orders@silocitylabs.com'>orders@silocitylabs.com</a>{' '}
+            </address>{' '}
           </section>
         </div>
       </Card.Body>

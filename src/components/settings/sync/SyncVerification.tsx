@@ -7,6 +7,7 @@ interface SyncVerificationProps {
   handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   existingKey: () => Promise<void>;
   isSpinning: boolean;
+  setInitialType: (type: '') => void;
 }
 
 export default function SyncVerification({
@@ -15,6 +16,7 @@ export default function SyncVerification({
   handleInputChange,
   existingKey,
   isSpinning,
+  setInitialType,
 }: SyncVerificationProps) {
   return (
     <div>
@@ -33,6 +35,9 @@ export default function SyncVerification({
       </Form.Group>
       <Button variant='primary' onClick={existingKey} disabled={isSpinning}>
         {isSpinning ? <Spinner as='span' size='sm' /> : 'Complete Setup'}
+      </Button>
+      <Button variant='link' onClick={() => setInitialType('')} className='ms-2'>
+        Cancel
       </Button>
     </div>
   );

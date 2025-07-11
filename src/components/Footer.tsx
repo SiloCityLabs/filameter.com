@@ -36,7 +36,9 @@ export default function Footer({ className }: { className?: string }) {
             />
             {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT && (
               <p className={styles.copyright}>
-                ©{new Date().getFullYear()} {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT}
+                <a href='https://silocitylabs.com' style={{ textDecoration: 'none' }}>
+                  ©{new Date().getFullYear()} {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT}
+                </a>
               </p>
             )}
           </Col>
@@ -61,11 +63,11 @@ export default function Footer({ className }: { className?: string }) {
             {showLicense && (
               <div className={styles.licenseSection}>
                 <a
-                  href='https://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1'
+                  href='https://github.com/SiloCityLabs/filameter.com/blob/main/LICENSE'
                   target='_blank'
                   rel='license noopener noreferrer'
                   className={styles.licenseLink}>
-                  <span>Licensed under CC BY-NC-SA 4.0</span>
+                  <span>Licensed under CC-BY-SA 4.0</span>
                   <div className={styles.licenseIcons}>
                     {images.map((image, index) => (
                       <Image key={index} src={image.src} alt={image.alt} width={22} height={22} />

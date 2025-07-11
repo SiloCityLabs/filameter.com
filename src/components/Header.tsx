@@ -25,6 +25,7 @@ const defaultNavLinks: NavLink[] = [
   { label: 'Home', href: '/', target: '' },
   { label: 'Spools', href: '/spools', target: '' },
   { label: 'Settings', href: '/settings', target: '' },
+  { label: 'FAQ', href: '/faq', target: '' },
   { label: 'Feedback', href: '/feedback', target: '' },
   {
     label: 'Products',
@@ -59,7 +60,7 @@ export default function Header({ className, navLinks }: Props) {
       fixed='top'
       className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ''} ${className}`}>
       <Container>
-        <Navbar.Brand href='/'>
+        <Navbar.Brand href='/' className='d-flex align-items-center'>
           <Image
             src='/images/logos/filameter-logo.svg'
             alt='FilaMeter Logo'
@@ -69,6 +70,7 @@ export default function Header({ className, navLinks }: Props) {
               e.currentTarget.onerror = null;
             }}
           />
+          <span className='d-none d-md-inline ms-2'>FilaMeter</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls='basic-navbar-nav' className={styles.navbarToggler} />
         <Navbar.Collapse id='basic-navbar-nav'>

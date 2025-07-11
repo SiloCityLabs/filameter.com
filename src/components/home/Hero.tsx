@@ -3,6 +3,8 @@
 // --- React ---
 import React from 'react';
 import { Container, Row, Col, Button, Image } from 'react-bootstrap';
+// --- Next ---
+import Link from 'next/link';
 // --- Styles ---
 import styles from '@/public/styles/components/home/Hero.module.css';
 
@@ -37,22 +39,16 @@ const Hero: React.FC = () => {
 
               {/* Call-to-Action Buttons */}
               <div className={styles.ctaContainer}>
-                <Button
-                  variant='custom'
-                  size='lg'
-                  className={styles.ctaButton}
-                  href='#features' // Link to your features section
-                >
-                  Get Started for Free
-                </Button>
-                <Button
-                  variant='outline-custom'
-                  size='lg'
-                  className={styles.secondaryButton}
-                  href='#contact' // Link to your contact section
-                >
-                  Learn More
-                </Button>
+                <Link href='/spools'>
+                  <Button variant='custom' size='lg' className={styles.ctaButton}>
+                    Get Started for Free
+                  </Button>
+                </Link>
+                <Link href='/faq'>
+                  <Button variant='outline-custom' size='lg' className={styles.secondaryButton}>
+                    Learn More
+                  </Button>
+                </Link>
               </div>
             </div>
           </Col>

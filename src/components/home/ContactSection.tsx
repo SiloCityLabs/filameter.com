@@ -15,7 +15,7 @@ const ContactSection: React.FC = () => {
   const [issueBody, setIssueBody] = useState('');
 
   const githubRepoUrl = process.env.NEXT_PUBLIC_APP_GITHUB_URL || '#';
-  const contactEmail = 'contact@filameter.com'; // Replace with your actual contact email
+  const contactEmail = 'orders@silocitylabs.com';
 
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();

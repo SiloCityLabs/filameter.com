@@ -88,6 +88,7 @@ export default function Sync({ verifyKey }: SyncProps) {
             handleInputChange={handleInputChange(setSyncKey)}
             existingKey={() => existingKey()}
             isSpinning={isSpinning}
+            setInitialType={setInitialType}
           />
         );
       case 'engaged':

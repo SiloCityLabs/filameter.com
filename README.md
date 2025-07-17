@@ -47,3 +47,7 @@ We welcome pull requests, issues, and feature ideas. Join the conversation or fo
 ## 🧾 License
 
 CC-BY-SA-4.0 — use it, remix it, share it.
+
+---
+
+This project is a collaborative effort by [OneBuffaloLabs](https://onebuffalolabs.com) and [SiloCityLabs](https://silocitylabs.com).

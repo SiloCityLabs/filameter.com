@@ -4,6 +4,7 @@
   "license": "CC-BY-SA-4.0",
   "packageManager": "pnpm@10.11.0",
   "scripts": {
+    "analyze": "pnpm run build:workspaces && ANALYZE=true next build",
     "build": "pnpm run build:workspaces && next build && next-sitemap",
     "build:turbo": "pnpm run --recursive --if-present build && next build --turbo",
     "build:workspaces": "pnpm run --filter \"./packages/*\" build",
@@ -39,6 +40,7 @@
     "react-select": "^5.10.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.4.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.14",

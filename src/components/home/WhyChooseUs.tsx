@@ -13,25 +13,27 @@ import { faGift, faUsers, faShieldAlt, faCodeBranch } from '@fortawesome/free-so
 const sellingPoints = [
   {
     icon: <FontAwesomeIcon icon={faGift} />,
-    title: 'No Strings Attached',
+    title: 'Clear, Organized Inventory',
     description:
-      'No ads, subscriptions, or logins required. FilaMeter is pure utility, free forever.',
+      'Manage all your spools in one place with detailed info on color, material, weight, and storage location.',
   },
   {
     icon: <FontAwesomeIcon icon={faUsers} />,
-    title: 'Versatile Use Cases',
-    description: 'Perfect for home labs, bustling makerspaces, or even small-scale print farms.',
+    title: 'Flexible Tracking Options',
+    description:
+      'Start with manual updates or level up to automated tracking with SpoolSense integration.',
   },
   {
     icon: <FontAwesomeIcon icon={faShieldAlt} />,
-    title: 'Reliability',
-    description: "Built to last and run on GitHub Pages. We're not going anywhere anytime soon.",
+    title: 'Multi-Device Support',
+    description:
+      'Access your data from your desktop, tablet, or phone. Paid users enjoy real-time, automatic syncing.',
   },
   {
     icon: <FontAwesomeIcon icon={faCodeBranch} />,
-    title: 'Customizable & Open Source',
+    title: 'Simple Setup',
     description:
-      'As an open-source project, FilaMeter is easily extendable and simple to self-host.',
+      "Use FilaMeter without setting up a traditional account. A valid email is all that's needed for syncing across devices.",
   },
 ];
 

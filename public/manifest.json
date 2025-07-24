@@ -10,7 +10,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
-  "start_url": "/spools",
+  "start_url": "/",
   "icons": [
     {
       "src": "/icons/web-app-manifest-192x192.png",

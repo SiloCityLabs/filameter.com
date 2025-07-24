@@ -19,32 +19,33 @@ import {
 const features = [
   {
     icon: <FontAwesomeIcon icon={faBoxOpen} size='2x' />,
-    title: 'Spool Tracking',
+    title: 'Filament Tracking',
     description:
-      'Easily track your filament spools by type, weight, material, and storage location for perfect organization.',
+      'FilaMeter makes it simple to log and monitor your filament usage. Keep tabs on color, material, weight, and storage location—no spreadsheets required.',
   },
   {
     icon: <FontAwesomeIcon icon={faChartLine} size='2x' />,
-    title: 'Consumption Tracking',
+    title: 'Track Usage Accurately Across Multiple Devices',
     description:
-      'Log filament usage after every print to maintain an accurate, real-time inventory of your remaining material.',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faHouseUser} size='2x' />,
-    title: 'Local-First Approach',
-    description:
-      'Your data is yours. FilaMeter runs 100% locally in your browser, no accounts or cloud sync required.',
+      'Log filaments usage after every print to maintain an accurate, real-time material inventory. Access your spool data from phone, tablet, or desktop.',
   },
   {
     icon: <FontAwesomeIcon icon={faExchangeAlt} size='2x' />,
-    title: 'Import / Export',
+    title: 'Simple to Update',
     description:
-      'Easily back up your entire filament database or migrate your inventory between different devices with a single click.',
+      'With FilaMeter Labels, managing spools is as easy as scanning a QR code. Instantly open and edit spool data from multiple devices.',
+  },
+  {
+    icon: <FontAwesomeIcon icon={faHouseUser} size='2x' />,
+    title: 'Suitable for All Users',
+    description:
+      'Whether you’re managing a home print setup or a professional lab, FilaMeter is designed to fit seamlessly into your 3D printing workflow.',
   },
   {
     icon: <FontAwesomeIcon icon={faQrcode} size='2x' />,
-    title: 'QR Code Integration',
-    description: 'Use QR codes for quick spool identification.',
+    title: 'Hardware That Works With You',
+    description:
+      'From QR code labels to upcoming in-spool sensors, FilaMeter offers hardware tools that simplify spool tracking and reduce manual input,helping you focus on printing, not paperwork.',
   },
 ];
 
@@ -55,7 +56,7 @@ const Features: React.FC = () => {
         {/* Section Header */}
         <Row className='justify-content-center text-center'>
           <Col md={8}>
-            <h2 className='display-5 fw-bold'>What We Do</h2>
+            <h2 className='display-5 fw-bold'>FilaMeter Benefits</h2>
             <p className='lead text-muted'>
               FilaMeter provides all the tools you need to track, manage, and optimize your 3D
               printing filament.

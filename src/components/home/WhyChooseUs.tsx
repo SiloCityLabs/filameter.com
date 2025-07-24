@@ -7,31 +7,38 @@ import { Container, Row, Col, Image } from 'react-bootstrap';
 import styles from '@/public/styles/components/home/WhyChooseUs.module.css';
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGift, faUsers, faShieldAlt, faCodeBranch } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBoxesStacked,
+  faChartLine,
+  faCloudArrowUp,
+  faUserPlus,
+} from '@fortawesome/free-solid-svg-icons';
 
 // Data array for the selling points
 const sellingPoints = [
   {
-    icon: <FontAwesomeIcon icon={faGift} />,
-    title: 'No Strings Attached',
+    icon: <FontAwesomeIcon icon={faBoxesStacked} />,
+    title: 'Clear, Organized Inventory',
     description:
-      'No ads, subscriptions, or logins required. FilaMeter is pure utility, free forever.',
+      'Manage all your spools in one place with detailed info on color, material, weight, and storage location.',
   },
   {
-    icon: <FontAwesomeIcon icon={faUsers} />,
-    title: 'Versatile Use Cases',
-    description: 'Perfect for home labs, bustling makerspaces, or even small-scale print farms.',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faShieldAlt} />,
-    title: 'Reliability',
-    description: "Built to last and run on GitHub Pages. We're not going anywhere anytime soon.",
-  },
-  {
-    icon: <FontAwesomeIcon icon={faCodeBranch} />,
-    title: 'Customizable & Open Source',
+    icon: <FontAwesomeIcon icon={faChartLine} />,
+    title: 'Flexible Tracking Options',
     description:
-      'As an open-source project, FilaMeter is easily extendable and simple to self-host.',
+      'Start with manual updates or level up to automated tracking with SpoolSense integration.',
+  },
+  {
+    icon: <FontAwesomeIcon icon={faCloudArrowUp} />,
+    title: 'Multi-Device Support',
+    description:
+      'Access your data from your desktop, tablet, or phone. Paid users enjoy real-time, automatic syncing.',
+  },
+  {
+    icon: <FontAwesomeIcon icon={faUserPlus} />,
+    title: 'Simple Setup',
+    description:
+      "Use FilaMeter without setting up a traditional account. A valid email is all that's needed for syncing across devices.",
   },
 ];
 

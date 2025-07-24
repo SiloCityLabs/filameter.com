@@ -57,6 +57,8 @@ jobs:
             ${{ runner.os }}-node-${{ matrix.node-version }}-
             ${{ runner.os }}- # Fallback keys
 
+      # --- End of explicit caching steps ---
+
       # Sets up GitHub Pages environment
       - name: Setup Pages
         uses: actions/configure-pages@v5

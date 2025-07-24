@@ -33,7 +33,8 @@ const SpoolsHeader: React.FC<SpoolsHeaderProps> = ({
         <Col xs='auto' className='d-flex gap-2'>
           <Button
             variant='outline-secondary'
-            disabled={isSpinning || syncCooldown > 0 || !syncKey}
+            // disabled={isSpinning || syncCooldown > 0 || !syncKey}
+            disabled={true} // Temporarily disabled for testing
             onClick={onSync}
             className={styles.headerButton}>
             <FontAwesomeIcon

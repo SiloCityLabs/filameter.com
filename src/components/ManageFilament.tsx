@@ -30,6 +30,7 @@ const defaultValue: Filament = {
 function ManageFilament({ data, db }: ManageFilamentProps) {
   const router = useRouter();
   const [isEdit, setIsEdit] = useState(false);
+  const [hideMultiple, setHideMultiple] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('');
@@ -38,11 +39,14 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     data && Object.keys(data).length > 0 ? data : defaultValue
   );
   const [createMultiple, setCreateMultiple] = useState(false);
-  const [numberOfRows, setNumberOfRows] = useState(1);
+  const [numberOfRows, setNumberOfRows] = useState(2);
 
   useEffect(() => {
-    if (data?._id && data?._rev) {
-      setIsEdit(true);
+    if (data?._id) {
+      setHideMultiple(true);
+      if (data?._rev) {
+        setIsEdit(true);
+      }
     }
   }, [data?._id, data?._rev]);
 
@@ -201,7 +205,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           />
         </Form.Group>
 
-        {!isEdit && (
+        {!hideMultiple && (
           <Form.Group controlId='createMultiple' className={styles.multipleOptionWrapper}>
             <Form.Check
               type='checkbox'
@@ -213,14 +217,14 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Form.Group>
         )}
 
-        {createMultiple && !isEdit && (
+        {createMultiple && !hideMultiple && (
           <Form.Group className='mb-3' controlId='numberOfRows'>
             <Form.Label>Number of spools to create:</Form.Label>
             <Form.Control
               type='number'
               value={numberOfRows}
               onChange={(e) => setNumberOfRows(parseInt(e.target.value))}
-              min={1}
+              min={2}
               max={50}
             />
           </Form.Group>

@@ -77,8 +77,7 @@ export default function QrScanPage() {
       setLocalError(null);
       try {
         const fetchedFilament = await getDocumentByColumn(filamentDb, '_id', id, 'filament');
-        const filamentDoc = Array.isArray(fetchedFilament) ? fetchedFilament : null;
-        if (!filamentDoc) {
+        if (!fetchedFilament) {
           router.push(`/manage-filament?id=${id}&type=create`);
         } else {
           router.push(`/manage-filament?id=${id}`);

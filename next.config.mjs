@@ -10,9 +10,7 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production', // Only remove in production
   },
-  images: {
-    unoptimized: true,
-  },
+  images: { unoptimized: true },
 };
 
 // Export the wrapped configuration

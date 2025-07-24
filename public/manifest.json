@@ -2,7 +2,7 @@
   "id": "filameter.com",
   "name": "FilaMeter",
   "short_name": "FilaMeter",
-  "description": "",
+  "description": "FilaMeter: Open-source, local-first 3D printing filament manager. Track, manage, and optimize filament by type, weight, material, and location.",
   "lang": "en-US",
   "dir": "ltr",
   "theme_color": "#1368ff",

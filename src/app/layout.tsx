@@ -5,7 +5,6 @@ import { Inter } from 'next/font/google';
 // --- Components ---
 import { GoogleAnalytics } from '@silocitypages/ui-core';
 import ClientDatabaseProviderWrapper from '@/components/ClientDatabaseProviderWrapper';
-import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar';
 // --- Utils ---
 import { generateMetadata } from '@/utils/metadata';
 
@@ -37,8 +36,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <GoogleAnalytics gaId={GA_TRACKING_ID} />
           </Suspense>
         )}
-
-        <ServiceWorkerRegistrar />
       </body>
     </html>
   );

@@ -7,26 +7,25 @@ import { Container, Row, Col } from 'react-bootstrap';
 import styles from '@/public/styles/components/home/Sync.module.css';
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSyncAlt, faKey, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faSyncAlt, faKey, faBolt } from '@fortawesome/free-solid-svg-icons';
 
 const syncSteps = [
   {
     icon: <FontAwesomeIcon icon={faSyncAlt} />,
-    title: 'Cross-Device Sync',
+    title: 'Multiple Device Support',
+    description: 'Keep your filament data accessible and consistent across all your devices.',
+  },
+  {
+    icon: <FontAwesomeIcon icon={faBolt} />,
+    title: 'FilaMeter supports multi-device use in both the free and paid versions.',
     description:
-      'Keep your filament inventory seamlessly updated across your desktop, laptop, and mobile devices.',
+      'Free users can sync manually once every 60 seconds, making it easy to move between devices when needed. Paid users have data synced across their devices automatically.',
   },
   {
     icon: <FontAwesomeIcon icon={faKey} />,
-    title: 'How It Works',
+    title: 'How it Works',
     description:
       'A unique and secure sync key is used to encrypt and transfer your data. No complex setups, just simple, secure syncing.',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faClock} />,
-    title: 'Intelligent Timestamp Check',
-    description:
-      'FilaMeter automatically checks timestamps to ensure you are always viewing and editing the most recent version of your data.',
   },
 ];
 

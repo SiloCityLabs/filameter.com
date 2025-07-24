@@ -19,6 +19,7 @@ interface SpoolsHeaderProps {
 const SpoolsHeader: React.FC<SpoolsHeaderProps> = ({
   isSpinning,
   syncCooldown,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   syncKey,
   onSync,
   searchTerm,

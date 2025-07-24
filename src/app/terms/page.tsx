@@ -8,12 +8,14 @@ import PageLayout from '@/components/PageLayout';
 import TermsContent from '@/components/legal/TermsContent';
 // --- Styles ---
 import styles from '@/public/styles/components/Legal.module.css';
+// --- Utils ---
+import { generateMetadata } from '@/utils/metadata';
 
-export const metadata: Metadata = {
-  title: 'Terms and Conditions | FilaMeter',
+export const metadata: Metadata = generateMetadata({
+  title: 'Terms And Conditions',
   description: 'The terms and conditions for using the FilaMeter website and application.',
-  keywords: ['terms and conditions', 'legal', 'privacy policy', 'filameter'],
-};
+  keywords: ['terms and conditions', 'legal', 'privacy policy'],
+});
 
 export default function TermsPage() {
   return (

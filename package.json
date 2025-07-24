@@ -4,6 +4,7 @@
   "license": "CC-BY-SA-4.0",
   "packageManager": "pnpm@10.12.4",
   "scripts": {
+    "analyze": "pnpm run build:workspaces && ANALYZE=true next build",
     "build:workbox": "workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-*.js out/",
     "build:workspaces": "pnpm run --filter \"./packages/*\" build",
     "build": "pnpm run build:workspaces && next build && next-sitemap && pnpm run build:workbox",
@@ -47,6 +48,7 @@
     "workbox-expiration": "^7.3.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.4.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@types/jest": "^29.5.14",

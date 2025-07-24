@@ -8,13 +8,15 @@ import PageLayout from '@/components/PageLayout';
 import PrivacyPolicyContent from '@/components/legal/PrivacyPolicyContent';
 // --- Styles ---
 import styles from '@/public/styles/components/Legal.module.css';
+// --- Utils ---
+import { generateMetadata } from '@/utils/metadata';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = generateMetadata({
   title: 'Privacy Policy',
   description:
     'Privacy policy outlining how FilaMeter collects, uses, maintains and discloses user information.',
   keywords: ['privacy policy', 'data collection', 'user data', 'filameter', 'local first'],
-};
+});
 
 export default function PrivacyPage() {
   return (

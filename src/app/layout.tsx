@@ -6,6 +6,8 @@ import { Inter } from 'next/font/google';
 import { GoogleAnalytics } from '@silocitypages/ui-core';
 import ClientDatabaseProviderWrapper from '@/components/ClientDatabaseProviderWrapper';
 import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar';
+// --- Utils ---
+import { generateMetadata } from '@/utils/metadata';
 
 // --- Styles ---
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -14,24 +16,12 @@ import './globals.css';
 
 // --- Environment Variables ---
 const GA_TRACKING_ID = process.env.NEXT_PUBLIC_APP_GA_TRACKING_ID;
-const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'SiloCityPages';
-const APP_DESC = process.env.NEXT_PUBLIC_APP_DESC || 'Default description';
-const APP_KEYWORDS = process.env.NEXT_PUBLIC_APP_KEYWORDS || 'default, keywords';
 
 // --- Metadata ---
-// Define static metadata for the entire application
-export const metadata: Metadata = {
-  title: {
-    default: APP_NAME,
-    template: `%s | ${APP_NAME}`, // Example: "About | SiloCityPages"
-  },
-  description: APP_DESC,
-  keywords: APP_KEYWORDS?.split(',').map((k) => k.trim()),
-  manifest: '/manifest.json',
-};
+export const metadata: Metadata = generateMetadata();
 
 // --- Viewport ---
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, maximumScale: 1 };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, userScalable: true };
 
 // Setup a font
 const inter = Inter({ subsets: ['latin'] });

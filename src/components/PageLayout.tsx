@@ -23,6 +23,9 @@ interface PageLayoutProps {
   headerShowBadge?: boolean;
   containerClassName?: string;
   contentClassName?: string;
+  headerLogoUrl?: string;
+  headerLogoWidth?: number | string;
+  headerLogoHeight?: number | string;
 }
 
 export default function PageLayout({
@@ -38,6 +41,12 @@ export default function PageLayout({
   headerShowBadge = false,
   containerClassName = '',
   contentClassName = '',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  headerLogoUrl,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  headerLogoWidth,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  headerLogoHeight,
 }: PageLayoutProps) {
   return (
     <div className={`main-container ${containerClassName}`}>

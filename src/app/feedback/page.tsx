@@ -3,10 +3,19 @@
 // --- React ---
 import React, { Suspense } from 'react';
 import { Container, Row, Col, Spinner, Card } from 'react-bootstrap';
+// --- Next ---
+import type { Metadata } from 'next';
 // --- Components ---
 import FeedbackForm from '@/components/feedback/FeedbackForm';
 // --- Styles ---
 import styles from '@/public/styles/components/Feedback.module.css';
+// --- Utils ---
+import { generateMetadata } from '@/utils/metadata';
+
+export const metadata: Metadata = generateMetadata({
+  title: 'Feedback',
+  description: 'Provide feedback or report an issue via GitHub.',
+});
 
 export default function FeedbackPage() {
   return (

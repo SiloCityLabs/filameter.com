@@ -9,13 +9,14 @@ import PageLayout from '@/components/PageLayout';
 import SettingsTabs from '@/components/settings/SettingsTabs';
 // --- Styles ---
 import styles from '@/public/styles/components/Settings.module.css';
+// --- Utils ---
+import { generateMetadata } from '@/utils/metadata';
 
-// --- Metadata ---
-export const metadata: Metadata = {
+export const metadata: Metadata = generateMetadata({
   title: 'Settings',
   description: 'View and manage your settings for FilaMeter.',
   keywords: ['filament', 'settings', 'manage', '3d printing'],
-};
+});
 
 export default function SettingsPage() {
   return (

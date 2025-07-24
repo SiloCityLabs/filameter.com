@@ -5,12 +5,11 @@
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "analyze": "pnpm run build:workspaces && ANALYZE=true next build",
-    "build:workbox": "workbox generateSW workbox-config.js && cp public/sw.js out/sw.js && cp public/workbox-*.js out/",
     "build:workspaces": "pnpm run --filter \"./packages/*\" build",
-    "build": "pnpm run build:workspaces && next build && next-sitemap && pnpm run build:workbox",
-    "build:turbo": "pnpm run --recursive --if-present build && next build --turbo && next-sitemap && pnpm run build:workbox",
-    "build:app": "next build && next-sitemap && pnpm run build:workbox",
-    "build:app:turbo": "next build --turbo && next-sitemap && pnpm run build:workbox",
+    "build": "pnpm run build:workspaces && next build && next-sitemap",
+    "build:turbo": "pnpm run --recursive --if-present build && next build --turbo && next-sitemap",
+    "build:app": "next build && next-sitemap",
+    "build:app:turbo": "next build --turbo && next-sitemap",
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
     "lint": "pnpm run build:workspaces && next lint",
@@ -44,8 +43,7 @@
     "react-content-loader": "^7.0.2",
     "react-dom": "^19.0.0",
     "react-select": "^5.10.1",
-    "uuid": "^11.1.0",
-    "workbox-expiration": "^7.3.0"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.4.1",
@@ -71,8 +69,7 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2",
-    "workbox-cli": "^7.3.0"
+    "typescript": "^5.8.2"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,md,html,yaml,yml,mjs}": [

@@ -17,7 +17,7 @@ const syncSteps = [
   },
   {
     icon: <FontAwesomeIcon icon={faBolt} />,
-    title: 'FilaMeter supports multi-device use in both the free and paid versions.',
+    title: 'Sync with free and paid versions.',
     description:
       'Free users can sync manually once every 60 seconds, making it easy to move between devices when needed. Paid users have data synced across their devices automatically.',
   },

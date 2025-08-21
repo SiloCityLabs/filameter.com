@@ -22,7 +22,7 @@ export const metadata: Metadata = generateMetadata({
   ],
 });
 
-export default function SsiLayout({ children }: { children: React.ReactNode }) {
+export default function SpoolsLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <PageLayout headerShowBadge={true}>{children}</PageLayout>

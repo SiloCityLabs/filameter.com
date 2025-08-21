@@ -19,10 +19,6 @@ const SpoolsPagination: React.FC<SpoolsPaginationProps> = ({
   onItemsPerPageChange,
   onPageChange,
 }) => {
-  if (totalPages <= 1) {
-    return null;
-  }
-
   return (
     <Row className='mt-3'>
       <Col className='d-flex justify-content-between align-items-center'>

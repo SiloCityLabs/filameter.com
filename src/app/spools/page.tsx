@@ -13,6 +13,7 @@ import SpoolsAlertDisplay from '@/components/spools/SpoolsAlertDisplay';
 // --- DB & Helpers ---
 import getAllFilaments from '@/helpers/database/filament/getAllFilaments';
 import getAllSettings from '@/helpers/database/settings/getAllSettings';
+import saveSettings from '@/helpers/database/settings/saveSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { deleteRow, getDocumentByColumn } from '@silocitypages/data-access';
 // --- Types ---
@@ -63,13 +64,14 @@ export default function SpoolsPage() {
       try {
         const [fetchedData, fetchedSettings] = await Promise.all([
           getAllFilaments(dbs.filament),
-          getAllSettings(dbs.settings),
+          getAllSettings(dbs.settings) as sclSettings,
         ]);
         setData(fetchedData);
         setSettings(fetchedSettings);
+        setItemsPerPage(Number(fetchedSettings?.itemsPerPage || 10));
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch initial data.';
-        setAlertMessage(errorMessage);
+        setAlertMessage(errorMessage + ' dfkjdshfkjdshjkfhdsjk');
         setShowAlert(true);
         setAlertVariant('danger');
       } finally {
@@ -154,10 +156,32 @@ export default function SpoolsPage() {
     setCurrentPage(1);
   }, []);
 
-  const handleItemsPerPageChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    setItemsPerPage(Number(event.target.value));
-    setCurrentPage(1);
-  }, []);
+  const handleItemsPerPageChange = useCallback(
+    async (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const newItemsPerPage = Number(event.target.value);
+      setItemsPerPage(newItemsPerPage);
+      setCurrentPage(1);
+      if (dbs.settings) {
+        try {
+          const newItemsPerPageValue = newItemsPerPage.toString();
+          const settingsToSave = { itemsPerPage: newItemsPerPageValue };
+
+          await saveSettings(dbs.settings, settingsToSave);
+
+          setSettings((prev) => ({
+            ...prev,
+            itemsPerPage: { ...(prev.itemsPerPage || {}), value: newItemsPerPageValue },
+          }));
+        } catch (error) {
+          console.error("Failed to save 'itemsPerPage' setting:", error);
+          setAlertMessage('Error saving settings.');
+          setAlertVariant('danger');
+          setShowAlert(true);
+        }
+      }
+    },
+    [dbs.settings]
+  );
 
   const handleSync = async () => {
     // Sync logic remains the same

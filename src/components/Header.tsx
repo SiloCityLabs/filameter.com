@@ -2,6 +2,7 @@
 
 // --- React and Next.js ---
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 // --- Components ---
@@ -60,7 +61,7 @@ export default function Header({ className, navLinks }: Props) {
       fixed='top'
       className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ''} ${className}`}>
       <Container>
-        <Navbar.Brand href='/' className='d-flex align-items-center'>
+        <Navbar.Brand as={Link} href='/' className='d-flex align-items-center'>
           <Image
             src='/images/logos/filameter-logo.svg'
             alt='FilaMeter Logo'
@@ -75,13 +76,15 @@ export default function Header({ className, navLinks }: Props) {
         <Navbar.Toggle aria-controls='basic-navbar-nav' className={styles.navbarToggler} />
         <Navbar.Collapse id='basic-navbar-nav'>
           <Nav className={`ms-auto ${styles.mainNav}`}>
-            {/* We now map over the corrected 'finalNavLinks' array */}
             {finalNavLinks.map((link) => (
               <Nav.Link
                 key={link.href}
+                as={link.target === '_blank' ? 'a' : Link}
                 href={link.href}
-                target={link.target || '_self'}
-                className={`${styles.navLink} ${pathname === link.href ? styles.activeNavLink : ''}`}>
+                target={link.target}
+                rel={link.target === '_blank' ? 'noopener noreferrer' : undefined}
+                className={styles.navLink}
+                active={pathname === link.href}>
                 {link.label}
               </Nav.Link>
             ))}

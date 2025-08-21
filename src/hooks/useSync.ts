@@ -33,7 +33,7 @@ export type SyncInitialType =
 
 const defaultSyncData: SyncDataStructure = { local: [], regular: [] };
 const LAST_SYNC_TIMESTAMP_KEY = 'scl-last-sync-timestamp';
-const COOLDOWN_SECONDS = 60;
+const COOLDOWN_SECONDS = 5;
 
 export const useSync = (verifyKey: string) => {
   const { dbs, isReady } = useDatabase();

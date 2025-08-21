@@ -259,7 +259,7 @@ describe('useSync Hook', () => {
       await result.current.pushSyncData(false);
     });
 
-    expect(result.current.syncCooldown).toBe(60);
+    expect(result.current.syncCooldown).toBe(5);
     expect(result.current.alertMessage).toBe('Data has been synced to the cloud!');
 
     // 2. Try to pull immediately, it should be blocked

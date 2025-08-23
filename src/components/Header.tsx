@@ -63,7 +63,7 @@ export default function Header({ className, navLinks }: Props) {
       <Container>
         <Navbar.Brand as={Link} href='/' className='d-flex align-items-center'>
           <Image
-            src='/images/logos/filameter-logo.svg'
+            src='/images/logos/filameter-banner-slim-blue.webp'
             alt='FilaMeter Logo'
             className={styles.logo}
             onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -71,7 +71,6 @@ export default function Header({ className, navLinks }: Props) {
               e.currentTarget.onerror = null;
             }}
           />
-          <span className='d-none d-md-inline ms-2'>FilaMeter</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls='basic-navbar-nav' className={styles.navbarToggler} />
         <Navbar.Collapse id='basic-navbar-nav'>

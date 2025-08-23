@@ -17,7 +17,7 @@ const Hero: React.FC = () => {
             <div className={`${styles.heroContent} mt-3`}>
               {/* Logo Area */}
               <Image
-                src='/images/logos/filameter-logo.svg'
+                src='/images/logos/filameter-banner-slim-blue.webp'
                 alt='FilaMeter Logo'
                 className={styles.logo}
                 onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -28,7 +28,7 @@ const Hero: React.FC = () => {
 
               {/* Animated Headline */}
               <h1 className={`${styles.headline} display-3`}>
-                FilaMeter: Your Open Source Filament Inventory Manager
+                Your Open Source Filament Inventory Manager
               </h1>
 
               {/* Animated Subheading */}

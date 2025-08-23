@@ -28,7 +28,7 @@ export default function Footer({ className }: { className?: string }) {
           {/* Column 1: Copyright and Logo */}
           <Col md={4} className='mb-3 mb-md-0'>
             <Image
-              src='/images/logos/filameter-logo.svg'
+              src='/images/logos/filameter-banner-slim-blue.webp'
               alt='FilaMeter Logo'
               width={120}
               height={40}

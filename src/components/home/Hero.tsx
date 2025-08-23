@@ -28,7 +28,7 @@ const Hero: React.FC = () => {
 
               {/* Animated Headline */}
               <h1 className={`${styles.headline} display-3`}>
-                FilaMeter: Your Open Source Filament Inventory Manager
+                Your Open Source Filament Inventory Manager
               </h1>
 
               {/* Animated Subheading */}

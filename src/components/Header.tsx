@@ -71,7 +71,6 @@ export default function Header({ className, navLinks }: Props) {
               e.currentTarget.onerror = null;
             }}
           />
-          <span className='d-none d-md-inline ms-2'>FilaMeter</span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls='basic-navbar-nav' className={styles.navbarToggler} />
         <Navbar.Collapse id='basic-navbar-nav'>

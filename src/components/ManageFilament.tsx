@@ -76,9 +76,13 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         }
       }
 
-      const successMessage = encodeURIComponent(
-        `Filament ${isEdit ? 'updated' : `(${numberOfRows}) added`} successfully!`
-      );
+      const successMessageText = isEdit
+        ? 'Filament updated successfully'
+        : createMultiple
+          ? `${numberOfRows} filament added successfully`
+          : 'Filament added successfully';
+
+      const successMessage = encodeURIComponent(successMessageText);
       router.push(`/spools?alert_msg=${successMessage}`);
     } catch (error: unknown) {
       console.error(`Error: Filament not ${type}:`, error);

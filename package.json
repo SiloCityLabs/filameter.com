@@ -2,7 +2,7 @@
   "name": "silocitypages",
   "version": "2.0.0",
   "license": "CC-BY-SA-4.0",
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@10.15.0",
   "scripts": {
     "analyze": "pnpm run build:workspaces && ANALYZE=true next build",
     "build": "pnpm run build:workspaces && next build && next-sitemap",

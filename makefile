@@ -19,3 +19,6 @@ build: ## Build the project
 
 lint: ## Lint the project
 	pnpm lint
+
+test: ## Test the project
+	pnpm test

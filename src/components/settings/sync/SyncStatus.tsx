@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, Spinner } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import type { sclSettings } from '@silocitypages/ui-core';
 
 interface SyncStatusProps {
@@ -7,7 +7,8 @@ interface SyncStatusProps {
   isSpinning: boolean;
   syncCooldown: number;
   checkSyncTimestamp: () => void;
-  sync: () => void; // Added sync function
+  forcePush: () => void;
+  forcePull: () => void;
   removeSync: () => void;
 }
 
@@ -16,7 +17,8 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
   isSpinning,
   syncCooldown,
   checkSyncTimestamp,
-  sync,
+  forcePush,
+  forcePull,
   removeSync,
 }) => {
   return (
@@ -33,23 +35,33 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
           <strong>Last Synced:</strong>{' '}
           {data.lastSynced ? new Date(data.lastSynced).toLocaleString() : 'Never'}
         </p>
-        <div className='d-grid gap-2'>
-          <Button variant='primary' onClick={sync} disabled={isSpinning || syncCooldown > 0}>
-            {isSpinning ? <Spinner as='span' animation='border' size='sm' /> : 'Sync Data'}
-          </Button>
+        <div className='mt-3 d-flex flex-wrap gap-2'>
           <Button
-            variant='secondary'
+            variant='primary'
             onClick={checkSyncTimestamp}
             disabled={isSpinning || syncCooldown > 0}>
-            {isSpinning ? <Spinner as='span' animation='border' size='sm' /> : 'Check for Updates'}
+            {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync Now'}
           </Button>
-          <Button variant='danger' onClick={removeSync} disabled={isSpinning}>
+          <Button
+            variant='outline-warning'
+            onClick={forcePush}
+            disabled={isSpinning || syncCooldown > 0}>
+            {syncCooldown > 0 ? `Push (${syncCooldown}s)` : 'Force Push'}
+          </Button>
+          <Button
+            variant='outline-info'
+            onClick={forcePull}
+            disabled={isSpinning || syncCooldown > 0}>
+            {syncCooldown > 0 ? `Pull (${syncCooldown}s)` : 'Force Pull'}
+          </Button>
+          <Button
+            variant='outline-danger'
+            onClick={removeSync}
+            disabled={isSpinning}
+            className='ms-md-auto'>
             Remove Sync
           </Button>
         </div>
-        {syncCooldown > 0 && (
-          <p className='text-muted mt-2'>Sync available in {syncCooldown} seconds</p>
-        )}
       </Card.Body>
     </Card>
   );

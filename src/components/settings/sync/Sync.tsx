@@ -38,7 +38,8 @@ export default function Sync({ verifyKey }: SyncProps) {
     removeSync,
     syncCooldown,
     handleForgotKey,
-    sync,
+    forcePush,
+    forcePull,
   } = useSync(verifyKey);
 
   const renderContent = () => {
@@ -97,7 +98,8 @@ export default function Sync({ verifyKey }: SyncProps) {
             isSpinning={isSpinning}
             syncCooldown={syncCooldown}
             checkSyncTimestamp={checkSyncTimestamp}
-            sync={sync}
+            forcePush={forcePush}
+            forcePull={forcePull}
             removeSync={removeSync}
           />
         );

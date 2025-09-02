@@ -16,7 +16,6 @@ import { forgotSyncKey } from '@/helpers/sync/forgotSyncKey';
 import { mergeSyncData } from '@/helpers/sync/mergeSyncData';
 import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
-import { ApiErrorResponse } from '@/types/api';
 
 interface SyncDataStructure {
   local: Filament[];
@@ -117,7 +116,7 @@ export const useSync = (verifyKey: string) => {
           await save({ 'scl-sync': updatedData });
           startCooldown();
           setAlertVariant('success');
-          setAlertMessage('Data has been synced to the cloud!');
+          setAlertMessage('Data has been pushed to the cloud!');
         } else if (response.status === 'error') {
           setAlertVariant('danger');
           setAlertMessage(response.error);
@@ -208,6 +207,20 @@ export const useSync = (verifyKey: string) => {
     }
   };
 
+  const forcePush = async () => {
+    if (!dbs?.filament) return;
+    const key = dataRef.current.syncKey;
+    if (!key) return;
+    const localExport = (await exportDB(dbs.filament, false)) as SyncDataStructure;
+    await pushSyncData(key, localExport, dataRef.current, true);
+  };
+
+  const forcePull = async () => {
+    const key = dataRef.current.syncKey;
+    if (!key) return;
+    await pullSyncData(key, dataRef.current, true);
+  };
+
   const existingKey = useCallback(
     async (key = '') => {
       const userKey = key || syncKey;
@@ -252,7 +265,7 @@ export const useSync = (verifyKey: string) => {
       }
       setIsSpinning(false);
     },
-    [syncKey, save, dbs] // Removed sync from dependency array as it's defined inside the hook scope
+    [syncKey, save, dbs, pullSyncData, pushSyncData]
   );
 
   const createSync = async () => {
@@ -469,11 +482,10 @@ export const useSync = (verifyKey: string) => {
     existingKey,
     createSync,
     checkSyncTimestamp,
-    pushSyncData,
-    pullSyncData,
     removeSync,
     syncCooldown,
     handleForgotKey,
-    sync: () => sync(dataRef.current.syncKey, dataRef.current),
+    forcePush,
+    forcePull,
   };
 };

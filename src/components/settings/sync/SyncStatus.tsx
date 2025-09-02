@@ -1,68 +1,58 @@
-import { Button, Card } from 'react-bootstrap';
-import styles from '@/public/styles/components/Settings.module.css';
+import React from 'react';
+import { Button, Card, Spinner } from 'react-bootstrap';
 import type { sclSettings } from '@silocitypages/ui-core';
 
 interface SyncStatusProps {
   data: sclSettings;
   isSpinning: boolean;
   syncCooldown: number;
-  checkSyncTimestamp: () => Promise<void>;
-  pushSyncData: (force: boolean) => Promise<void>;
-  pullSyncData: (force: boolean) => Promise<void>;
-  removeSync: () => Promise<void>;
+  checkSyncTimestamp: () => void;
+  sync: () => void; // Added sync function
+  removeSync: () => void;
 }
 
-export default function SyncStatus({
+const SyncStatus: React.FC<SyncStatusProps> = ({
   data,
   isSpinning,
   syncCooldown,
   checkSyncTimestamp,
-  pushSyncData,
-  pullSyncData,
+  sync,
   removeSync,
-}: SyncStatusProps) {
+}) => {
   return (
-    <div>
-      <h5 className={styles.paneSubtitle}>Sync Status</h5>
-      <Card body className={styles.syncStatusCard}>
+    <Card>
+      <Card.Header>Sync Status</Card.Header>
+      <Card.Body>
         <p>
           <strong>Email:</strong> {data.email}
         </p>
         <p>
-          <strong>Status:</strong> <span className='text-success'>Active</span>
+          <strong>Account Type:</strong> {data.accountType}
         </p>
-        <p className='mb-0'>
+        <p>
           <strong>Last Synced:</strong>{' '}
           {data.lastSynced ? new Date(data.lastSynced).toLocaleString() : 'Never'}
         </p>
-      </Card>
-      <div className='mt-3 d-flex flex-wrap gap-2'>
-        <Button
-          variant='primary'
-          onClick={checkSyncTimestamp}
-          disabled={isSpinning || syncCooldown > 0}>
-          {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync Now'}
-        </Button>
-        <Button
-          variant='outline-warning'
-          onClick={() => pushSyncData(true)}
-          disabled={isSpinning || syncCooldown > 0}>
-          {syncCooldown > 0 ? `Push (${syncCooldown}s)` : 'Force Push'}
-        </Button>
-        <Button
-          variant='outline-info'
-          onClick={() => pullSyncData(true)}
-          disabled={isSpinning || syncCooldown > 0}>
-          {syncCooldown > 0 ? `Pull (${syncCooldown}s)` : 'Force Pull'}
-        </Button>
-        <Button
-          variant='outline-danger'
-          onClick={removeSync}
-          disabled={isSpinning}
-          className='ms-md-auto'>
-          Remove Sync
-        </Button>
-      </div>
-    </div>
+        <div className='d-grid gap-2'>
+          <Button variant='primary' onClick={sync} disabled={isSpinning || syncCooldown > 0}>
+            {isSpinning ? <Spinner as='span' animation='border' size='sm' /> : 'Sync Data'}
+          </Button>
+          <Button
+            variant='secondary'
+            onClick={checkSyncTimestamp}
+            disabled={isSpinning || syncCooldown > 0}>
+            {isSpinning ? <Spinner as='span' animation='border' size='sm' /> : 'Check for Updates'}
+          </Button>
+          <Button variant='danger' onClick={removeSync} disabled={isSpinning}>
+            Remove Sync
+          </Button>
+        </div>
+        {syncCooldown > 0 && (
+          <p className='text-muted mt-2'>Sync available in {syncCooldown} seconds</p>
+        )}
+      </Card.Body>
+    </Card>
   );
-}
+};
+
+export default SyncStatus;

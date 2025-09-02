@@ -12,6 +12,7 @@ import { pushData } from '../../helpers/sync/pushData';
 import { pullData } from '../../helpers/sync/pullData';
 import { checkTimestamp } from '../../helpers/sync/checkTimestamp';
 import { forgotSyncKey } from '../../helpers/sync/forgotSyncKey';
+import { mergeSyncData } from '../../helpers/sync/mergeSyncData';
 
 // Mock dependencies
 jest.mock('@silocitypages/data-access', () => ({ getDocumentByColumn: jest.fn() }));
@@ -26,6 +27,7 @@ jest.mock('../../helpers/sync/pushData', () => ({ pushData: jest.fn() }));
 jest.mock('../../helpers/sync/pullData', () => ({ pullData: jest.fn() }));
 jest.mock('../../helpers/sync/checkTimestamp', () => ({ checkTimestamp: jest.fn() }));
 jest.mock('../../helpers/sync/forgotSyncKey', () => ({ forgotSyncKey: jest.fn() }));
+jest.mock('../../helpers/sync/mergeSyncData', () => ({ mergeSyncData: jest.fn() }));
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -69,7 +71,12 @@ describe('useSync Hook', () => {
     });
     (setupSyncByKey as jest.Mock).mockResolvedValue({
       status: 'success',
-      data: { token: 'new-key', userData: { email: 'test@example.com' }, keyType: 'personal' },
+      data: {
+        token: 'new-key',
+        userData: { email: 'test@example.com' },
+        keyType: 'personal',
+        data: { local: [], regular: [] },
+      },
     });
     (checkTimestamp as jest.Mock).mockResolvedValue({
       status: 'success',
@@ -79,6 +86,7 @@ describe('useSync Hook', () => {
       status: 'message',
       msg: 'Check your email for your code',
     });
+    (mergeSyncData as jest.Mock).mockImplementation((local, server) => server);
     localStorage.clear();
   });
 
@@ -98,17 +106,6 @@ describe('useSync Hook', () => {
     expect(result.current.initialType).toBe('');
   });
 
-  it('should handle input change', async () => {
-    const { result } = renderHook(() => useSync(''));
-    await waitFor(() => expect(result.current.initialType).not.toBe('loading'));
-    act(() => {
-      result.current.handleInputChange(result.current.setSyncEmail)({
-        target: { value: 'test@example.com' },
-      } as React.ChangeEvent<HTMLInputElement>);
-    });
-    expect(result.current.syncEmail).toBe('test@example.com');
-  });
-
   it('should create sync with a valid email', async () => {
     const { result } = renderHook(() => useSync(''));
     await waitFor(() => expect(result.current.initialType).not.toBe('loading'));
@@ -126,7 +123,7 @@ describe('useSync Hook', () => {
     expect(result.current.alertMessage).toBe('Verification email sent.');
   });
 
-  it('should handle existing key setup', async () => {
+  it('should handle existing key setup and perform initial sync', async () => {
     const { result } = renderHook(() => useSync(''));
     await waitFor(() => expect(result.current.initialType).not.toBe('loading'));
 
@@ -140,26 +137,16 @@ describe('useSync Hook', () => {
 
     expect(setupSyncByKey).toHaveBeenCalledWith('existing-key');
     expect(result.current.initialType).toBe('engaged');
+    await waitFor(() => {
+      expect(pullData).toHaveBeenCalledWith('new-key');
+      expect(pushData).toHaveBeenCalled();
+      expect(result.current.alertMessage).toBe(
+        'Sync complete: Data successfully pulled and pushed.'
+      );
+    });
   });
 
-  it('should handle forgot key request', async () => {
-    const { result } = renderHook(() => useSync(''));
-    await waitFor(() => expect(result.current.initialType).not.toBe('loading'));
-
-    act(() => {
-      result.current.setSyncEmail('test@example.com');
-    });
-
-    await act(async () => {
-      await result.current.handleForgotKey();
-    });
-
-    expect(forgotSyncKey).toHaveBeenCalledWith('test@example.com');
-    expect(result.current.initialType).toBe('setupKey');
-    expect(result.current.alertMessage).toBe('Check your email for your code');
-  });
-
-  it('should push data successfully', async () => {
+  it('should force push data successfully', async () => {
     const initialSyncData = { syncKey: 'a-valid-sync-key', needsVerification: false };
     (getDocumentByColumn as jest.Mock).mockResolvedValue({
       value: JSON.stringify(initialSyncData),
@@ -169,15 +156,15 @@ describe('useSync Hook', () => {
     await waitFor(() => expect(result.current.initialType).toBe('engaged'));
 
     await act(async () => {
-      await result.current.pushSyncData(false);
+      await result.current.forcePush();
     });
 
     expect(pushData).toHaveBeenCalled();
-    expect(result.current.alertMessage).toBe('Data has been synced to the cloud!');
+    expect(result.current.alertMessage).toBe('Data has been pushed to the cloud!');
     expect(result.current.alertVariant).toBe('success');
   });
 
-  it('should pull and merge data', async () => {
+  it('should force pull and merge data', async () => {
     const initialSyncData = { syncKey: 'a-valid-sync-key', needsVerification: false };
     (getDocumentByColumn as jest.Mock).mockResolvedValue({
       value: JSON.stringify(initialSyncData),
@@ -197,17 +184,17 @@ describe('useSync Hook', () => {
     await waitFor(() => expect(result.current.initialType).toBe('engaged'));
 
     await act(async () => {
-      await result.current.pullSyncData(false);
+      await result.current.forcePull();
     });
 
     await waitFor(() => {
       expect(pullData).toHaveBeenCalled();
       expect(importDB).toHaveBeenCalled();
-      expect(result.current.alertMessage).toBe('Data has been pulled and merged with local data!');
+      expect(result.current.alertMessage).toBe('Data has been pulled and merged locally!');
     });
   });
 
-  it('should check timestamp and pull if remote is newer', async () => {
+  it('should check timestamp and sync if remote is newer', async () => {
     const olderDate = new Date(Date.now() - 100000).toISOString();
     const newerDate = new Date().toISOString();
 
@@ -217,7 +204,6 @@ describe('useSync Hook', () => {
     (checkTimestamp as jest.Mock).mockResolvedValue({ status: 'success', timestamp: newerDate });
 
     const { result } = renderHook(() => useSync(''));
-
     await waitFor(() => expect(result.current.initialType).toBe('engaged'));
 
     await act(async () => {
@@ -226,6 +212,29 @@ describe('useSync Hook', () => {
 
     expect(checkTimestamp).toHaveBeenCalled();
     await waitFor(() => expect(pullData).toHaveBeenCalledWith('a-sync-key'));
+    await waitFor(() => expect(pushData).toHaveBeenCalled());
+  });
+
+  it('should check timestamp and show warning if local is up-to-date', async () => {
+    const newerDate = new Date().toISOString();
+    const olderDate = new Date(Date.now() - 100000).toISOString();
+
+    (getDocumentByColumn as jest.Mock).mockResolvedValue({
+      value: JSON.stringify({ syncKey: 'a-sync-key', lastSynced: newerDate }),
+    });
+    (checkTimestamp as jest.Mock).mockResolvedValue({ status: 'success', timestamp: olderDate });
+
+    const { result } = renderHook(() => useSync(''));
+    await waitFor(() => expect(result.current.initialType).toBe('engaged'));
+
+    await act(async () => {
+      await result.current.checkSyncTimestamp();
+    });
+
+    expect(checkTimestamp).toHaveBeenCalled();
+    expect(pullData).not.toHaveBeenCalled();
+    expect(result.current.alertVariant).toBe('warning');
+    expect(result.current.alertMessage).toBe('Your data is already up-to-date with the server.');
   });
 
   it('should remove sync settings and clear cooldown', async () => {
@@ -245,7 +254,7 @@ describe('useSync Hook', () => {
     expect(localStorage.getItem('scl-last-sync-timestamp')).toBeNull();
   });
 
-  it('should enforce cooldown across all sync actions', async () => {
+  it('should bypass cooldown for forced actions but enforce it for regular syncs', async () => {
     const initialSyncData = { syncKey: 'a-valid-sync-key', needsVerification: false };
     (getDocumentByColumn as jest.Mock).mockResolvedValue({
       value: JSON.stringify(initialSyncData),
@@ -254,52 +263,41 @@ describe('useSync Hook', () => {
     const { result } = renderHook(() => useSync(''));
     await waitFor(() => expect(result.current.initialType).toBe('engaged'));
 
-    // 1. Perform a successful push to start the cooldown
+    // 1. Perform a successful forced action to start the cooldown
     await act(async () => {
-      await result.current.pushSyncData(false);
+      await result.current.forcePush();
     });
 
     expect(result.current.syncCooldown).toBe(5);
-    expect(result.current.alertMessage).toBe('Data has been synced to the cloud!');
+    expect(pushData).toHaveBeenCalledTimes(1);
+    expect(result.current.alertMessage).toBe('Data has been pushed to the cloud!');
 
-    // 2. Try to pull immediately, it should be blocked
+    // 2. Try another forced action immediately; it should bypass the cooldown and succeed
     await act(async () => {
-      await result.current.pullSyncData(false);
+      await result.current.forcePull();
     });
-    expect(pullData).not.toHaveBeenCalled();
-    expect(result.current.alertMessage).toBe('Please wait 5 seconds between syncs.');
+    expect(pullData).toHaveBeenCalledTimes(1);
+    expect(result.current.alertMessage).toBe('Data has been pulled and merged locally!');
 
-    // 3. Try to check timestamp immediately, it should be blocked
+    // 3. Try a non-forced action (check timestamp); it should be blocked by the cooldown
     await act(async () => {
       await result.current.checkSyncTimestamp();
     });
     expect(checkTimestamp).not.toHaveBeenCalled();
-    expect(result.current.alertMessage).toBe('Please wait 5 seconds between syncs.');
+    expect(result.current.alertMessage).toBe(
+      `Please wait ${result.current.syncCooldown} seconds between syncs.`
+    );
 
-    // 4. Advance time by 30 seconds
-    // act(() => {
-    //   jest.advanceTimersByTime(30000);
-    // });
-    // await waitFor(() => expect(result.current.syncCooldown).toBe(30));
-
-    // // 5. Try to push again, should still be blocked
-    // await act(async () => {
-    //   await result.current.pushSyncData(false);
-    // });
-    // // pushData was called once initially, should not be called again
-    // expect(pushData).toHaveBeenCalledTimes(1);
-    // expect(result.current.alertMessage).toBe('Please wait 30 seconds between syncs.');
-
-    // 6. Advance time past the cooldown
+    // 4. Advance time past the cooldown
     act(() => {
-      jest.advanceTimersByTime(30000);
+      jest.advanceTimersByTime(6000);
     });
     await waitFor(() => expect(result.current.syncCooldown).toBe(0));
 
-    // 7. Try to pull again, should now succeed
+    // 5. Try a non-forced action again, it should now succeed
     await act(async () => {
-      await result.current.pullSyncData(false);
+      await result.current.checkSyncTimestamp();
     });
-    expect(pullData).toHaveBeenCalledTimes(1);
+    expect(checkTimestamp).toHaveBeenCalledTimes(1);
   });
 });

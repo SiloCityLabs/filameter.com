@@ -92,12 +92,15 @@ export const useSync = (verifyKey: string) => {
       key: string,
       dataToPush: SyncDataStructure,
       currentData: sclSettings,
-      _force = false
+      _force = false,
+      displayAlert = true
     ): Promise<void> => {
       if (syncCooldown > 0 && !_force) {
-        setAlertVariant('warning');
-        setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
-        setShowAlert(true);
+        if (displayAlert) {
+          setAlertVariant('warning');
+          setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
+          setShowAlert(true);
+        }
         return;
       }
 
@@ -107,7 +110,6 @@ export const useSync = (verifyKey: string) => {
         setIsSpinning(true);
         const response = await pushData(key, dataToPush);
         if (response.status === 'success') {
-          // lastSynced is only updated after a successful push to the server.
           const updatedData = {
             ...currentData,
             syncKey: key,
@@ -116,18 +118,25 @@ export const useSync = (verifyKey: string) => {
           setData(updatedData);
           await save({ 'scl-sync': updatedData });
           startCooldown();
-          setAlertVariant('success');
-          setAlertMessage('Data has been pushed to the cloud!');
+          if (displayAlert) {
+            setAlertVariant('success');
+            setAlertMessage('Data has been pushed to the cloud!');
+            setShowAlert(true);
+          }
         } else if (response.status === 'error') {
-          setAlertVariant('danger');
-          setAlertMessage(response.error);
+          if (displayAlert) {
+            setAlertVariant('danger');
+            setAlertMessage(response.error);
+            setShowAlert(true);
+          }
         }
-        setShowAlert(true);
       } catch (error) {
         console.error('Failed to push', error);
-        setShowAlert(true);
-        setAlertVariant('danger');
-        setAlertMessage('Push Failed!');
+        if (displayAlert) {
+          setShowAlert(true);
+          setAlertVariant('danger');
+          setAlertMessage('Push Failed!');
+        }
       } finally {
         setIsSpinning(false);
       }
@@ -139,25 +148,29 @@ export const useSync = (verifyKey: string) => {
     async (
       key: string,
       currentData: sclSettings,
-      force = false
+      force = false,
+      displayAlert = true
     ): Promise<SyncDataStructure | null> => {
       if (syncCooldown > 0 && !force) {
-        setAlertVariant('warning');
-        setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
-        setShowAlert(true);
+        if (displayAlert) {
+          setAlertVariant('warning');
+          setAlertMessage(`Please wait ${syncCooldown} seconds between syncs.`);
+          setShowAlert(true);
+        }
         return null;
       }
       if (!dbs?.filament || !key) {
-        setAlertMessage('Database not ready or sync key missing.');
-        setAlertVariant('warning');
-        setShowAlert(true);
+        if (displayAlert) {
+          setAlertMessage('Database not ready or sync key missing.');
+          setAlertVariant('warning');
+          setShowAlert(true);
+        }
         return null;
       }
       try {
         setIsSpinning(true);
         const response = await pullData(key);
         if (response.status === 'success') {
-          // lastSynced is only updated after a successful pull from the server.
           const nowISO = new Date().toISOString();
           const updatedSettingsData = {
             ...currentData,
@@ -170,7 +183,6 @@ export const useSync = (verifyKey: string) => {
           setData(updatedSettingsData);
           await save({ 'scl-sync': updatedSettingsData });
           startCooldown();
-
           const serverData: SyncDataStructure = {
             local: (response.data?.data?.local as Filament[]) ?? [],
             regular: (response.data?.data?.regular as Filament[]) ?? [],
@@ -181,20 +193,26 @@ export const useSync = (verifyKey: string) => {
 
           await importDB(dbs.filament, finalDataToImport);
 
-          setAlertVariant('success');
-          setAlertMessage('Data has been pulled and merged locally!');
-          setShowAlert(true);
+          if (displayAlert) {
+            setAlertVariant('success');
+            setAlertMessage('Data has been pulled and merged locally!');
+            setShowAlert(true);
+          }
           return finalDataToImport;
         } else if (response.status === 'error') {
-          setAlertVariant('danger');
-          setAlertMessage(response.error);
+          if (displayAlert) {
+            setAlertVariant('danger');
+            setAlertMessage(response.error);
+            setShowAlert(true);
+          }
         }
-        setShowAlert(true);
       } catch (error) {
         console.error('Failed to pull', error);
-        setShowAlert(true);
-        setAlertVariant('danger');
-        setAlertMessage('Pull Failed!');
+        if (displayAlert) {
+          setShowAlert(true);
+          setAlertVariant('danger');
+          setAlertMessage('Pull Failed!');
+        }
       } finally {
         setIsSpinning(false);
       }
@@ -203,11 +221,13 @@ export const useSync = (verifyKey: string) => {
     [dbs, save, syncCooldown, startCooldown]
   );
 
-  // Orchestrates the full sync process: pull, merge, then push.
   const sync = async (key: string, currentData: sclSettings) => {
-    const mergedData = await pullSyncData(key, currentData, true);
+    const mergedData = await pullSyncData(key, currentData, true, false);
     if (mergedData) {
-      await pushSyncData(key, mergedData, currentData, true);
+      await pushSyncData(key, mergedData, currentData, true, false);
+      setAlertVariant('success');
+      setAlertMessage('Sync complete: Data successfully pulled and pushed.');
+      setShowAlert(true);
     }
   };
 
@@ -238,7 +258,6 @@ export const useSync = (verifyKey: string) => {
       try {
         const response = await setupSyncByKey(userKey);
         if (response.status === 'success' && response.data) {
-          // Initially, lastSynced is null because no sync has occurred yet.
           const keyData = {
             syncKey: response.data.token,
             email: (response.data.userData as { email?: string })?.email ?? '',
@@ -251,7 +270,6 @@ export const useSync = (verifyKey: string) => {
           setInitialType('engaged');
 
           if (dbs.filament) {
-            // Perform the first sync, which will set the initial lastSynced timestamp.
             await sync(response.data.token, keyData);
           } else {
             setAlertVariant('success');
@@ -333,7 +351,6 @@ export const useSync = (verifyKey: string) => {
     setIsSpinning(false);
   };
 
-  // This is the "smart sync" function called by the UI.
   const checkSyncTimestamp = useCallback(async () => {
     if (syncCooldown > 0) {
       setAlertVariant('warning');
@@ -356,14 +373,12 @@ export const useSync = (verifyKey: string) => {
           const responseDate = new Date(response.timestamp);
           const lastSyncedDate = new Date(dataRef.current.lastSynced ?? 0);
 
-          // Core Logic: Only sync if the server's data is newer.
           if (responseDate > lastSyncedDate) {
             setAlertMessage('Newer data found on server, syncing now...');
             setShowAlert(true);
             setAlertVariant('info');
             await sync(currentKey, dataRef.current);
           } else {
-            // If local data is up-to-date, just reset the cooldown.
             startCooldown();
             setAlertVariant('warning');
             setAlertMessage('Your data is already up-to-date with the server.');

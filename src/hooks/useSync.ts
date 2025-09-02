@@ -107,6 +107,7 @@ export const useSync = (verifyKey: string) => {
         setIsSpinning(true);
         const response = await pushData(key, dataToPush);
         if (response.status === 'success') {
+          // lastSynced is only updated after a successful push to the server.
           const updatedData = {
             ...currentData,
             syncKey: key,
@@ -156,6 +157,7 @@ export const useSync = (verifyKey: string) => {
         setIsSpinning(true);
         const response = await pullData(key);
         if (response.status === 'success') {
+          // lastSynced is only updated after a successful pull from the server.
           const nowISO = new Date().toISOString();
           const updatedSettingsData = {
             ...currentData,
@@ -168,6 +170,7 @@ export const useSync = (verifyKey: string) => {
           setData(updatedSettingsData);
           await save({ 'scl-sync': updatedSettingsData });
           startCooldown();
+
           const serverData: SyncDataStructure = {
             local: (response.data?.data?.local as Filament[]) ?? [],
             regular: (response.data?.data?.regular as Filament[]) ?? [],
@@ -200,6 +203,7 @@ export const useSync = (verifyKey: string) => {
     [dbs, save, syncCooldown, startCooldown]
   );
 
+  // Orchestrates the full sync process: pull, merge, then push.
   const sync = async (key: string, currentData: sclSettings) => {
     const mergedData = await pullSyncData(key, currentData, true);
     if (mergedData) {
@@ -234,6 +238,7 @@ export const useSync = (verifyKey: string) => {
       try {
         const response = await setupSyncByKey(userKey);
         if (response.status === 'success' && response.data) {
+          // Initially, lastSynced is null because no sync has occurred yet.
           const keyData = {
             syncKey: response.data.token,
             email: (response.data.userData as { email?: string })?.email ?? '',
@@ -246,6 +251,7 @@ export const useSync = (verifyKey: string) => {
           setInitialType('engaged');
 
           if (dbs.filament) {
+            // Perform the first sync, which will set the initial lastSynced timestamp.
             await sync(response.data.token, keyData);
           } else {
             setAlertVariant('success');
@@ -265,7 +271,7 @@ export const useSync = (verifyKey: string) => {
       }
       setIsSpinning(false);
     },
-    [syncKey, save, dbs, pullSyncData, pushSyncData]
+    [syncKey, save, dbs]
   );
 
   const createSync = async () => {
@@ -327,6 +333,7 @@ export const useSync = (verifyKey: string) => {
     setIsSpinning(false);
   };
 
+  // This is the "smart sync" function called by the UI.
   const checkSyncTimestamp = useCallback(async () => {
     if (syncCooldown > 0) {
       setAlertVariant('warning');
@@ -348,18 +355,19 @@ export const useSync = (verifyKey: string) => {
         if (response.timestamp) {
           const responseDate = new Date(response.timestamp);
           const lastSyncedDate = new Date(dataRef.current.lastSynced ?? 0);
-          if (isNaN(responseDate.getTime()) || isNaN(lastSyncedDate.getTime())) {
-            setAlertVariant('danger');
-            setAlertMessage('Error comparing sync times: Invalid date format.');
+
+          // Core Logic: Only sync if the server's data is newer.
+          if (responseDate > lastSyncedDate) {
+            setAlertMessage('Newer data found on server, syncing now...');
+            setShowAlert(true);
+            setAlertVariant('info');
+            await sync(currentKey, dataRef.current);
           } else {
-            if (responseDate > lastSyncedDate) {
-              await sync(currentKey, dataRef.current);
-            } else {
-              startCooldown();
-              setAlertVariant('success');
-              setAlertMessage('Data is up-to-date.');
-              setShowAlert(true);
-            }
+            // If local data is up-to-date, just reset the cooldown.
+            startCooldown();
+            setAlertVariant('warning');
+            setAlertMessage('Your data is already up-to-date with the server.');
+            setShowAlert(true);
           }
         } else {
           setAlertVariant('warning');

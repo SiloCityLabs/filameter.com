@@ -16,6 +16,7 @@ import getAllSettings from '@/helpers/database/settings/getAllSettings';
 import saveSettings from '@/helpers/database/settings/saveSettings';
 import { useDatabase } from '@/contexts/DatabaseContext';
 import { deleteRow, getDocumentByColumn } from '@silocitypages/data-access';
+import { useSync } from '@/hooks/useSync';
 // --- Types ---
 import type { sclSettings } from '@silocitypages/ui-core';
 import type { Filament } from '@/types/Filament';
@@ -24,6 +25,7 @@ import styles from '@/public/styles/components/Spools.module.css';
 
 export default function SpoolsPage() {
   const { dbs, isReady } = useDatabase();
+  const { updateLastModified } = useSync('');
   const searchParams = useSearchParams();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -119,6 +121,7 @@ export default function SpoolsPage() {
     try {
       const success = await deleteRow(dbs.filament, id, 'filament');
       if (success) {
+        await updateLastModified();
         setAlertMessage('Filament deleted successfully.');
         setAlertVariant('success');
         setData((prev) => prev.filter((f) => f._id !== id));

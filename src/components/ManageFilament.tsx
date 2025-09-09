@@ -15,6 +15,8 @@ import styles from '@/public/styles/components/ManageFilament.module.css';
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+// --- Hooks ---
+import { useSync } from '@/hooks/useSync';
 // --- Types ---
 import { ManageFilamentProps, Filament } from '@/types/Filament';
 
@@ -29,6 +31,7 @@ const defaultValue: Filament = {
 
 function ManageFilament({ data, db }: ManageFilamentProps) {
   const router = useRouter();
+  const { updateLastModified } = useSync('');
   const [isEdit, setIsEdit] = useState(false);
   const [hideMultiple, setHideMultiple] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -74,6 +77,11 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         if (!finalResult.success) {
           throw new Error(JSON.stringify(finalResult.error));
         }
+      }
+
+      // If the save was successful, update the last modified timestamp.
+      if (finalResult?.success) {
+        await updateLastModified();
       }
 
       const successMessageText = isEdit

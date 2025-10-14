@@ -4,7 +4,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Container, Spinner, Card } from 'react-bootstrap';
 // --- Next ---
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 // --- Components ---
 import SpoolsHeader from '@/components/spools/SpoolsHeader';
 import SpoolsTable from '@/components/spools/SpoolsTable';
@@ -25,8 +25,10 @@ import styles from '@/public/styles/components/Spools.module.css';
 
 export default function SpoolsPage() {
   const { dbs, isReady } = useDatabase();
-  const { updateLastModified } = useSync('');
+  const { updateLastModified, checkSyncTimestamp } = useSync('');
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -42,12 +44,32 @@ export default function SpoolsPage() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [syncData, setSyncData] = useState<sclSettings>({});
   const [syncCooldown, setSyncCooldown] = useState<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSpinning, setIsSpinning] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    if (!dbs.filament || !dbs.settings) return;
+    setIsLoading(true);
+    try {
+      const [fetchedData, fetchedSettings] = await Promise.all([
+        getAllFilaments(dbs.filament),
+        getAllSettings(dbs.settings) as sclSettings,
+      ]);
+      setData(fetchedData);
+      setSettings(fetchedSettings);
+      setItemsPerPage(Number(fetchedSettings?.itemsPerPage || 10));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch initial data.';
+      setAlertMessage(errorMessage);
+      setShowAlert(true);
+      setAlertVariant('danger');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dbs.filament, dbs.settings]);
 
   // --- Effects ---
   useEffect(() => {
-    const alert_msg = searchParams?.get('alert_msg') ?? '';
+    const alert_msg = searchParams?.get('alert_msg');
     if (alert_msg) {
       setShowAlert(true);
       setAlertMessage(decodeURIComponent(alert_msg));
@@ -56,33 +78,17 @@ export default function SpoolsPage() {
           ? 'danger'
           : 'success'
       );
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      newSearchParams.delete('alert_msg');
+      const newUrl = `${pathname}${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`;
+      router.replace(newUrl, { scroll: false });
     }
-  }, [searchParams]);
+  }, [searchParams, pathname, router]);
 
   useEffect(() => {
-    async function fetchData() {
-      if (!dbs.filament || !dbs.settings) return;
-      setIsLoading(true);
-      try {
-        const [fetchedData, fetchedSettings] = await Promise.all([
-          getAllFilaments(dbs.filament),
-          getAllSettings(dbs.settings) as sclSettings,
-        ]);
-        setData(fetchedData);
-        setSettings(fetchedSettings);
-        setItemsPerPage(Number(fetchedSettings?.itemsPerPage || 10));
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch initial data.';
-        setAlertMessage(errorMessage + ' dfkjdshfkjdshjkfhdsjk');
-        setShowAlert(true);
-        setAlertVariant('danger');
-      } finally {
-        setIsLoading(false);
-      }
-    }
     if (isReady) fetchData();
     else setIsLoading(true);
-  }, [dbs, isReady]);
+  }, [isReady, fetchData]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -99,7 +105,7 @@ export default function SpoolsPage() {
       if (dbs.settings) {
         try {
           const sclSync = await getDocumentByColumn(dbs.settings, 'name', 'scl-sync', 'settings');
-          if (sclSync && sclSync.value) setSyncData(JSON.parse(sclSync.value));
+          if (sclSync && sclSync.value) setSyncData(JSON.parse(sclSync.value as string));
         } catch (error) {
           console.error('Error fetching sync data:', error);
         }
@@ -187,7 +193,13 @@ export default function SpoolsPage() {
   );
 
   const handleSync = async () => {
-    // Sync logic remains the same
+    setIsSpinning(true);
+    await checkSyncTimestamp();
+    await fetchData();
+    setAlertMessage('Sync successful!');
+    setAlertVariant('success');
+    setShowAlert(true);
+    setIsSpinning(false);
   };
 
   // --- Data Processing ---
@@ -237,28 +249,40 @@ export default function SpoolsPage() {
         />
         <Card className={styles.tableCard}>
           <Card.Body>
-            <SpoolsAlertDisplay
-              showAlert={showAlert}
-              alertVariant={alertVariant}
-              alertMessage={alertMessage}
-              onClose={() => setShowAlert(false)}
-            />
-            <SpoolsTable
-              currentItems={currentItems}
-              isDeleting={isDeleting}
-              settings={settings}
-              onDelete={handleDelete}
-              onSortClick={handleSortClick}
-              sortKey={sortKey}
-              sortDirection={sortDirection}
-            />
-            <SpoolsPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              onItemsPerPageChange={handleItemsPerPageChange}
-              onPageChange={setCurrentPage}
-            />
+            {isSpinning ? (
+              <div
+                className='d-flex justify-content-center align-items-center'
+                style={{ minHeight: '300px' }}>
+                <Spinner animation='border' role='status'>
+                  <span className='visually-hidden'>Syncing...</span>
+                </Spinner>
+              </div>
+            ) : (
+              <>
+                <SpoolsAlertDisplay
+                  showAlert={showAlert}
+                  alertVariant={alertVariant}
+                  alertMessage={alertMessage}
+                  onClose={() => setShowAlert(false)}
+                />
+                <SpoolsTable
+                  currentItems={currentItems}
+                  isDeleting={isDeleting}
+                  settings={settings}
+                  onDelete={handleDelete}
+                  onSortClick={handleSortClick}
+                  sortKey={sortKey}
+                  sortDirection={sortDirection}
+                />
+                <SpoolsPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={handleItemsPerPageChange}
+                  onPageChange={setCurrentPage}
+                />
+              </>
+            )}
           </Card.Body>
         </Card>
       </Container>

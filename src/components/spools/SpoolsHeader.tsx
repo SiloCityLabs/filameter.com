@@ -19,7 +19,6 @@ interface SpoolsHeaderProps {
 const SpoolsHeader: React.FC<SpoolsHeaderProps> = ({
   isSpinning,
   syncCooldown,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   syncKey,
   onSync,
   searchTerm,
@@ -34,8 +33,7 @@ const SpoolsHeader: React.FC<SpoolsHeaderProps> = ({
         <Col xs='auto' className='d-flex gap-2'>
           <Button
             variant='outline-secondary'
-            // disabled={isSpinning || syncCooldown > 0 || !syncKey}
-            disabled={true} // Temporarily disabled for testing
+            disabled={isSpinning || syncCooldown > 0 || !syncKey}
             onClick={onSync}
             className={styles.headerButton}>
             <FontAwesomeIcon
@@ -44,12 +42,19 @@ const SpoolsHeader: React.FC<SpoolsHeaderProps> = ({
             />
             {syncCooldown > 0 ? `Sync (${syncCooldown}s)` : 'Sync'}
           </Button>
-          <Link href='/manage-filament' passHref>
-            <Button variant='primary' className={styles.headerButton}>
+          {isSpinning ? (
+            <Button variant='primary' className={styles.headerButton} disabled>
               <FontAwesomeIcon icon={faPlus} className='me-2' />
               Add Filament
             </Button>
-          </Link>
+          ) : (
+            <Link href='/manage-filament' passHref>
+              <Button variant='primary' className={styles.headerButton}>
+                <FontAwesomeIcon icon={faPlus} className='me-2' />
+                Add Filament
+              </Button>
+            </Link>
+          )}
         </Col>
       </Row>
       <Row className='mb-3'>
@@ -60,6 +65,7 @@ const SpoolsHeader: React.FC<SpoolsHeaderProps> = ({
             value={searchTerm}
             onChange={onSearchChange}
             className={styles.searchInput}
+            disabled={isSpinning}
           />
         </Col>
       </Row>

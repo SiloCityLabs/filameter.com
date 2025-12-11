@@ -89,6 +89,7 @@ Before diving deep, ensure your environment is correctly set up:
   - `robots.txt`: : is automatically generated. (See `next-sitemap.config.js`)
 - **Code Style**: Update `.prettierrc.mjs` if you have specific code style preferences that differ from the project's defaults.
 - **Linting**: Review the [Linting Configuration](#linting-configuration-important-for-forks) section, especially if you are forking this repository.
+- **AI Agents (`AGENTS.md`)**: This framework uses `AGENTS.md` to guide AI coding assistants. When forking, copy the template from `docs/AGENTS_TEMPLATE.md` to a new file named `AGENTS.md` in the project root. **Update** the "Project Purpose" section in this new file to describe your specific application (e.g., "A 3D Filament Inventory System"). Do _not_ modify the nested `AGENTS.md` files inside the `packages/` directory, as they contain critical framework rules.
 - **PNPM Workspace Configuration (`.npmrc`)**: This project uses PNPM workspaces and primarily manages dependencies at the workspace root. To allow adding new dependencies directly to the root `package.json` using `pnpm add <package-name>` (without requiring the `-w` flag or seeing default PNPM warnings), you need to configure PNPM:
   - **Create the file**: In the project's root directory (the same location as this README and the root `package.json`), create a file named `.npmrc` if one doesn't already exist.
   - **Add the configuration**: Open the `.npmrc` file and add the following line:

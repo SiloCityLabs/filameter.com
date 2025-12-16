@@ -14,7 +14,7 @@
     "dev:turbo": "next dev --turbo",
     "lint": "pnpm run build:workspaces && next lint",
     "lint:app": "next lint",
-    "prepare": "husky",
+    "prepare": "touch scratchpad.md && husky",
     "prettier": "prettier --write .",
     "qlint": "pnpm run build:workspaces && next lint --quiet",
     "start": "next start",

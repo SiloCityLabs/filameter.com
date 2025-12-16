@@ -29,6 +29,9 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
           <strong>Email:</strong> {data.email}
         </p>
         <p>
+          <strong>Sync Key:</strong> {data.syncKey}
+        </p>
+        <p>
           <strong>Account Type:</strong> {data.accountType}
         </p>
         <p>

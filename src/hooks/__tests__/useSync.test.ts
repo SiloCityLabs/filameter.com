@@ -268,7 +268,7 @@ describe('useSync Hook', () => {
       await result.current.forcePush();
     });
 
-    expect(result.current.syncCooldown).toBe(5);
+    expect(result.current.syncCooldown).toBe(60);
     expect(pushData).toHaveBeenCalledTimes(1);
     expect(result.current.alertMessage).toBe('Data has been pushed to the cloud!');
 
@@ -290,7 +290,7 @@ describe('useSync Hook', () => {
 
     // 4. Advance time past the cooldown
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(61000);
     });
     await waitFor(() => expect(result.current.syncCooldown).toBe(0));
 

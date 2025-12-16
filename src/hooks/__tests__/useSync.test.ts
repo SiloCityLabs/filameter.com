@@ -290,7 +290,7 @@ describe('useSync Hook', () => {
 
     // 4. Advance time past the cooldown
     act(() => {
-      jest.advanceTimersByTime(6000);
+      jest.advanceTimersByTime(61000);
     });
     await waitFor(() => expect(result.current.syncCooldown).toBe(0));
 

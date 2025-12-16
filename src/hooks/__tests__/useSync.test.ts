@@ -268,7 +268,7 @@ describe('useSync Hook', () => {
       await result.current.forcePush();
     });
 
-    expect(result.current.syncCooldown).toBe(5);
+    expect(result.current.syncCooldown).toBe(60);
     expect(pushData).toHaveBeenCalledTimes(1);
     expect(result.current.alertMessage).toBe('Data has been pushed to the cloud!');
 

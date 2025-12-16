@@ -25,7 +25,7 @@ import styles from '@/public/styles/components/Spools.module.css';
 
 export default function SpoolsPage() {
   const { dbs, isReady } = useDatabase();
-  const { updateLastModified, checkSyncTimestamp } = useSync('');
+  const { updateLastModified, checkSyncTimestamp, syncCooldown } = useSync('');
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -43,7 +43,7 @@ export default function SpoolsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [syncData, setSyncData] = useState<sclSettings>({});
-  const [syncCooldown, setSyncCooldown] = useState<number>(0);
+
   const [isSpinning, setIsSpinning] = useState(false);
 
   const fetchData = useCallback(async () => {
@@ -89,16 +89,6 @@ export default function SpoolsPage() {
     if (isReady) fetchData();
     else setIsLoading(true);
   }, [isReady, fetchData]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (syncCooldown > 0) {
-      timer = setInterval(() => setSyncCooldown((prev) => Math.max(0, prev - 1)), 1000);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [syncCooldown]);
 
   useEffect(() => {
     async function fetchSyncData() {

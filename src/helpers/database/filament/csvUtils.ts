@@ -1,10 +1,8 @@
 import Papa from 'papaparse';
 import { Filament } from '@/types/Filament';
 
-// Removed 'comments' so it cannot be explicitly mapped.
-// "Add to Comments" is now the exclusive way to populate notes.
 export const FILAMENT_FIELDS: { key: keyof Filament; label: string }[] = [
-  { key: 'filament', label: 'Brand / Name' },
+  { key: 'filament', label: 'Filament Name' },
   { key: 'material', label: 'Material Type' },
   { key: 'color', label: 'Color' } as any,
   { key: 'total_weight', label: 'Total Weight (g)' },
@@ -49,34 +47,34 @@ export const parseAndMapCsv = (
               const mappedField = mapping[csvHeader];
               let value = row[csvHeader]?.trim();
 
-              if (!value) value = ''; // Ensure we have a string to work with
+              if (!value) value = '';
 
+              // If mapped to a specific field (and not "Add to Comments")
               if (mappedField && mappedField !== 'ignore') {
                 // --- Special Logic for Weights ---
                 if (mappedField === 'total_weight') {
                   const num = parseFloat(value.replace(/[^0-9.]/g, ''));
-                  // Default to 1000 if empty or NaN
                   newFilament.total_weight = isNaN(num) ? 1000 : num;
                 } else if (mappedField === 'used_weight') {
                   const num = parseFloat(value.replace(/[^0-9.]/g, ''));
-                  // Default to 0 if empty or NaN
                   newFilament.used_weight = isNaN(num) ? 0 : num;
                 }
                 // --- Standard Strings ---
                 else {
                   if (value) newFilament[mappedField] = value;
                 }
-              } else if (mappedField !== 'ignore' && value) {
-                // If the field is "ignore" (Add to Comments) and has a value, add it to notes
+              }
+              // LOGIC UPDATE: If mapped to 'ignore' (Add to Comments), append it.
+              else if (mappedField === 'ignore' && value) {
                 unmappedNotes += `${csvHeader}: ${value}\n`;
               }
             });
 
-            // If we didn't map weights, ensure defaults are applied
-            // (Note: This covers the case where the USER didn't map the column at all)
+            // Defaults
             if (newFilament.total_weight === undefined) newFilament.total_weight = 1000;
             if (newFilament.used_weight === undefined) newFilament.used_weight = 0;
 
+            // Finalize Comments
             if (unmappedNotes) {
               const separator = newFilament.comments ? '\n\n--- Imported Data ---\n' : '';
               newFilament.comments =

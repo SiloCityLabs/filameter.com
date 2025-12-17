@@ -19,8 +19,8 @@ const CtaSection: React.FC = () => {
               <h2 className='display-5 fw-bold'>Go Pro & Get 20 Labels on Us</h2>
               <p className={`lead ${styles.ctaText}`}>
                 Ready to take your filament tracking to the next level? Upgrade to Pro today and
-                we'll send you a pack of 20 QR labels for free. It's the perfect way to get your
-                entire collection organized and logged instantly.
+                we&apos;ll send you a pack of 20 QR labels for free. It&apos;s the perfect way to
+                get your entire collection organized and logged instantly.
               </p>
               <p className='text-white-50 mb-4'>
                 Grab your sync key to unlock Pro features and claim your labels.

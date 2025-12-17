@@ -488,6 +488,12 @@ export const useSync = (verifyKey: string) => {
 
   useEffect(() => {
     const calculateCooldown = () => {
+      // Skip cooldown for Pro users
+      if (data.accountType === 'Pro') {
+        setSyncCooldown(0);
+        return;
+      }
+
       if (lastSyncTime) {
         const elapsed = Date.now() - lastSyncTime;
         const remaining = COOLDOWN_SECONDS * 1000 - elapsed;
@@ -502,7 +508,7 @@ export const useSync = (verifyKey: string) => {
     calculateCooldown();
     const intervalId = setInterval(calculateCooldown, 1000);
     return () => clearInterval(intervalId);
-  }, [lastSyncTime]);
+  }, [lastSyncTime, data.accountType]);
 
   return {
     isSpinning,

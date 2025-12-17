@@ -147,6 +147,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
                 value={formData.filament}
                 onChange={handleInputChange}
                 placeholder='e.g., Galaxy Black'
+                required
               />
             </Form.Group>
           </Col>

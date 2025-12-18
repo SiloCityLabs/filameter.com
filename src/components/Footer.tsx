@@ -7,6 +7,10 @@ import { Container, Row, Col, Nav } from 'react-bootstrap';
 // --- Next ---
 import Image from 'next/image';
 
+// --- Icons ---
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub, faReddit, faFacebook } from '@fortawesome/free-brands-svg-icons';
+
 // --- Styles ---
 import styles from '@/public/styles/components/Footer.module.css';
 
@@ -24,9 +28,10 @@ export default function Footer({ className }: { className?: string }) {
   return (
     <footer id='site-footer' className={`${styles.footer} ${className}`}>
       <Container>
-        <Row className='align-items-center text-center text-md-start'>
+        {/* 4-col layout: lg={3} md={6} */}
+        <Row className='align-items-start text-center text-md-start gy-4'>
           {/* Column 1: Copyright and Logo */}
-          <Col md={4} className='mb-3 mb-md-0'>
+          <Col lg={3} md={6} className='d-flex flex-column align-items-center align-items-md-start'>
             <Image
               src='/images/logos/filameter-banner-slim-blue.webp'
               alt='FilaMeter Logo'
@@ -44,8 +49,8 @@ export default function Footer({ className }: { className?: string }) {
           </Col>
 
           {/* Column 2: Navigation Links */}
-          <Col md={4} className='mb-3 mb-md-0'>
-            <Nav className='justify-content-center'>
+          <Col lg={3} md={6}>
+            <Nav className='flex-column align-items-center align-items-md-start'>
               <Nav.Link href='/faq' className={styles.footerLink}>
                 FAQ
               </Nav.Link>
@@ -58,8 +63,39 @@ export default function Footer({ className }: { className?: string }) {
             </Nav>
           </Col>
 
-          {/* Column 3: License Information */}
-          <Col md={4}>
+          {/* Column 3: Socials */}
+          <Col lg={3} md={6} className='d-flex flex-column align-items-center align-items-md-start'>
+            <h6 className={styles.columnTitle}>Connect</h6>
+            <div className={styles.socialIcons}>
+              <a
+                href='https://github.com/SiloCityLabs/filameter.com'
+                target='_blank'
+                rel='noopener noreferrer'
+                className={styles.socialLink}
+                aria-label='GitHub'>
+                <FontAwesomeIcon icon={faGithub} size='2x' />
+              </a>
+              <a
+                href='https://www.reddit.com/r/FilaMeter/'
+                target='_blank'
+                rel='noopener noreferrer'
+                className={styles.socialLink}
+                aria-label='Reddit'>
+                <FontAwesomeIcon icon={faReddit} size='2x' />
+              </a>
+              <a
+                href='https://www.facebook.com/SiloCityLabs'
+                target='_blank'
+                rel='noopener noreferrer'
+                className={styles.socialLink}
+                aria-label='Facebook'>
+                <FontAwesomeIcon icon={faFacebook} size='2x' />
+              </a>
+            </div>
+          </Col>
+
+          {/* Column 4: License Information */}
+          <Col lg={3} md={6} className='text-center text-md-start'>
             {showLicense && (
               <div className={styles.licenseSection}>
                 <a

@@ -13,13 +13,13 @@
 .copyright {
   font-size: 0.9rem;
   margin: 0;
-  color: #6c757d; /* A softer text color for the copyright */
+  color: #6c757d;
 }
 
 .footerLink {
   color: var(--text-dark);
   font-weight: 500;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0;
   transition: color 0.3s ease;
 }
 
@@ -27,8 +27,45 @@
   color: var(--primary-color);
 }
 
+.columnTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-dark);
+  opacity: 0.9;
+}
+
+/* --- Socials Section --- */
+.socialIcons {
+  display: flex;
+  /* Reduced gap to 1rem for tighter spacing */
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.socialLink {
+  color: var(--text-dark);
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.socialLink:hover {
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+/* --- License Section --- */
 .licenseSection {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+@media (min-width: 768px) {
+  .licenseSection {
+    justify-content: flex-start;
+  }
 }
 
 .licenseLink {
@@ -39,6 +76,11 @@
   color: var(--text-dark);
   text-decoration: none;
   transition: color 0.3s ease;
+}
+@media (min-width: 768px) {
+  .licenseLink {
+    align-items: flex-start;
+  }
 }
 
 .licenseLink:hover {
@@ -60,14 +102,11 @@
     padding: 2rem 0;
   }
 
-  .footerLogo,
-  .copyright,
-  .licenseSection {
-    text-align: center;
+  .licenseLink {
+    align-items: center;
   }
 
-  .footerLogo {
-    margin-left: auto;
-    margin-right: auto;
+  .licenseSection {
+    justify-content: center;
   }
 }

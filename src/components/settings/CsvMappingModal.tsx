@@ -66,7 +66,13 @@ export default function CsvMappingModal({ show, file, onClose, onSave }: CsvMapp
     if (!file) return;
     setLoading(true);
     try {
-      const data = await parseAndMapCsv(file, mapping as any);
+      // Filter out 'exclude' values so the parser ignores these columns entirely
+      const cleanMapping = Object.fromEntries(
+        Object.entries(mapping).filter(([_, value]) => value !== 'exclude')
+      );
+
+      // Pass cleanMapping instead of raw mapping
+      const data = await parseAndMapCsv(file, cleanMapping as any);
       await onSave(data);
       onClose();
     } catch (err) {
@@ -78,7 +84,9 @@ export default function CsvMappingModal({ show, file, onClose, onSave }: CsvMapp
   };
 
   // Calculate which fields are already used in the mapping (excluding 'ignore')
-  const usedFields = new Set(Object.values(mapping).filter((v) => v !== 'ignore'));
+  const usedFields = new Set(
+    Object.values(mapping).filter((v) => v !== 'ignore' && v !== 'exclude')
+  );
 
   return (
     <CustomModal
@@ -117,8 +125,9 @@ export default function CsvMappingModal({ show, file, onClose, onSave }: CsvMapp
                         value={mapping[header] || 'ignore'}
                         onChange={(e) => handleMappingChange(header, e.target.value)}>
                         <option value='ignore'>-- Add to Comments --</option>
+                        <option value='exclude'>-- Exclude Column --</option>
+
                         {FILAMENT_FIELDS.map((field) => {
-                          // Check if this field is used by ANOTHER header
                           const isUsedElsewhere =
                             usedFields.has(field.key) && mapping[header] !== field.key;
 

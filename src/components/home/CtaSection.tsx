@@ -16,14 +16,11 @@ const CtaSection: React.FC = () => {
           <Col md={10} lg={8}>
             <div className={styles.ctaContent}>
               <FontAwesomeIcon icon={faQrcode} className={styles.ctaIcon} />
-              <h2 className='display-5 fw-bold'>Go Pro & Get 20 Labels on Us</h2>
+              <h2 className='display-5 fw-bold'>Upgrade to Pro — Get 20 Free QR Labels</h2>
               <p className={`lead ${styles.ctaText}`}>
-                Ready to take your filament tracking to the next level? Upgrade to Pro today and
-                we&apos;ll send you a pack of 20 QR labels for free. It&apos;s the perfect way to
-                get your entire collection organized and logged instantly.
-              </p>
-              <p className='text-white-50 mb-4'>
-                Grab your sync key to unlock Pro features and claim your labels.
+                Upgrade to Pro and easily track and manage your filament spools with FilaMeter QR
+                Labels. Scan, log, and monitor usage with a simple tap. To help you get started,
+                we&apos;ll include 20 QR labels free with your Pro upgrade.
               </p>
               <Button
                 variant='light'
@@ -31,7 +28,7 @@ const CtaSection: React.FC = () => {
                 href={ctaLink}
                 target='_blank'
                 className={styles.ctaButton}>
-                Get Pro & Free Labels
+                Get Pro
               </Button>
             </div>
           </Col>

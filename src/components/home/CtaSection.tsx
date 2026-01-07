@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQrcode } from '@fortawesome/free-solid-svg-icons';
 
 const CtaSection: React.FC = () => {
-  const ctaLink = 'https://shop.silocitylabs.com/products/scl-sync-key';
+  const ctaLink = 'https://shop.silocitylabs.com/cart/50812497920300:4,50948651843884:1';
 
   return (
     <section className={styles.ctaSection}>

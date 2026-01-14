@@ -33,7 +33,6 @@ const defaultNavLinks: NavLink[] = [
     href: 'https://shop.silocitylabs.com/collections/filameter',
     target: '_blank',
   },
-  { label: 'GitHub', href: process.env.NEXT_PUBLIC_APP_GITHUB_URL || '#', target: '_blank' },
 ];
 
 export default function Header({ className, navLinks }: Props) {

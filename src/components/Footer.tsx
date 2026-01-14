@@ -17,6 +17,7 @@ import styles from '@/public/styles/components/Footer.module.css';
 export default function Footer({ className }: { className?: string }) {
   const showLicense =
     process.env.NEXT_PUBLIC_FOOTER_SITE && process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT_URL;
+  const version = process.env.NEXT_PUBLIC_APP_VERSION;
 
   const images = [
     { src: 'https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1', alt: 'CC' },
@@ -44,9 +45,17 @@ export default function Footer({ className }: { className?: string }) {
                 <a href='https://silocitylabs.com' style={{ textDecoration: 'none' }}>
                   ©{new Date().getFullYear()} {process.env.NEXT_PUBLIC_FOOTER_COPYRIGHT}
                 </a>
+                {version && (
+                  <>
+                    <span className='mx-2 text-muted'>•</span>
+                    <span className='text-muted small'>v{version}</span>
+                  </>
+                )}
               </p>
             )}
           </Col>
+
+          {/* ... Rest of the footer remains the same ... */}
 
           {/* Column 2: Navigation Links */}
           <Col lg={3} md={6}>

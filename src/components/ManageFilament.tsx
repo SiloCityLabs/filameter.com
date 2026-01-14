@@ -2,19 +2,19 @@
 
 // --- React ---
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Row, Col, Spinner } from 'react-bootstrap';
+import { Form, Button, Row, Col, Spinner, InputGroup } from 'react-bootstrap';
 // --- Next ---
 import { useRouter } from 'next/navigation';
 // --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
 // --- Helpers ---
-import { save } from '@silocitypages/data-access';
+import { save, deleteRow } from '@silocitypages/data-access';
 import { filamentSchema } from '@/helpers/database/filament/migrateFilamentDB';
 // --- Styles ---
 import styles from '@/public/styles/components/ManageFilament.module.css';
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faSave, faTimes, faPen, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 // --- Hooks ---
 import { useSync } from '@/hooks/useSync';
 // --- Types ---
@@ -38,11 +38,15 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
-  const [formData, setFormData] = useState(
+  // Use 'any' for initial state to handle incoming legacy fields like 'color' without TS errors before we clean them
+  const [formData, setFormData] = useState<any>(
     data && Object.keys(data).length > 0 ? data : defaultValue
   );
   const [createMultiple, setCreateMultiple] = useState(false);
   const [numberOfRows, setNumberOfRows] = useState(2);
+
+  // --- New State for ID Editing ---
+  const [isIdEditable, setIsIdEditable] = useState(false);
 
   useEffect(() => {
     if (data?._id) {
@@ -57,6 +61,25 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleEnableIdEdit = () => {
+    const confirmEdit = window.confirm(
+      'Are you sure you want to edit the ID? \n\nChanging the ID manually can break links or create duplicate records if not handled carefully. Only do this if you know what you are doing.'
+    );
+    if (confirmEdit) {
+      setIsIdEditable(true);
+    }
+  };
+
+  const validateId = (id: string): boolean => {
+    // Regex for standard UUID (case insensitive)
+    const uuidRegex =
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    // Regex for FilaMeter QR Code (Alphanumeric, EXACTLY 8 characters)
+    const qrRegex = /^[a-zA-Z0-9]{8}$/;
+
+    return uuidRegex.test(id) || qrRegex.test(id);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!db) {
@@ -66,16 +89,65 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       return;
     }
 
+    // --- ID Validation ---
+    if (formData._id && !validateId(formData._id)) {
+      setAlertVariant('danger');
+      setAlertMessage(
+        'Invalid ID Format. ID must be a valid UUID or a FilaMeter QR Code (exactly 8 alphanumeric characters).'
+      );
+      setShowAlert(true);
+      return;
+    }
+
     setIsSaving(true);
-    const type = isEdit ? 'updated' : 'added';
+
+    // Check if ID changed. If so, we treat it as an insert (new ID) and delete the old one.
+    const isIdChanged = data?._id && formData._id !== data._id;
+    const finalOperationIsEdit = isEdit && !isIdChanged;
+    const type = finalOperationIsEdit ? 'updated' : 'added';
+
     let finalResult;
     try {
-      for (let x = 0; x < (createMultiple && !isEdit ? numberOfRows : 1); x++) {
-        const dataToSave =
-          createMultiple && !isEdit ? { ...formData, _id: undefined, _rev: undefined } : formData;
-        finalResult = await save(db, dataToSave, filamentSchema, 'filament');
+      for (let x = 0; x < (createMultiple && !finalOperationIsEdit ? numberOfRows : 1); x++) {
+        // 1. Prepare base data
+        let dataToSave = { ...formData };
+
+        if (createMultiple && !finalOperationIsEdit) {
+          // Creating multiple new entries (ignore ID and Rev)
+          dataToSave = { ...formData, _id: undefined, _rev: undefined };
+        } else if (isIdChanged) {
+          // ID was manually changed; treat as new record (strip _rev)
+          // This creates the NEW record.
+          dataToSave = { ...formData, _rev: undefined };
+        }
+
+        // 2. Sanitize Data: Strip unknown fields (like 'color') that fail schema validation
+        const sanitizedData: any = {
+          filament: dataToSave.filament,
+          material: dataToSave.material,
+          used_weight: Number(dataToSave.used_weight),
+          total_weight: Number(dataToSave.total_weight),
+          location: dataToSave.location || '',
+          comments: dataToSave.comments || '',
+        };
+
+        // Re-attach ID and Rev if they exist and are valid for this operation
+        if (dataToSave._id) sanitizedData._id = dataToSave._id;
+        if (dataToSave._rev) sanitizedData._rev = dataToSave._rev;
+
+        // 3. Save
+        finalResult = await save(db, sanitizedData, filamentSchema, 'filament');
         if (!finalResult.success) {
+          // Pass the error up to the catch block
           throw new Error(JSON.stringify(finalResult.error));
+        }
+      }
+
+      // If ID was changed and the new save was successful, DELETE the old record.
+      if (isIdChanged && data?._id && finalResult?.success) {
+        const deleteSuccess = await deleteRow(db, data._id, 'filament');
+        if (!deleteSuccess) {
+          console.warn('Failed to delete the old filament record after creating the new one.');
         }
       }
 
@@ -84,11 +156,13 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         await updateLastModified();
       }
 
-      const successMessageText = isEdit
+      const successMessageText = finalOperationIsEdit
         ? 'Filament updated successfully'
-        : createMultiple
-          ? `${numberOfRows} filament added successfully`
-          : 'Filament added successfully';
+        : isIdChanged
+          ? 'Filament ID updated successfully'
+          : createMultiple
+            ? `${numberOfRows} filament added successfully`
+            : 'Filament added successfully';
 
       const successMessage = encodeURIComponent(successMessageText);
       router.push(`/spools?alert_msg=${successMessage}`);
@@ -96,19 +170,31 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       console.error(`Error: Filament not ${type}:`, error);
       let message = 'An unexpected error occurred.';
       if (error instanceof Error) {
-        // Type guard to check if it's an Error instance
         try {
           const errorObj = JSON.parse(error.message);
           if (Array.isArray(errorObj)) {
-            message = errorObj.map((eItem: { message: string }) => eItem.message).join(', '); // Add type for eItem
+            // Check specifically for Joi validation errors (which return arrays)
+            const validationMessages = errorObj
+              .map((eItem: { message: string }) => eItem.message)
+              .join(', ');
+            message = `Validation Error: ${validationMessages}`;
+          } else {
+            // Handle plain string errors returned from DB (like 'Document update conflict')
+            message = String(errorObj);
           }
         } catch (_e) {
-          // Prefix with underscore to mark as intentionally unused
           message = error.message || message;
         }
       } else if (typeof error === 'string') {
         message = error;
       }
+
+      // --- GRACEFUL CONFLICT HANDLING ---
+      // Check for the specific PouchDB/CouchDB 409 Conflict message
+      if (message && message.toLowerCase().includes('document update conflict')) {
+        message = `A filament with the ID "${formData._id}" already exists. IDs must be unique.`;
+      }
+
       setAlertMessage(message);
       setAlertVariant('danger');
       setShowAlert(true);
@@ -126,13 +212,39 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         onClose={() => setShowAlert(false)}
       />
       <Form onSubmit={handleSubmit} className={styles.manageForm}>
+        {/* Only show ID field if it exists (Edit Mode) or if user manually populated it via URL */}
         {formData._id && (
           <Form.Group as={Row} className='mb-3 align-items-center' controlId='_id'>
             <Form.Label column sm='auto' className='mb-0'>
               ID:
             </Form.Label>
             <Col>
-              <Form.Control type='text' value={formData._id} disabled readOnly />
+              <InputGroup>
+                <Form.Control
+                  type='text'
+                  name='_id'
+                  value={formData._id}
+                  onChange={handleInputChange}
+                  disabled={!isIdEditable}
+                  readOnly={!isIdEditable}
+                  className={isIdEditable ? 'bg-white' : ''}
+                />
+                {!isIdEditable && (
+                  <Button variant='outline-secondary' onClick={handleEnableIdEdit} title='Edit ID'>
+                    <FontAwesomeIcon icon={faPen} size='sm' />
+                  </Button>
+                )}
+                {isIdEditable && (
+                  <InputGroup.Text className='text-warning'>
+                    <FontAwesomeIcon icon={faExclamationTriangle} />
+                  </InputGroup.Text>
+                )}
+              </InputGroup>
+              {isIdEditable && (
+                <Form.Text className='text-muted'>
+                  Allowed formats: UUID or 8 character alphanumeric code.
+                </Form.Text>
+              )}
             </Col>
           </Form.Group>
         )}

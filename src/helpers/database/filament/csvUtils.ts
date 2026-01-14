@@ -4,7 +4,7 @@ import { Filament } from '@/types/Filament';
 export const FILAMENT_FIELDS: { key: keyof Filament; label: string }[] = [
   { key: 'filament', label: 'Filament Name' },
   { key: 'material', label: 'Material Type' },
-  { key: 'color', label: 'Color' } as any,
+  // { key: 'color', label: 'Color' } as any,
   { key: 'total_weight', label: 'Total Weight (g)' },
   { key: 'used_weight', label: 'Used Weight (g)' },
   { key: 'location', label: 'Storage Location' },

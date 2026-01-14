@@ -38,10 +38,12 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
-  // Use 'any' for initial state to handle incoming legacy fields like 'color' without TS errors before we clean them
-  const [formData, setFormData] = useState<any>(
+
+  // Use intersection type to allow unknown legacy fields (like 'color') without using 'any'
+  const [formData, setFormData] = useState<Filament & Record<string, unknown>>(
     data && Object.keys(data).length > 0 ? data : defaultValue
   );
+
   const [createMultiple, setCreateMultiple] = useState(false);
   const [numberOfRows, setNumberOfRows] = useState(2);
 
@@ -122,18 +124,18 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         }
 
         // 2. Sanitize Data: Strip unknown fields (like 'color') that fail schema validation
-        const sanitizedData: any = {
+        // We explicitly construct the object to ensure only valid fields are passed.
+        const sanitizedData = {
           filament: dataToSave.filament,
           material: dataToSave.material,
           used_weight: Number(dataToSave.used_weight),
           total_weight: Number(dataToSave.total_weight),
-          location: dataToSave.location || '',
-          comments: dataToSave.comments || '',
+          location: (dataToSave.location as string) || '',
+          comments: (dataToSave.comments as string) || '',
+          // Conditionally add _id and _rev if they exist
+          ...(dataToSave._id ? { _id: dataToSave._id } : {}),
+          ...(dataToSave._rev ? { _rev: dataToSave._rev } : {}),
         };
-
-        // Re-attach ID and Rev if they exist and are valid for this operation
-        if (dataToSave._id) sanitizedData._id = dataToSave._id;
-        if (dataToSave._rev) sanitizedData._rev = dataToSave._rev;
 
         // 3. Save
         finalResult = await save(db, sanitizedData, filamentSchema, 'filament');
@@ -312,7 +314,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           <Form.Control
             type='text'
             name='location'
-            value={formData.location}
+            value={formData.location as string}
             onChange={handleInputChange}
             placeholder='e.g., Shelf A, Bin 3'
           />
@@ -324,7 +326,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
             as='textarea'
             rows={3}
             name='comments'
-            value={formData.comments}
+            value={formData.comments as string}
             onChange={handleInputChange}
             placeholder='e.g., Prints best at 215°C'
           />

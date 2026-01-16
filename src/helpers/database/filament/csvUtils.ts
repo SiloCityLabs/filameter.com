@@ -61,7 +61,7 @@ export const parseAndMapCsv = (
                 } else if (mappedField === 'used_weight') {
                   const num = parseFloat(value.replace(/[^0-9.]/g, ''));
                   newFilament.used_weight = isNaN(num) ? 0 : num;
-                }else if (mappedField === 'price') {
+                } else if (mappedField === 'price') {
                   const num = parseFloat(value.replace(/[^0-9.]/g, ''));
                   newFilament.price = isNaN(num) ? 0 : num;
                 } else if (mappedField === 'color') {

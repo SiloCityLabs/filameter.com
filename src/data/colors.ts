@@ -187,4 +187,3 @@ export const normalizeColorToHex = (value: string): string => {
   // Return original value if not a recognized format
   return trimmed;
 };
-

@@ -1,8 +1,9 @@
-export interface Filament {
+export type Filament = {
   _id?: string;
   _rev?: string;
   filament: string;
   material: string;
+  brand?: string;
   color?: string;
   price?: number;
   used_weight: number;
@@ -10,7 +11,7 @@ export interface Filament {
   calc_weight?: number;
   location?: string;
   comments?: string;
-}
+};
 
 export interface ManageFilamentProps {
   data?: Filament;

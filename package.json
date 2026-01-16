@@ -41,6 +41,7 @@
     "pouchdb-find": "^9.0.0",
     "react": "^19.1.1",
     "react-bootstrap": "^2.10.10",
+    "react-bootstrap-typeahead": "^6.4.1",
     "react-content-loader": "^7.1.1",
     "react-dom": "^19.1.1",
     "react-select": "^5.10.2",

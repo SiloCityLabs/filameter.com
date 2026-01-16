@@ -1,7 +1,6 @@
 export interface Vendor {
   id: string;
   name: string;
-  // Add other vendor properties as needed
 }
 
 export const vendors: Vendor[] = [

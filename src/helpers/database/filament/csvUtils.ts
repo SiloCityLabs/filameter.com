@@ -2,6 +2,7 @@ import Papa from 'papaparse';
 import { Filament } from '@/types/Filament';
 
 export const FILAMENT_FIELDS: { key: keyof Filament; label: string }[] = [
+  { key: 'brand', label: 'Brand' },
   { key: 'filament', label: 'Filament Name' },
   { key: 'material', label: 'Material Type' },
   { key: 'color', label: 'Color' },

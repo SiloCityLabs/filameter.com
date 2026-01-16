@@ -7,24 +7,29 @@ import { Form, Button, Row, Col, Spinner, InputGroup } from 'react-bootstrap';
 import { useRouter } from 'next/navigation';
 // --- Components ---
 import { CustomAlert } from '@silocitypages/ui-core';
+import { Typeahead } from 'react-bootstrap-typeahead';
 // --- Helpers ---
 import { save, deleteRow } from '@silocitypages/data-access';
 import { filamentSchema } from '@/helpers/database/filament/migrateFilamentDB';
 // --- Styles ---
 import styles from '@/public/styles/components/ManageFilament.module.css';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faTimes, faPen, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 // --- Hooks ---
 import { useSync } from '@/hooks/useSync';
+// --- Data ---
+import { vendors } from '@/data/vendors';
 // --- Types ---
 import { ManageFilamentProps, Filament } from '@/types/Filament';
 
 const defaultValue: Filament = {
   filament: '',
   material: '',
+  brand: '',
   color: '',
-  price: 0, // Default price
+  price: 0,
   used_weight: 0,
   total_weight: 1000,
   location: '',
@@ -153,8 +158,9 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         const sanitizedData = {
           filament: dataToSave.filament,
           material: dataToSave.material,
+          brand: (dataToSave.brand as string) || '',
           color: (dataToSave.color as string) || '',
-          price: Number(dataToSave.price) || 0, // Save Price
+          price: Number(dataToSave.price) || 0,
           used_weight: Number(dataToSave.used_weight),
           total_weight: Number(dataToSave.total_weight),
           location: (dataToSave.location as string) || '',
@@ -268,9 +274,32 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Form.Group>
         )}
 
-        {/* Row 1: Name, Material, Color */}
+        {/* Row 1: Brand and Filament Name */}
         <Row>
-          <Col md={5}>
+          <Col md={6}>
+            <Form.Group className='mb-3' controlId='brand'>
+              <Form.Label>Brand</Form.Label>
+              <Typeahead
+                id='brand-typeahead'
+                allowNew
+                clearButton
+                options={vendors.map((v) => v.name)}
+                placeholder='e.g., Prusament'
+                onChange={(selected) => {
+                  const value = selected.length > 0 ? selected[0] : '';
+                  // Handle if value is object (custom option) or string
+                  const brandName =
+                    typeof value === 'object' && 'label' in value ? value.label : value;
+                  setFormData({ ...formData, brand: brandName as string });
+                }}
+                onInputChange={(text) => {
+                  setFormData({ ...formData, brand: text });
+                }}
+                selected={formData.brand ? [formData.brand] : []}
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
             <Form.Group className='mb-3' controlId='filament'>
               <Form.Label>Filament Name</Form.Label>
               <Form.Control
@@ -283,7 +312,11 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
               />
             </Form.Group>
           </Col>
-          <Col md={4}>
+        </Row>
+
+        {/* Row 2: Material and Color */}
+        <Row>
+          <Col md={6}>
             <Form.Group className='mb-3' controlId='material'>
               <Form.Label>Material</Form.Label>
               <Form.Control
@@ -296,7 +329,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
               />
             </Form.Group>
           </Col>
-          <Col md={3}>
+          <Col md={6}>
             <Form.Group className='mb-3' controlId='color'>
               <Form.Label>Color (Hex)</Form.Label>
               <InputGroup>
@@ -325,7 +358,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Col>
         </Row>
 
-        {/* Row 2: Weights */}
+        {/* Row 3: Weights */}
         <Row>
           <Col md={6}>
             <Form.Group className='mb-3' controlId='usedWeight'>
@@ -355,7 +388,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Col>
         </Row>
 
-        {/* Row 3: Price and Location */}
+        {/* Row 4: Price and Location */}
         <Row>
           <Col md={6}>
             <Form.Group className='mb-3' controlId='price'>
@@ -380,7 +413,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
               <Form.Control
                 type='text'
                 name='location'
-                value={formData.location as string}
+                value={(formData.location as string) || ''}
                 onChange={handleInputChange}
                 placeholder='e.g., Shelf A, Bin 3'
               />
@@ -394,7 +427,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
             as='textarea'
             rows={3}
             name='comments'
-            value={formData.comments as string}
+            value={(formData.comments as string) || ''}
             onChange={handleInputChange}
             placeholder='e.g., Prints best at 215°C'
           />

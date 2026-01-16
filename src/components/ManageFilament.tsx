@@ -21,6 +21,7 @@ import { faSave, faTimes, faPen, faExclamationTriangle } from '@fortawesome/free
 import { useSync } from '@/hooks/useSync';
 // --- Data ---
 import { vendors } from '@/data/vendors';
+import { materials } from '@/data/materials';
 // --- Types ---
 import { ManageFilamentProps, Filament } from '@/types/Filament';
 
@@ -284,7 +285,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
                 allowNew
                 clearButton
                 options={vendors.map((v) => v.name)}
-                placeholder='e.g., Prusament'
+                placeholder='e.g., Creality'
                 onChange={(selected) => {
                   const value = selected.length > 0 ? selected[0] : '';
                   // Handle if value is object (custom option) or string
@@ -319,13 +320,25 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           <Col md={6}>
             <Form.Group className='mb-3' controlId='material'>
               <Form.Label>Material</Form.Label>
-              <Form.Control
-                type='text'
-                name='material'
-                value={formData.material}
-                onChange={handleInputChange}
-                placeholder='e.g., PLA'
-                required
+              <Typeahead
+                id='material-typeahead'
+                allowNew
+                clearButton
+                options={materials.map((m) => m.name)}
+                placeholder='e.g., PLA+'
+                onChange={(selected) => {
+                  const value = selected.length > 0 ? selected[0] : '';
+                  // Handle if value is object (custom option) or string
+                  const materialName =
+                    typeof value === 'object' && 'label' in value ? value.label : value;
+                  setFormData({ ...formData, material: materialName as string });
+                }}
+                onInputChange={(text) => {
+                  setFormData({ ...formData, material: text });
+                }}
+                selected={formData.material ? [formData.material] : []}
+                // Ensure the field is marked as required for the form
+                inputProps={{ required: true }}
               />
             </Form.Group>
           </Col>

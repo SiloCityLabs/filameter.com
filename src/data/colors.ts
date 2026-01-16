@@ -162,7 +162,7 @@ export const htmlColorNameToHex = (colorName: string): string => {
     .toLowerCase()
     .trim()
     .replace(/[\s\-_.,;:!@#$%^&*()+=\[\]{}|\\<>?/~`'"]/g, '');
-  
+
   return htmlColorNames[normalizedName] || colorName;
 };
 

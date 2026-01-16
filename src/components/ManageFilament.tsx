@@ -23,6 +23,7 @@ import { ManageFilamentProps, Filament } from '@/types/Filament';
 const defaultValue: Filament = {
   filament: '',
   material: '',
+  color: '',
   used_weight: 0,
   total_weight: 1000,
   location: '',
@@ -40,8 +41,11 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
   const [alertMessage, setAlertMessage] = useState('');
 
   // Use intersection type to allow unknown legacy fields (like 'color') without using 'any'
+  // FIXED: Added type assertion as requested (Option 1)
   const [formData, setFormData] = useState<Filament & Record<string, unknown>>(
-    data && Object.keys(data).length > 0 ? data : defaultValue
+    (data && Object.keys(data).length > 0
+      ? { ...defaultValue, ...data }
+      : defaultValue) as Filament & Record<string, unknown>
   );
 
   const [createMultiple, setCreateMultiple] = useState(false);
@@ -59,8 +63,36 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     }
   }, [data?._id, data?._rev]);
 
+  // --- Helpers for Color Input ---
+
+  // Ensure the color picker always gets a valid 6-digit hex or fallback
+  const getNormalizedColorForPicker = (color: string | undefined) => {
+    if (!color) return '#000000';
+
+    // Expand 3-digit hex (#F00) to 6-digit (#FF0000)
+    const threeDigitRegex = /^#([0-9A-F])([0-9A-F])([0-9A-F])$/i;
+    const match = color.match(threeDigitRegex);
+
+    if (match) {
+      return `#${match[1]}${match[1]}${match[2]}${match[2]}${match[3]}${match[3]}`;
+    }
+
+    return color.startsWith('#') ? color : `#${color}`;
+  };
+
+  // Strict Hex validation
+  const validateColor = (color: string): boolean => {
+    if (!color) return true; // Optional field
+    const hexRegex = /^#([0-9A-F]{3}|[0-9A-F]{6})$/i;
+    return hexRegex.test(color);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleColorPickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, color: e.target.value });
   };
 
   const handleEnableIdEdit = () => {
@@ -101,6 +133,14 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       return;
     }
 
+    // --- Color Validation ---
+    if (formData.color && !validateColor(formData.color as string)) {
+      setAlertVariant('danger');
+      setAlertMessage('Invalid Color Format. Please use a Hex code (e.g., #FF0000 or #F00).');
+      setShowAlert(true);
+      return;
+    }
+
     setIsSaving(true);
 
     // Check if ID changed. If so, we treat it as an insert (new ID) and delete the old one.
@@ -123,11 +163,12 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           dataToSave = { ...formData, _rev: undefined };
         }
 
-        // 2. Sanitize Data: Strip unknown fields (like 'color') that fail schema validation
+        // 2. Sanitize Data: Strip unknown fields that fail schema validation
         // We explicitly construct the object to ensure only valid fields are passed.
         const sanitizedData = {
           filament: dataToSave.filament,
           material: dataToSave.material,
+          color: (dataToSave.color as string) || '', // Add Color
           used_weight: Number(dataToSave.used_weight),
           total_weight: Number(dataToSave.total_weight),
           location: (dataToSave.location as string) || '',
@@ -251,8 +292,9 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Form.Group>
         )}
 
+        {/* Updated Row with Color Input */}
         <Row>
-          <Col md={6}>
+          <Col md={5}>
             <Form.Group className='mb-3' controlId='filament'>
               <Form.Label>Filament Name</Form.Label>
               <Form.Control
@@ -265,7 +307,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
               />
             </Form.Group>
           </Col>
-          <Col md={6}>
+          <Col md={4}>
             <Form.Group className='mb-3' controlId='material'>
               <Form.Label>Material</Form.Label>
               <Form.Control
@@ -276,6 +318,34 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
                 placeholder='e.g., PLA'
                 required
               />
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group className='mb-3' controlId='color'>
+              <Form.Label>Color (Hex)</Form.Label>
+              <InputGroup>
+                {/* Normalize the value for the picker so it doesn't break on 3-digit hex
+                 */}
+                <Form.Control
+                  type='color'
+                  value={getNormalizedColorForPicker(formData.color as string)}
+                  onChange={handleColorPickerChange}
+                  title='Choose a color'
+                  style={{ maxWidth: '50px', padding: '5px', cursor: 'pointer' }}
+                />
+                <Form.Control
+                  type='text'
+                  name='color'
+                  value={(formData.color as string) || ''}
+                  onChange={handleInputChange}
+                  placeholder='#000000'
+                  isInvalid={!!formData.color && !validateColor(formData.color as string)}
+                  maxLength={7}
+                />
+                <Form.Control.Feedback type='invalid'>
+                  Must be Hex (e.g. #FF0000)
+                </Form.Control.Feedback>
+              </InputGroup>
             </Form.Group>
           </Col>
         </Row>

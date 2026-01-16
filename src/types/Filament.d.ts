@@ -4,6 +4,7 @@ export interface Filament {
   filament: string;
   material: string;
   color?: string;
+  price?: number;
   used_weight: number;
   total_weight: number;
   calc_weight?: number;

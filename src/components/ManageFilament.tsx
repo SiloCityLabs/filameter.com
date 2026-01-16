@@ -24,6 +24,7 @@ const defaultValue: Filament = {
   filament: '',
   material: '',
   color: '',
+  price: 0, // Default price
   used_weight: 0,
   total_weight: 1000,
   location: '',
@@ -40,8 +41,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
   const [alertVariant, setAlertVariant] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
 
-  // Use intersection type to allow unknown legacy fields (like 'color') without using 'any'
-  // FIXED: Added type assertion as requested (Option 1)
+  // Use intersection type to allow unknown legacy fields
   const [formData, setFormData] = useState<Filament & Record<string, unknown>>(
     (data && Object.keys(data).length > 0
       ? { ...defaultValue, ...data }
@@ -64,25 +64,20 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
   }, [data?._id, data?._rev]);
 
   // --- Helpers for Color Input ---
-
-  // Ensure the color picker always gets a valid 6-digit hex or fallback
   const getNormalizedColorForPicker = (color: string | undefined) => {
     if (!color) return '#000000';
 
     // Expand 3-digit hex (#F00) to 6-digit (#FF0000)
     const threeDigitRegex = /^#([0-9A-F])([0-9A-F])([0-9A-F])$/i;
     const match = color.match(threeDigitRegex);
-
     if (match) {
       return `#${match[1]}${match[1]}${match[2]}${match[2]}${match[3]}${match[3]}`;
     }
-
     return color.startsWith('#') ? color : `#${color}`;
   };
 
-  // Strict Hex validation
   const validateColor = (color: string): boolean => {
-    if (!color) return true; // Optional field
+    if (!color) return true;
     const hexRegex = /^#([0-9A-F]{3}|[0-9A-F]{6})$/i;
     return hexRegex.test(color);
   };
@@ -110,7 +105,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
     // Regex for FilaMeter QR Code (Alphanumeric, EXACTLY 8 characters)
     const qrRegex = /^[a-zA-Z0-9]{8}$/;
-
     return uuidRegex.test(id) || qrRegex.test(id);
   };
 
@@ -123,7 +117,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       return;
     }
 
-    // --- ID Validation ---
     if (formData._id && !validateId(formData._id)) {
       setAlertVariant('danger');
       setAlertMessage(
@@ -133,7 +126,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
       return;
     }
 
-    // --- Color Validation ---
     if (formData.color && !validateColor(formData.color as string)) {
       setAlertVariant('danger');
       setAlertMessage('Invalid Color Format. Please use a Hex code (e.g., #FF0000 or #F00).');
@@ -143,7 +135,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
 
     setIsSaving(true);
 
-    // Check if ID changed. If so, we treat it as an insert (new ID) and delete the old one.
     const isIdChanged = data?._id && formData._id !== data._id;
     const finalOperationIsEdit = isEdit && !isIdChanged;
     const type = finalOperationIsEdit ? 'updated' : 'added';
@@ -151,42 +142,33 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     let finalResult;
     try {
       for (let x = 0; x < (createMultiple && !finalOperationIsEdit ? numberOfRows : 1); x++) {
-        // 1. Prepare base data
         let dataToSave = { ...formData };
 
         if (createMultiple && !finalOperationIsEdit) {
-          // Creating multiple new entries (ignore ID and Rev)
           dataToSave = { ...formData, _id: undefined, _rev: undefined };
         } else if (isIdChanged) {
-          // ID was manually changed; treat as new record (strip _rev)
-          // This creates the NEW record.
           dataToSave = { ...formData, _rev: undefined };
         }
 
-        // 2. Sanitize Data: Strip unknown fields that fail schema validation
-        // We explicitly construct the object to ensure only valid fields are passed.
         const sanitizedData = {
           filament: dataToSave.filament,
           material: dataToSave.material,
-          color: (dataToSave.color as string) || '', // Add Color
+          color: (dataToSave.color as string) || '',
+          price: Number(dataToSave.price) || 0, // Save Price
           used_weight: Number(dataToSave.used_weight),
           total_weight: Number(dataToSave.total_weight),
           location: (dataToSave.location as string) || '',
           comments: (dataToSave.comments as string) || '',
-          // Conditionally add _id and _rev if they exist
           ...(dataToSave._id ? { _id: dataToSave._id } : {}),
           ...(dataToSave._rev ? { _rev: dataToSave._rev } : {}),
         };
 
-        // 3. Save
         finalResult = await save(db, sanitizedData, filamentSchema, 'filament');
         if (!finalResult.success) {
-          // Pass the error up to the catch block
           throw new Error(JSON.stringify(finalResult.error));
         }
       }
 
-      // If ID was changed and the new save was successful, DELETE the old record.
       if (isIdChanged && data?._id && finalResult?.success) {
         const deleteSuccess = await deleteRow(db, data._id, 'filament');
         if (!deleteSuccess) {
@@ -194,7 +176,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         }
       }
 
-      // If the save was successful, update the last modified timestamp.
       if (finalResult?.success) {
         await updateLastModified();
       }
@@ -216,13 +197,11 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         try {
           const errorObj = JSON.parse(error.message);
           if (Array.isArray(errorObj)) {
-            // Check specifically for Joi validation errors (which return arrays)
             const validationMessages = errorObj
               .map((eItem: { message: string }) => eItem.message)
               .join(', ');
             message = `Validation Error: ${validationMessages}`;
           } else {
-            // Handle plain string errors returned from DB (like 'Document update conflict')
             message = String(errorObj);
           }
         } catch (_e) {
@@ -232,8 +211,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         message = error;
       }
 
-      // --- GRACEFUL CONFLICT HANDLING ---
-      // Check for the specific PouchDB/CouchDB 409 Conflict message
       if (message && message.toLowerCase().includes('document update conflict')) {
         message = `A filament with the ID "${formData._id}" already exists. IDs must be unique.`;
       }
@@ -255,7 +232,6 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         onClose={() => setShowAlert(false)}
       />
       <Form onSubmit={handleSubmit} className={styles.manageForm}>
-        {/* Only show ID field if it exists (Edit Mode) or if user manually populated it via URL */}
         {formData._id && (
           <Form.Group as={Row} className='mb-3 align-items-center' controlId='_id'>
             <Form.Label column sm='auto' className='mb-0'>
@@ -292,7 +268,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Form.Group>
         )}
 
-        {/* Updated Row with Color Input */}
+        {/* Row 1: Name, Material, Color */}
         <Row>
           <Col md={5}>
             <Form.Group className='mb-3' controlId='filament'>
@@ -324,8 +300,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
             <Form.Group className='mb-3' controlId='color'>
               <Form.Label>Color (Hex)</Form.Label>
               <InputGroup>
-                {/* Normalize the value for the picker so it doesn't break on 3-digit hex
-                 */}
+                {/* Normalize the value for the picker so it doesn't break on 3-digit hex */}
                 <Form.Control
                   type='color'
                   value={getNormalizedColorForPicker(formData.color as string)}
@@ -350,6 +325,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Col>
         </Row>
 
+        {/* Row 2: Weights */}
         <Row>
           <Col md={6}>
             <Form.Group className='mb-3' controlId='usedWeight'>
@@ -379,16 +355,38 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
           </Col>
         </Row>
 
-        <Form.Group className='mb-3' controlId='location'>
-          <Form.Label>Location</Form.Label>
-          <Form.Control
-            type='text'
-            name='location'
-            value={formData.location as string}
-            onChange={handleInputChange}
-            placeholder='e.g., Shelf A, Bin 3'
-          />
-        </Form.Group>
+        {/* Row 3: Price and Location */}
+        <Row>
+          <Col md={6}>
+            <Form.Group className='mb-3' controlId='price'>
+              <Form.Label>Price</Form.Label>
+              <InputGroup>
+                <InputGroup.Text>$</InputGroup.Text>
+                <Form.Control
+                  type='number'
+                  name='price'
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  min='0'
+                  step='0.01'
+                  placeholder='0.00'
+                />
+              </InputGroup>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className='mb-3' controlId='location'>
+              <Form.Label>Location</Form.Label>
+              <Form.Control
+                type='text'
+                name='location'
+                value={formData.location as string}
+                onChange={handleInputChange}
+                placeholder='e.g., Shelf A, Bin 3'
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
         <Form.Group className='mb-3' controlId='comments'>
           <Form.Label>Comments</Form.Label>

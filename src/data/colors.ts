@@ -157,7 +157,12 @@ export const htmlColorNames: Record<string, string> = {
  * Returns the hex value without the # prefix, or the original value if not a recognized color name.
  */
 export const htmlColorNameToHex = (colorName: string): string => {
-  const normalizedName = colorName.toLowerCase().trim();
+  // Normalize for lookup: lowercase, trim, and remove all spaces and special characters
+  const normalizedName = colorName
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\-_.,;:!@#$%^&*()+=\[\]{}|\\<>?/~`'"]/g, '');
+  
   return htmlColorNames[normalizedName] || colorName;
 };
 

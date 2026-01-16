@@ -154,7 +154,8 @@ export const htmlColorNames: Record<string, string> = {
 
 /**
  * Converts HTML color names to hex values.
- * Returns the hex value without the # prefix, or the original value if not a recognized color name.
+ * Returns the hex value without the # prefix (for internal lookup), or the original value if not a recognized color name.
+ * Note: The final output from normalizeColorToHex will include the # prefix.
  */
 export const htmlColorNameToHex = (colorName: string): string => {
   // Normalize for lookup: lowercase, trim, and remove all spaces and special characters
@@ -167,7 +168,7 @@ export const htmlColorNameToHex = (colorName: string): string => {
 };
 
 /**
- * Converts a color value to hex format (without # prefix).
+ * Converts a color value to hex format (with # prefix).
  * Handles hex values (with or without #), HTML color names, and returns as-is if already valid.
  */
 export const normalizeColorToHex = (value: string): string => {
@@ -177,16 +178,21 @@ export const normalizeColorToHex = (value: string): string => {
 
   // If it's already a hex color (with or without #)
   if (/^#?[0-9A-Fa-f]{3,6}$/.test(trimmed)) {
-    // Remove # if present and return
-    return trimmed.startsWith('#') ? trimmed.slice(1).toUpperCase() : trimmed.toUpperCase();
+    // Ensure # prefix is present
+    const hex = trimmed.startsWith('#') ? trimmed.slice(1) : trimmed;
+    // Expand 3-digit hex to 6-digit if needed
+    if (hex.length === 3) {
+      return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`.toUpperCase();
+    }
+    return `#${hex.toUpperCase()}`;
   }
 
   // Try to convert from HTML color name
   const hexValue = htmlColorNameToHex(trimmed);
 
-  // If conversion succeeded (returned a hex value), return it
+  // If conversion succeeded (returned a hex value), return it with # prefix
   if (hexValue !== trimmed && /^[0-9A-Fa-f]{6}$/.test(hexValue)) {
-    return hexValue.toUpperCase();
+    return `#${hexValue.toUpperCase()}`;
   }
 
   // Return original value if not a recognized format

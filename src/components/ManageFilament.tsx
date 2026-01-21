@@ -13,7 +13,7 @@ import { save, deleteRow } from '@silocitypages/data-access';
 import { filamentSchema } from '@/helpers/database/filament/migrateFilamentDB';
 // --- Styles ---
 import styles from '@/public/styles/components/ManageFilament.module.css';
-import 'react-bootstrap-typeahead/css/Typeahead.css';
+import 'react-bootstrap-typeahead/css/Typeahead.bs5.css';
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faTimes, faPen, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';

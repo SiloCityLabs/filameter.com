@@ -71,7 +71,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
 
   // --- Helpers for Color Input ---
   const getNormalizedColorForPicker = (color: string | undefined) => {
-    if (!color) return '#000000';
+    if (!color) return '#FF0000';
 
     // Expand 3-digit hex (#F00) to 6-digit (#FF0000)
     const threeDigitRegex = /^#([0-9A-F])([0-9A-F])([0-9A-F])$/i;

@@ -138,9 +138,13 @@ export default function ImportExport() {
         type: 'success',
         message: `Successfully imported ${successCount} spools from CSV.`,
       });
+      // Scroll to top so user sees the success message
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('CSV Import Error', error);
       setStatus({ type: 'error', message: 'Failed to save CSV data to database.' });
+      // Scroll to top so user sees the error message
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

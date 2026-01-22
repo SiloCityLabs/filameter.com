@@ -82,5 +82,8 @@ export const filamentSchema = Joi.object({
   used_weight: Joi.number().min(0).empty('').default(0),
   total_weight: Joi.number().min(0).empty('').default(1000),
   location: Joi.string().empty('').default(''),
-  comments: Joi.string().allow(''),
+  comments: Joi.string().allow('').default(''),
+  color: Joi.string().allow('').default(''),
+  price: Joi.number().min(0).empty('').default(0),
+  brand: Joi.string().allow('').default(''),
 });

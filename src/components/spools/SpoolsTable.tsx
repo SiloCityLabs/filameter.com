@@ -95,7 +95,26 @@ const SpoolsTable: React.FC<SpoolsTableProps> = ({
                   </td>
                 )}
                 {(!settings?.spoolHeaders || settings.spoolHeaders['Filament'] !== false) && (
-                  <td>{filament.filament}</td>
+                  <td>
+                    <div className='d-flex align-items-center'>
+                      {filament.color && (
+                        <span
+                          style={{
+                            backgroundColor: filament.color,
+                            width: '16px',
+                            height: '16px',
+                            borderRadius: '50%',
+                            display: 'inline-block',
+                            marginRight: '8px',
+                            border: '1px solid #dee2e6',
+                            flexShrink: 0,
+                          }}
+                          title={filament.color}
+                        />
+                      )}
+                      {filament.filament}
+                    </div>
+                  </td>
                 )}
                 {(!settings?.spoolHeaders || settings.spoolHeaders['Material'] !== false) && (
                   <td>{filament.material}</td>

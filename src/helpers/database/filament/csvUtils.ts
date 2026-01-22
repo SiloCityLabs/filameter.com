@@ -1,12 +1,15 @@
 import Papa from 'papaparse';
 import { Filament } from '@/types/Filament';
+import { normalizeColorToHex } from '@/data/colors';
 
 export const FILAMENT_FIELDS: { key: keyof Filament; label: string }[] = [
+  { key: 'brand', label: 'Brand' },
   { key: 'filament', label: 'Filament Name' },
   { key: 'material', label: 'Material Type' },
-  { key: 'color', label: 'Color' } as any,
-  { key: 'total_weight', label: 'Total Weight (g)' },
+  { key: 'color', label: 'Color' },
   { key: 'used_weight', label: 'Used Weight (g)' },
+  { key: 'total_weight', label: 'Total Weight (g)' },
+  { key: 'price', label: 'Price' },
   { key: 'location', label: 'Storage Location' },
 ];
 
@@ -58,6 +61,12 @@ export const parseAndMapCsv = (
                 } else if (mappedField === 'used_weight') {
                   const num = parseFloat(value.replace(/[^0-9.]/g, ''));
                   newFilament.used_weight = isNaN(num) ? 0 : num;
+                } else if (mappedField === 'price') {
+                  const num = parseFloat(value.replace(/[^0-9.]/g, ''));
+                  newFilament.price = isNaN(num) ? 0 : num;
+                } else if (mappedField === 'color') {
+                  // Convert color to hex format (handles hex values and HTML color names)
+                  newFilament.color = normalizeColorToHex(value);
                 }
                 // --- Standard Strings ---
                 else {

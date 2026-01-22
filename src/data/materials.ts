@@ -1,7 +1,6 @@
 export interface Material {
   id: string;
   name: string;
-  // Add other material properties as needed
 }
 
 export const materials: Material[] = [

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import PouchDB from 'pouchdb';
 import { getDatabases } from '@/utils/db';
 
 // --- Context Definition ---

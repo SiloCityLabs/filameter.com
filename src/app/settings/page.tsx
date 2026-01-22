@@ -19,18 +19,35 @@ export const metadata: Metadata = generateMetadata({
 });
 
 export default function SettingsPage() {
+  const version = process.env.NEXT_PUBLIC_APP_VERSION;
+
   return (
     <PageLayout headerShowBadge={false}>
       <div className={styles.settingsPage}>
         <Container>
-          <Row className='mb-4'>
-            <Col>
-              <h1 className={styles.pageHeader}>Application Settings</h1>
-              <p className='text-muted'>
-                Manage your application preferences, data, and synchronization options.
-              </p>
-            </Col>
-          </Row>
+          {/* Header Section */}
+          <div className='text-center py-3 mb-4'>
+            <h1 className={`${styles.pageHeader} fw-bold mb-3`}>Application Settings</h1>
+
+            <Row className='justify-content-center'>
+              <Col md={8} lg={6}>
+                <p className='text-muted mb-3 lead fs-6'>
+                  Manage your application preferences, data, and synchronization options to tailor
+                  FilaMeter to your workflow.
+                </p>
+              </Col>
+            </Row>
+
+            {version && (
+              <div
+                className='d-inline-flex align-items-center justify-content-center border rounded-pill px-3 bg-light text-muted small'
+                style={{ fontSize: '0.85rem' }}>
+                <span className='fw-semibold me-1'>v{version}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Settings Tabs */}
           <Row>
             <Col>
               <SettingsTabs />

@@ -1,6 +1,6 @@
 {
   "name": "filameter.com",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "license": "CC-BY-SA-4.0",
   "packageManager": "pnpm@10.15.0",
   "scripts": {
@@ -41,6 +41,7 @@
     "pouchdb-find": "^9.0.0",
     "react": "^19.1.1",
     "react-bootstrap": "^2.10.10",
+    "react-bootstrap-typeahead": "^6.4.1",
     "react-content-loader": "^7.1.1",
     "react-dom": "^19.1.1",
     "react-select": "^5.10.2",

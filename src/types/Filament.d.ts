@@ -3,11 +3,14 @@ export type Filament = {
   _rev?: string;
   filament: string;
   material: string;
-  used_weight?: number;
-  total_weight?: number;
+  brand?: string;
+  color?: string;
+  price?: number;
+  used_weight: number;
+  total_weight: number;
   calc_weight?: number;
   location?: string;
-  comments: string;
+  comments?: string;
 };
 
 export interface ManageFilamentProps {

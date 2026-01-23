@@ -9,9 +9,16 @@ help:
 	@echo
 
 install: ## Install the project
-	sudo npm install -g pnpm && \
-	pnpm install && \
-	pnpm run build:workspaces
+	pnpm install
 
 start: ## Run the project in development mode
 	pnpm dev
+
+build: ## Build the project
+	pnpm build
+
+lint: ## Lint the project
+	pnpm lint
+
+test: ## Test the project
+	pnpm test

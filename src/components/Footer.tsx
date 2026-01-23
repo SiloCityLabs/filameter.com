@@ -36,7 +36,7 @@ export default function Footer({ className }: { className?: string }) {
             <Image
               src='/images/logos/filameter-banner-slim-blue.webp'
               alt='FilaMeter Logo'
-              width={120}
+              width={163}
               height={40}
               className={styles.footerLogo}
             />

@@ -16,6 +16,8 @@ const ProductImage: React.FC<ProductImageProps> = ({ src, alt, className }) => {
     e.currentTarget.onerror = null;
   };
 
+  // Using img instead of Next.js Image for error handling fallback functionality
+  // eslint-disable-next-line @next/next/no-img-element
   return <img src={src} alt={alt} className={className} onError={handleError} />;
 };
 

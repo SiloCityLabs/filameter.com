@@ -159,7 +159,7 @@ export default function SpoolSensePage() {
                     <div className={styles.stepNumber}>1</div>
                     <h4 className='h5 fw-bold mt-3 mb-2'>Built-in eInk Display</h4>
                     <p>
-                      The battery-powered 0.97" eInk screen provides instant feedback, showing
+                      The battery-powered 0.97&quot; eInk screen provides instant feedback, showing
                       exactly how much filament has been used on each spool.
                     </p>
                   </Col>
@@ -185,7 +185,7 @@ export default function SpoolSensePage() {
                 <Row className='g-4'>
                   <Col md={6}>
                     <div className={styles.specItem}>
-                      <strong>Display:</strong> 0.97" E-ink Display
+                      <strong>Display:</strong> 0.97&quot; E-ink Display
                     </div>
                   </Col>
                   <Col md={6}>

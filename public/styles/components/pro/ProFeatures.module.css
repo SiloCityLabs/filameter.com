@@ -55,3 +55,32 @@
   border: 2px dashed #dee2e6;
   background-color: transparent;
 }
+
+.proDescription {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #495057;
+  margin-bottom: 1rem;
+}
+
+.buyNowButton {
+  padding: 0.8rem 2.5rem;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.buyNowButton:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.additionalInfo {
+  background-color: var(--white);
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}

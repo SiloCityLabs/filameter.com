@@ -23,10 +23,15 @@ export default function SettingsTabs() {
 
   useEffect(() => {
     const keyParam = searchParams?.get('key') ?? '';
+    const tabParam = searchParams?.get('tab') ?? '';
+
     if (keyParam) {
       setVerifyKey(keyParam);
       setActiveKey('sync'); // Switch to sync tab if key is present
+    } else if (tabParam && ['main', 'import-export', 'sync'].includes(tabParam)) {
+      setActiveKey(tabParam);
     }
+
     setIsLoading(false);
   }, [searchParams]);
 

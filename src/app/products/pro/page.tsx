@@ -1,4 +1,4 @@
-// src/app/pro/page.tsx
+// src/app/products/pro/page.tsx
 
 // --- React ---
 import React from 'react';
@@ -15,10 +15,25 @@ import styles from '@/public/styles/components/pro/ProFeatures.module.css';
 import { generateMetadata } from '@/utils/metadata';
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Pro Features',
+  title: 'FilaMeter Pro - Advanced Filament Tracking App Features',
   description:
-    'Discover FilaMeter Pro features including instant syncing and upcoming advanced tools for your 3D printing workflow.',
-  keywords: ['pro', 'features', 'filameter', 'sync', '3d printing', 'inventory'],
+    'Unlock advanced features in FilaMeter Pro, the premium 3D filament tracker. Get instant syncing, cross-device access, and advanced filament tracking capabilities for your 3D printing workflow.',
+  keywords: [
+    'filament tracking',
+    '3d filament tracker',
+    'filament tracking app',
+    'filament management app',
+    'filament tracking system',
+    '3d printer filament tracking app',
+    'filament inventory management',
+    'pro',
+    'features',
+    'filameter',
+    'sync',
+    '3d printing',
+    'inventory',
+    'spool tracker',
+  ],
 });
 
 export default function ProPage() {

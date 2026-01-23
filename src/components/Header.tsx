@@ -28,11 +28,7 @@ const defaultNavLinks: NavLink[] = [
   { label: 'Settings', href: '/settings', target: '' },
   { label: 'FAQ', href: '/faq', target: '' },
   { label: 'Feedback', href: '/feedback', target: '' },
-  {
-    label: 'Products',
-    href: 'https://shop.silocitylabs.com/collections/filameter',
-    target: '_blank',
-  },
+  { label: 'Products', href: '/products', target: '' },
 ];
 
 export default function Header({ className, navLinks }: Props) {

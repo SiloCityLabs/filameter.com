@@ -1,0 +1,196 @@
+.productPageSection {
+  background-color: var(--background-light);
+  padding: 6rem 0 4rem 0;
+  min-height: 100vh;
+}
+
+.heroIcon {
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+}
+
+.heroDescription {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #495057;
+  margin-bottom: 1.5rem;
+}
+
+.buyNowButton {
+  padding: 0.8rem 2.5rem;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.buyNowButton:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.featureCard {
+  background-color: var(--white);
+  border-radius: 15px;
+  padding: 2rem;
+  height: 100%;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.featureIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--background-light);
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.featureCard:hover .featureIcon {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.featureTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.featureDescription {
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.howItWorks {
+  background-color: var(--white);
+  border-radius: 15px;
+  padding: 3rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: var(--white);
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 auto;
+}
+
+.benefitsSection {
+  background-color: var(--white);
+  border-radius: 15px;
+  padding: 3rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.benefitsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefitsList li {
+  padding: 1rem 0;
+  color: #495057;
+  font-size: 1rem;
+  line-height: 1.6;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.benefitsList li:last-child {
+  border-bottom: none;
+}
+
+.benefitsList li svg {
+  color: var(--primary-color);
+}
+
+.pricingSection {
+  background-color: var(--white);
+  border-radius: 15px;
+  padding: 3rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.pricingTable {
+  overflow-x: auto;
+}
+
+.pricingTable table {
+  margin-bottom: 0;
+}
+
+.pricingTable thead th {
+  background-color: var(--background-light);
+  color: var(--primary-color);
+  font-weight: bold;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.pricingTable tbody td {
+  vertical-align: middle;
+}
+
+.specsSection {
+  background-color: var(--white);
+  border-radius: 15px;
+  padding: 3rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.specItem {
+  padding: 1rem;
+  background-color: var(--background-light);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  color: #495057;
+}
+
+.ctaSection {
+  background: linear-gradient(45deg, var(--primary-color) 0%, var(--complementary-color) 100%);
+  border-radius: 15px;
+  padding: 3rem;
+  color: var(--white);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.ctaSection h2,
+.ctaSection p {
+  color: var(--white);
+}
+
+.ctaSection .buyNowButton {
+  background-color: var(--white);
+  color: var(--primary-color);
+  border: none;
+}
+
+.ctaSection .buyNowButton:hover {
+  background-color: var(--white);
+  color: var(--complementary-color);
+}

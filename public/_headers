@@ -1,0 +1,28 @@
+# Cache static assets with content hashes for 1 year (immutable)
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache images for 1 year
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache icons for 1 year
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache fonts for 1 year
+/_next/static/media/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache manifest for 1 hour (may change with updates)
+/manifest.json
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# HTML pages - short cache with revalidation (1 hour)
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# Root path and all other HTML paths - short cache (1 hour)
+/
+  Cache-Control: public, max-age=3600, must-revalidate
+

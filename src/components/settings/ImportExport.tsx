@@ -5,12 +5,13 @@ import { useCallback, useState, useEffect } from 'react';
 import { Button, Form, Spinner, Alert } from 'react-bootstrap';
 // --- Context ---
 import { useDatabase } from '@/contexts/DatabaseContext';
-// --- Helpers ---
+// --- Helpers & Hooks ---
 import { exportDB } from '@/helpers/exportDB';
 import { importDB } from '@/helpers/importDB';
+import { useScrollToTop } from '@/hooks/useScrollToTop';
 import { Filament } from '@/types/Filament';
 // --- Components ---
-import CsvMappingModal from './CsvMappingModal';
+import CsvMappingModal from '@/components/settings/CsvMappingModal';
 // --- Styles ---
 import styles from '@/public/styles/components/Settings.module.css';
 // --- Font Awesome ---
@@ -24,6 +25,9 @@ export default function ImportExport() {
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [clearBeforeImport, setClearBeforeImport] = useState(false);
   const [triggerImport, setTriggerImport] = useState(false);
+
+  // --- Hooks ---
+  const { ref: topRef, scrollToTop } = useScrollToTop();
 
   // --- CSV State ---
   const [showCsvModal, setShowCsvModal] = useState(false);
@@ -138,6 +142,9 @@ export default function ImportExport() {
         type: 'success',
         message: `Successfully imported ${successCount} spools from CSV.`,
       });
+
+      // Use the new hook to scroll up
+      scrollToTop();
     } catch (error) {
       console.error('CSV Import Error', error);
       setStatus({ type: 'error', message: 'Failed to save CSV data to database.' });
@@ -160,7 +167,7 @@ export default function ImportExport() {
   }
 
   return (
-    <div className={styles.settingsPane}>
+    <div className={styles.settingsPane} ref={topRef}>
       {status && (
         <Alert variant={status.type} onClose={() => setStatus(null)} dismissible>
           {status.message}

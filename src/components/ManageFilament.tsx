@@ -16,7 +16,13 @@ import styles from '@/public/styles/components/ManageFilament.module.css';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 // --- Font Awesome ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSave, faTimes, faPen, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import {
+  faSave,
+  faTimes,
+  faPen,
+  faExclamationTriangle,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
 // --- Hooks ---
 import { useSync } from '@/hooks/useSync';
 // --- Data ---
@@ -43,6 +49,7 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
   const [isEdit, setIsEdit] = useState(false);
   const [hideMultiple, setHideMultiple] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
@@ -112,6 +119,32 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     // Regex for FilaMeter QR Code (Alphanumeric, EXACTLY 8 characters)
     const qrRegex = /^[a-zA-Z0-9]{8}$/;
     return uuidRegex.test(id) || qrRegex.test(id);
+  };
+
+  const handleDelete = async () => {
+    if (!db || !formData._id) return;
+
+    if (!window.confirm('Are you sure you want to delete this filament? This cannot be undone.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteRow(db, formData._id, 'filament');
+      if (result) {
+        await updateLastModified();
+        const successMessage = encodeURIComponent('Filament deleted successfully');
+        router.push(`/spools?alert_msg=${successMessage}`);
+      } else {
+        throw new Error('Failed to delete row');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      setAlertVariant('danger');
+      setAlertMessage('Failed to delete filament. Please try again.');
+      setShowAlert(true);
+      setIsDeleting(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -472,11 +505,17 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         )}
 
         <div className='mt-4 d-flex justify-content-end gap-2'>
-          <Button href='/spools' variant='outline-secondary'>
+          {isEdit && (
+            <Button variant='danger' onClick={handleDelete} disabled={isDeleting || isSaving}>
+              <FontAwesomeIcon icon={faTrash} className='me-2' />
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          )}
+          <Button href='/spools' variant='outline-secondary' className='ms-auto'>
             <FontAwesomeIcon icon={faTimes} className='me-2' />
             {isEdit ? 'Back to Spools' : 'Cancel'}
           </Button>
-          <Button variant='primary' type='submit' disabled={isSaving}>
+          <Button variant='primary' type='submit' disabled={isSaving || isDeleting}>
             <FontAwesomeIcon icon={faSave} className='me-2' />
             {isSaving ? <Spinner as='span' size='sm' /> : 'Save Filament'}
           </Button>

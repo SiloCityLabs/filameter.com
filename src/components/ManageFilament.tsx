@@ -7,6 +7,7 @@ import { Form, Button, Spinner } from 'react-bootstrap';
 import { CustomAlert } from '@silocitypages/ui-core';
 import FilamentIdSection from '@/components/manage-filament/FilamentIdSection';
 import FilamentAttributes from '@/components/manage-filament/FilamentAttributes';
+import UsageHistory from '@/components/manage-filament/UsageHistory';
 // --- Hooks ---
 import { useManageFilamentForm } from '@/hooks/useManageFilamentForm';
 // --- Styles ---
@@ -36,6 +37,9 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
     handleDelete,
     handleSubmit,
     validateColor,
+    handleLogAdd,
+    handleLogUpdate,
+    handleLogDelete,
   } = useManageFilamentForm(data, db);
 
   return (
@@ -54,11 +58,24 @@ function ManageFilament({ data, db }: ManageFilamentProps) {
         {/* --- Main Attributes --- */}
         <FilamentAttributes
           formData={formData}
+          isEdit={isEdit}
           onInputChange={handleInputChange}
           onTypeaheadChange={handleTypeaheadChange}
           onColorPickerChange={handleColorPickerChange}
           validateColor={validateColor}
         />
+
+        {/* --- Usage History (Only show for existing items) --- */}
+        {formData._id && (
+          <UsageHistory
+            history={formData.usage_history || []}
+            onAdd={handleLogAdd}
+            onEdit={handleLogUpdate}
+            onDelete={handleLogDelete}
+          />
+        )}
+
+        <hr className='my-4' />
 
         {/* --- Comments --- */}
         <Form.Group className='mb-3' controlId='comments'>

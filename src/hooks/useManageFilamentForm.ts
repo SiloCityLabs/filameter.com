@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useSync } from '@/hooks/useSync';
 import { save, deleteRow } from '@silocitypages/data-access';
 import { filamentSchema } from '@/helpers/database/filament/migrateFilamentDB';
-import { Filament } from '@/types/Filament';
+import { Filament, UsageLog } from '@/types/Filament';
 import PouchDB from 'pouchdb';
 
 const defaultValue: Filament = {
@@ -16,6 +16,7 @@ const defaultValue: Filament = {
   total_weight: 1000,
   location: '',
   comments: '',
+  usage_history: [],
 };
 
 export const useManageFilamentForm = (
@@ -75,7 +76,20 @@ export const useManageFilamentForm = (
 
   // --- Handlers ---
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value, type } = e.target;
+    let finalValue: string | number = value;
+
+    // Force numeric types for weight and price fields to prevent string concatenation bugs
+    if (
+      type === 'number' ||
+      name === 'used_weight' ||
+      name === 'total_weight' ||
+      name === 'price'
+    ) {
+      finalValue = value === '' ? 0 : parseFloat(value);
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: finalValue }));
   };
 
   const handleTypeaheadChange = (field: keyof Filament, selected: any[]) => {
@@ -86,6 +100,49 @@ export const useManageFilamentForm = (
 
   const handleColorPickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, color: e.target.value }));
+  };
+
+  // --- Log Handlers ---
+  const handleLogAdd = (log: UsageLog) => {
+    setFormData((prev) => ({
+      ...prev,
+      // Explicitly cast prev.used_weight to Number() to ensure arithmetic addition
+      used_weight: (Number(prev.used_weight) || 0) + log.weight,
+      usage_history: [...(prev.usage_history || []), log],
+    }));
+  };
+
+  const handleLogUpdate = (updatedLog: UsageLog) => {
+    setFormData((prev) => {
+      const oldLog = prev.usage_history?.find((l) => l.id === updatedLog.id);
+      if (!oldLog) return prev;
+
+      const weightDiff = updatedLog.weight - oldLog.weight;
+      const updatedHistory = prev.usage_history?.map((l) =>
+        l.id === updatedLog.id ? updatedLog : l
+      );
+
+      return {
+        ...prev,
+        // Explicitly cast prev.used_weight to Number()
+        used_weight: (Number(prev.used_weight) || 0) + weightDiff,
+        usage_history: updatedHistory,
+      };
+    });
+  };
+
+  const handleLogDelete = (logId: string) => {
+    setFormData((prev) => {
+      const logToDelete = prev.usage_history?.find((l) => l.id === logId);
+      if (!logToDelete) return prev;
+
+      return {
+        ...prev,
+        // Explicitly cast prev.used_weight to Number()
+        used_weight: Math.max(0, (Number(prev.used_weight) || 0) - logToDelete.weight),
+        usage_history: prev.usage_history?.filter((l) => l.id !== logId),
+      };
+    });
   };
 
   const handleDelete = async () => {
@@ -160,6 +217,7 @@ export const useManageFilamentForm = (
           price: Number(dataToSave.price) || 0,
           used_weight: Number(dataToSave.used_weight),
           total_weight: Number(dataToSave.total_weight),
+          usage_history: Array.isArray(dataToSave.usage_history) ? dataToSave.usage_history : [],
         };
 
         finalResult = await save(db, sanitizedData, filamentSchema, 'filament');
@@ -212,5 +270,8 @@ export const useManageFilamentForm = (
     handleDelete,
     handleSubmit,
     validateColor,
+    handleLogAdd,
+    handleLogUpdate,
+    handleLogDelete,
   };
 };

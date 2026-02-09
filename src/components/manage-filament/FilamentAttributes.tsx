@@ -1,6 +1,8 @@
-import React from 'react';
-import { Form, Row, Col, InputGroup } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Form, Row, Col, InputGroup, Button } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPen } from '@fortawesome/free-solid-svg-icons';
 import { vendors } from '@/data/vendors';
 import { materials } from '@/data/materials';
 import { Filament } from '@/types/Filament';
@@ -8,6 +10,7 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 interface FilamentAttributesProps {
   formData: Filament & Record<string, unknown>;
+  isEdit: boolean;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onTypeaheadChange: (field: keyof Filament, selected: any[]) => void;
   onColorPickerChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -16,11 +19,14 @@ interface FilamentAttributesProps {
 
 export default function FilamentAttributes({
   formData,
+  isEdit,
   onInputChange,
   onTypeaheadChange,
   onColorPickerChange,
   validateColor,
 }: FilamentAttributesProps) {
+  const [isManualOverride, setIsManualOverride] = useState(false);
+
   const getNormalizedColorForPicker = (color: string | undefined) => {
     if (!color) return '#000000';
     const match = color.match(/^#([0-9A-F])([0-9A-F])([0-9A-F])$/i);
@@ -28,6 +34,16 @@ export default function FilamentAttributes({
       return `#${match[1]}${match[1]}${match[2]}${match[2]}${match[3]}${match[3]}`;
     }
     return color.startsWith('#') ? color : `#${color}`;
+  };
+
+  const handleManualOverrideClick = () => {
+    if (
+      window.confirm(
+        '⚠ Warning: Editing the Used Weight manually will desync it from your Usage History logs.\n\nAre you sure you want to proceed?'
+      )
+    ) {
+      setIsManualOverride(true);
+    }
   };
 
   return (
@@ -115,14 +131,34 @@ export default function FilamentAttributes({
         <Col md={6}>
           <Form.Group className='mb-3' controlId='usedWeight'>
             <Form.Label>Used Weight (g)</Form.Label>
-            <Form.Control
-              type='number'
-              name='used_weight'
-              value={formData.used_weight}
-              onChange={onInputChange}
-              min='0'
-              required
-            />
+            <InputGroup>
+              <Form.Control
+                type='number'
+                name='used_weight'
+                value={formData.used_weight}
+                onChange={onInputChange}
+                min='0'
+                required
+                readOnly={isEdit && !isManualOverride}
+                className={isEdit && !isManualOverride ? 'bg-light' : ''}
+                title={
+                  isEdit && !isManualOverride
+                    ? 'Calculated from Usage History. Click edit icon to override.'
+                    : ''
+                }
+              />
+              {isEdit && !isManualOverride && (
+                <Button
+                  variant='outline-secondary'
+                  onClick={handleManualOverrideClick}
+                  title='Manually override used weight (Not Recommended)'>
+                  <FontAwesomeIcon icon={faPen} size='sm' />
+                </Button>
+              )}
+            </InputGroup>
+            {isEdit && !isManualOverride && (
+              <Form.Text className='text-muted small'>Calculated from usage logs.</Form.Text>
+            )}
           </Form.Group>
         </Col>
         <Col md={6}>

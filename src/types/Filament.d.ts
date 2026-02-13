@@ -1,3 +1,14 @@
+import PouchDB from 'pouchdb';
+
+export interface UsageLog {
+  id: string;
+  date: string; // ISO string
+  weight: number; // Weight used in grams
+  printName?: string;
+  status: 'success' | 'failure';
+  notes?: string;
+}
+
 export type Filament = {
   _id?: string;
   _rev?: string;
@@ -11,6 +22,7 @@ export type Filament = {
   calc_weight?: number;
   location?: string;
   comments?: string;
+  usage_history?: UsageLog[];
 };
 
 export interface ManageFilamentProps {

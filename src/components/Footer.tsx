@@ -93,7 +93,7 @@ export default function Footer({ className }: { className?: string }) {
                 <FontAwesomeIcon icon={faReddit} size='2x' />
               </a>
               <a
-                href='https://www.facebook.com/SiloCityLabs'
+                href='https://www.facebook.com/filameter'
                 target='_blank'
                 rel='noopener noreferrer'
                 className={styles.socialLink}

@@ -34,7 +34,7 @@
     "bootstrap": "^5.3.7",
     "fflate": "^0.8.2",
     "joi": "^17.13.3",
-    "next": "^15.5.9",
+    "next": "^15.5.10",
     "papaparse": "^5.5.3",
     "pouchdb": "^9.0.0",
     "pouchdb-adapter-idb": "^9.0.0",

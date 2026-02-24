@@ -1,9 +1,11 @@
-'use client';
-
+// --- React ---
 import React from 'react';
-import { Table, Button, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
+// --- Next ---
 import Link from 'next/link';
+// --- Components ---
+import { Table, Button, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// --- Icons ---
 import {
   faPenToSquare,
   faTrash,
@@ -12,9 +14,11 @@ import {
   faSortUp,
   faSortDown,
 } from '@fortawesome/free-solid-svg-icons';
-import styles from '@/public/styles/components/Spools.module.css';
+// --- Types ---
 import type { Filament } from '@/types/Filament';
 import type { sclSettings } from '@silocitypages/ui-core';
+// --- Styles ---
+import styles from '@/public/styles/components/Spools.module.css';
 
 interface SpoolsTableProps {
   currentItems: Filament[];
@@ -120,13 +124,25 @@ const SpoolsTable: React.FC<SpoolsTableProps> = ({
                   <td>{filament.material}</td>
                 )}
                 {(!settings?.spoolHeaders || settings.spoolHeaders['Used (g)'] !== false) && (
-                  <td>{filament.used_weight}</td>
+                  <td>
+                    {typeof filament.used_weight === 'number'
+                      ? Number(filament.used_weight.toFixed(2))
+                      : filament.used_weight}
+                  </td>
                 )}
                 {(!settings?.spoolHeaders || settings.spoolHeaders['Total (g)'] !== false) && (
-                  <td>{filament.total_weight}</td>
+                  <td>
+                    {typeof filament.total_weight === 'number'
+                      ? Number(filament.total_weight.toFixed(2))
+                      : filament.total_weight}
+                  </td>
                 )}
                 {(!settings?.spoolHeaders || settings.spoolHeaders['Remaining (g)'] !== false) && (
-                  <td>{filament?.calc_weight ?? ''}</td>
+                  <td>
+                    {typeof filament.calc_weight === 'number'
+                      ? Number(filament.calc_weight.toFixed(2))
+                      : (filament.calc_weight ?? '')}
+                  </td>
                 )}
                 {(!settings?.spoolHeaders || settings.spoolHeaders['Location'] !== false) && (
                   <td>{filament.location}</td>

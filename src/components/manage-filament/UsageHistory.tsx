@@ -1,8 +1,13 @@
+// --- React ---
 import React, { useState, useEffect } from 'react';
+// --- Components ---
 import { Table, Button, Modal, Form, Row, Col, Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// --- Icons ---
 import { faPlus, faEdit, faTrash, faHistory } from '@fortawesome/free-solid-svg-icons';
+// --- Types ---
 import { UsageLog } from '@/types/Filament';
+// --- Helpers ---
 import { v4 as uuidv4 } from 'uuid';
 
 interface UsageHistoryProps {
@@ -12,7 +17,11 @@ interface UsageHistoryProps {
   onDelete: (id: string) => void;
 }
 
-const emptyLog: UsageLog = {
+interface EditingUsageLog extends Omit<UsageLog, 'weight'> {
+  weight: number | string;
+}
+
+const emptyLog: EditingUsageLog = {
   id: '',
   date: '',
   weight: 0,
@@ -23,11 +32,10 @@ const emptyLog: UsageLog = {
 
 export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: UsageHistoryProps) {
   const [showModal, setShowModal] = useState(false);
-  const [editingLog, setEditingLog] = useState<UsageLog>(emptyLog);
+  const [editingLog, setEditingLog] = useState<EditingUsageLog>(emptyLog);
   const [isEditMode, setIsEditMode] = useState(false);
   const [validated, setValidated] = useState(false);
 
-  // Reset validation when modal opens/closes
   useEffect(() => {
     if (showModal) {
       setValidated(false);
@@ -35,26 +43,21 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
   }, [showModal]);
 
   const handleShowAdd = () => {
-    setEditingLog({
-      ...emptyLog,
-      id: uuidv4(),
-      date: new Date().toISOString().slice(0, 16), // Default to current time for datetime-local
-    });
+    setEditingLog({ ...emptyLog, id: uuidv4(), date: new Date().toISOString().slice(0, 16) });
     setIsEditMode(false);
     setShowModal(true);
   };
 
   const handleShowEdit = (log: UsageLog) => {
-    setEditingLog({
-      ...log,
-      date: log.date ? log.date.slice(0, 16) : '', // Format for input
-    });
+    setEditingLog({ ...log, weight: log.weight, date: log.date ? log.date.slice(0, 16) : '' });
     setIsEditMode(true);
     setShowModal(true);
   };
 
-  const isWeightValid = (weight: number) => {
-    return !isNaN(weight) && weight >= 0;
+  const isWeightValid = (weight: number | string) => {
+    if (weight === '') return false;
+    const num = typeof weight === 'string' ? parseFloat(weight) : weight;
+    return !isNaN(num) && num >= 0;
   };
 
   const isFormValid = () => {
@@ -73,10 +76,14 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
       return;
     }
 
-    const logToSave = {
+    const finalWeight =
+      typeof editingLog.weight === 'string' ? parseFloat(editingLog.weight) : editingLog.weight;
+
+    const logToSave: UsageLog = {
       ...editingLog,
-      date: new Date(editingLog.date).toISOString(), // Ensure ISO format on save
-      printName: editingLog.printName?.trim() || '', // Ensure it's trimmed
+      weight: isNaN(finalWeight) ? 0 : Number(finalWeight.toFixed(2)),
+      date: new Date(editingLog.date).toISOString(),
+      printName: editingLog.printName?.trim() || '',
     };
 
     if (isEditMode) {
@@ -147,7 +154,9 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
                       className='p-0 text-danger'
                       onClick={() => {
                         if (
-                          confirm('Delete this log entry? It will correct the total used weight.')
+                          window.confirm(
+                            'Delete this log entry? It will correct the total used weight.'
+                          )
                         ) {
                           onDelete(log.id);
                         }
@@ -163,7 +172,6 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
         </div>
       )}
 
-      {/* --- Log Modal --- */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>{isEditMode ? 'Edit Usage Log' : 'Log Print Usage'}</Modal.Title>
@@ -192,9 +200,16 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
                     min='0'
                     step='0.01'
                     value={editingLog.weight}
-                    onChange={(e) =>
-                      setEditingLog({ ...editingLog, weight: parseFloat(e.target.value) })
-                    }
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      if (val.includes('.')) {
+                        const parts = val.split('.');
+                        if (parts[1].length > 2) {
+                          val = `${parts[0]}.${parts[1].slice(0, 2)}`;
+                        }
+                      }
+                      setEditingLog({ ...editingLog, weight: val });
+                    }}
                     required
                     isInvalid={validated && !isWeightValid(editingLog.weight)}
                   />

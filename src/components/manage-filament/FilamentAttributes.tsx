@@ -1,18 +1,24 @@
+// --- React ---
 import React, { useState } from 'react';
+// --- Components ---
 import { Form, Row, Col, InputGroup, Button } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// --- Icons ---
 import { faPen } from '@fortawesome/free-solid-svg-icons';
+// --- Data ---
 import { vendors } from '@/data/vendors';
 import { materials } from '@/data/materials';
+// --- Types ---
 import { Filament } from '@/types/Filament';
+// --- Styles ---
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 interface FilamentAttributesProps {
   formData: Filament & Record<string, unknown>;
   isEdit: boolean;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onTypeaheadChange: (field: keyof Filament, selected: any[]) => void;
+  onTypeaheadChange: (field: keyof Filament, selected: { label: string }[] | string[]) => void;
   onColorPickerChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   validateColor: (color: string) => boolean;
 }
@@ -48,7 +54,6 @@ export default function FilamentAttributes({
 
   return (
     <>
-      {/* Brand & Name */}
       <Row>
         <Col md={6}>
           <Form.Group className='mb-3' controlId='brand'>
@@ -59,7 +64,7 @@ export default function FilamentAttributes({
               clearButton
               options={vendors.map((v) => v.name)}
               placeholder='e.g., Creality'
-              onChange={(s) => onTypeaheadChange('brand', s)}
+              onChange={(s) => onTypeaheadChange('brand', s as string[])}
               onInputChange={(text) => onTypeaheadChange('brand', text ? [{ label: text }] : [])}
               selected={formData.brand ? [formData.brand] : []}
             />
@@ -80,7 +85,6 @@ export default function FilamentAttributes({
         </Col>
       </Row>
 
-      {/* Material & Color */}
       <Row>
         <Col md={6}>
           <Form.Group className='mb-3' controlId='material'>
@@ -91,7 +95,7 @@ export default function FilamentAttributes({
               clearButton
               options={materials.map((m) => m.name)}
               placeholder='e.g., PLA+'
-              onChange={(s) => onTypeaheadChange('material', s)}
+              onChange={(s) => onTypeaheadChange('material', s as string[])}
               onInputChange={(text) => onTypeaheadChange('material', text ? [{ label: text }] : [])}
               selected={formData.material ? [formData.material] : []}
               inputProps={{ required: true }}
@@ -126,7 +130,6 @@ export default function FilamentAttributes({
         </Col>
       </Row>
 
-      {/* Weights */}
       <Row>
         <Col md={6}>
           <Form.Group className='mb-3' controlId='usedWeight'>
@@ -135,9 +138,14 @@ export default function FilamentAttributes({
               <Form.Control
                 type='number'
                 name='used_weight'
-                value={formData.used_weight}
+                value={
+                  typeof formData.used_weight === 'number'
+                    ? Number(formData.used_weight.toFixed(2))
+                    : formData.used_weight
+                }
                 onChange={onInputChange}
                 min='0'
+                step='0.01'
                 required
                 readOnly={isEdit && !isManualOverride}
                 className={isEdit && !isManualOverride ? 'bg-light' : ''}
@@ -167,16 +175,20 @@ export default function FilamentAttributes({
             <Form.Control
               type='number'
               name='total_weight'
-              value={formData.total_weight}
+              value={
+                typeof formData.total_weight === 'number'
+                  ? Number(formData.total_weight.toFixed(2))
+                  : formData.total_weight
+              }
               onChange={onInputChange}
               min='0'
+              step='0.01'
               required
             />
           </Form.Group>
         </Col>
       </Row>
 
-      {/* Price & Location */}
       <Row>
         <Col md={6}>
           <Form.Group className='mb-3' controlId='price'>
@@ -186,7 +198,11 @@ export default function FilamentAttributes({
               <Form.Control
                 type='number'
                 name='price'
-                value={formData.price}
+                value={
+                  typeof formData.price === 'number'
+                    ? Number(formData.price.toFixed(2))
+                    : formData.price
+                }
                 onChange={onInputChange}
                 min='0'
                 step='0.01'

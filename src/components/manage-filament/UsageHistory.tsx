@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Row, Col, Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // --- Icons ---
-import { faPlus, faEdit, faTrash, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faHistory, faCopy } from '@fortawesome/free-solid-svg-icons';
 // --- Types ---
 import { UsageLog } from '@/types/Filament';
 // --- Helpers ---
@@ -30,6 +30,13 @@ const emptyLog: EditingUsageLog = {
   notes: '',
 };
 
+// --- Utilities ---
+const getLocalDatetimeString = () => {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
+};
+
 export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: UsageHistoryProps) {
   const [showModal, setShowModal] = useState(false);
   const [editingLog, setEditingLog] = useState<EditingUsageLog>(emptyLog);
@@ -43,15 +50,31 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
   }, [showModal]);
 
   const handleShowAdd = () => {
-    setEditingLog({ ...emptyLog, id: uuidv4(), date: new Date().toISOString().slice(0, 16) });
+    setEditingLog({ ...emptyLog, id: uuidv4(), date: getLocalDatetimeString() });
     setIsEditMode(false);
     setShowModal(true);
   };
 
   const handleShowEdit = (log: UsageLog) => {
-    setEditingLog({ ...log, weight: log.weight, date: log.date ? log.date.slice(0, 16) : '' });
+    setEditingLog({
+      ...log,
+      weight: log.weight,
+      date: log.date ? getLocalDatetimeStringFromISO(log.date) : '',
+    });
     setIsEditMode(true);
     setShowModal(true);
+  };
+
+  const handleShowDuplicate = (log: UsageLog) => {
+    setEditingLog({ ...log, id: uuidv4(), date: getLocalDatetimeString() });
+    setIsEditMode(false);
+    setShowModal(true);
+  };
+
+  const getLocalDatetimeStringFromISO = (isoString: string) => {
+    const date = new Date(isoString);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toISOString().slice(0, 16);
   };
 
   const isWeightValid = (weight: number | string) => {
@@ -82,7 +105,7 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
     const logToSave: UsageLog = {
       ...editingLog,
       weight: isNaN(finalWeight) ? 0 : Number(finalWeight.toFixed(2)),
-      date: new Date(editingLog.date).toISOString(),
+      date: new Date(editingLog.date).toISOString(), // Convert local datetime back to UTC for storage
       printName: editingLog.printName?.trim() || '',
     };
 
@@ -128,7 +151,15 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
             <tbody>
               {sortedHistory.map((log) => (
                 <tr key={log.id}>
-                  <td>{new Date(log.date).toLocaleDateString()}</td>
+                  <td>
+                    {new Date(log.date).toLocaleDateString()}{' '}
+                    <span className='text-muted small'>
+                      {new Date(log.date).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </td>
                   <td>
                     {log.printName || <span className='text-muted'>-</span>}
                     {log.notes && (
@@ -140,7 +171,9 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
                   <td>
                     <Badge bg={log.status === 'success' ? 'success' : 'danger'}>{log.status}</Badge>
                   </td>
-                  <td className='text-end'>{log.weight}g</td>
+                  <td className='text-end'>
+                    {typeof log.weight === 'number' ? Number(log.weight.toFixed(2)) : log.weight}g
+                  </td>
                   <td className='text-end'>
                     <Button
                       variant='link'
@@ -148,6 +181,13 @@ export default function UsageHistory({ history = [], onAdd, onEdit, onDelete }: 
                       onClick={() => handleShowEdit(log)}
                       title='Edit'>
                       <FontAwesomeIcon icon={faEdit} />
+                    </Button>
+                    <Button
+                      variant='link'
+                      className='p-0 me-2 text-secondary'
+                      onClick={() => handleShowDuplicate(log)}
+                      title='Duplicate'>
+                      <FontAwesomeIcon icon={faCopy} />
                     </Button>
                     <Button
                       variant='link'

@@ -6,12 +6,12 @@
 }
 
 /* when scrolling to a section-anchor, the header overlaps content */
-.ctaAnchor::before {
+.ctaAnchor {
   content: '';
   display: block;
   visibility: hidden;
-  height: 3rem; /* height of the header */
-  margin-top: -3rem; /* height the header, negated */
+  height: 9rem; /* height of the header */
+  margin-top: -9rem; /* height the header, negated */
 }
 
 .ctaContent {

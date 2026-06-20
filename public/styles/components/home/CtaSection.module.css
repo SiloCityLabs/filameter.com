@@ -38,7 +38,7 @@
 }
 
 /* when scrolling to a section-anchor, the header overlaps content */
-pro::before {
+#pro::before {
   content: '';
   display: block;
   visibility: hidden;

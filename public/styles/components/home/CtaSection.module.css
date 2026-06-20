@@ -10,8 +10,8 @@
   content: '';
   display: block;
   visibility: hidden;
-  height: 82px; /* height of the header */
-  margin-top: -82px; /* height the header, negated */
+  height: 3rem; /* height of the header */
+  margin-top: -3rem; /* height the header, negated */
 }
 
 .ctaContent {

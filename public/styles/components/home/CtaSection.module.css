@@ -6,7 +6,7 @@
 }
 
 /* when scrolling to a section-anchor, the header overlaps content */
-.ctaSection::before {
+.ctaAnchor::before {
   content: '';
   display: block;
   visibility: hidden;

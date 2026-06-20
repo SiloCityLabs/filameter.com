@@ -10,7 +10,8 @@ const CtaSection: React.FC = () => {
   const ctaLink = 'https://shop.silocitylabs.com/cart/50812497920300:4,50948651843884:1';
 
   return (
-    <section className={styles.ctaSection} id='pro'>
+    <section className={styles.ctaSection}>
+      <span className={styles.ctaAnchor} id='pro'></span>
       <Container>
         <Row className='justify-content-center text-center'>
           <Col md={10} lg={8}>

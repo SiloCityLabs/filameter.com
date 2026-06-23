@@ -1,5 +1,3 @@
-// src/app/products/pro/page.tsx
-
 // --- React ---
 import React from 'react';
 import { Container } from 'react-bootstrap';

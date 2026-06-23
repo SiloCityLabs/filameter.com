@@ -39,14 +39,14 @@ const CTA_LINK = 'https://shop.silocitylabs.com/cart/50812497920300:4,5094865184
  */
 export default function LifetimeDealPage(): React.JSX.Element {
   return (
-    <PageLayout showHeader={false}>
+    <PageLayout>
       <section
         className='py-5 text-center'
         style={{
           background: 'linear-gradient(135deg, var(--bs-primary-bg-subtle) 0%, transparent 100%)',
           borderBottom: '1px solid var(--bs-border-color)',
         }}>
-        <Container className='py-4 py-md-5'>
+        <Container className='py-5'>
           <span className='badge bg-danger mb-4 fs-6 px-3 py-2 rounded-pill shadow-sm'>
             🔥 Only 100 Lifetime Seats Available
           </span>

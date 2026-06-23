@@ -39,7 +39,7 @@ const CTA_LINK = 'https://shop.silocitylabs.com/cart/50812497920300:4,5094865184
  */
 export default function LifetimeDealPage(): React.JSX.Element {
   return (
-    <PageLayout>
+    <PageLayout showHeader={false}>
       <section
         className='py-5 text-center'
         style={{

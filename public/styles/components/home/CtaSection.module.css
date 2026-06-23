@@ -5,6 +5,15 @@
   color: var(--white);
 }
 
+/* when scrolling to a section-anchor, the header overlaps content */
+.ctaAnchor {
+  content: '';
+  display: block;
+  visibility: hidden;
+  height: 9rem; /* height of the header */
+  margin-top: -9rem; /* height the header, negated */
+}
+
 .ctaContent {
   position: relative;
 }

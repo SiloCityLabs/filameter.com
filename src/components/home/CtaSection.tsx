@@ -11,6 +11,7 @@ const CtaSection: React.FC = () => {
 
   return (
     <section className={styles.ctaSection}>
+      <span className={styles.ctaAnchor} id='pro'></span>
       <Container>
         <Row className='justify-content-center text-center'>
           <Col md={10} lg={8}>
